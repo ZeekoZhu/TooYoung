@@ -9,7 +9,10 @@ using Microsoft.AspNetCore.SpaServices.Webpack;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.PlatformAbstractions;
+using MongoDB.Driver;
 using TooYoung.Jwt;
+using TooYoung.Services;
+using TooYoung.Utils;
 using ZeekoUtilsPack.AspNetCore.Jwt;
 
 namespace TooYoung
@@ -28,15 +31,28 @@ namespace TooYoung
         {
             // 配置 MongoDB
             var connectStr = Configuration.GetConnectionString("Mongo");
+            connectStr.ParseEnvVarParams()
+                .Select(p => (Key:$"$({p})", Val:Configuration.GetSection(p).Value))
+                .ToList()
+                .ForEach(p => { connectStr = connectStr.Replace(p.Key, p.Val); });
+            var dbName = Configuration.GetSection("MONGO_DBNAME").Value;
+            services.AddSingleton<IMongoClient>(provider => new MongoClient(connectStr));
+            services.AddScoped(provider =>
+                provider.GetService<IMongoClient>().GetDatabase(dbName));
+
+            services.AddScoped<AccountService>();
+
+
+            // 配置 JWT
             string keyDir = PlatformServices.Default.Application.ApplicationBasePath;
             var tokenOptions = new JwtConfigOptions(keyDir, "tooyoung", "tooyoung");
             services.AddSingleton(tokenOptions.TokenOptions);
             services.AddJwtAuthorization(tokenOptions);
             // 使用 JWT 保护 API
             services.AddAuthentication().AddJwtBearer(options =>
-                {
-                    options.TokenValidationParameters = tokenOptions.JwTokenValidationParameters;
-                });
+            {
+                options.TokenValidationParameters = tokenOptions.JwTokenValidationParameters;
+            });
             // 使用 Cookie 保护页面
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
                 .AddCookie(options =>
@@ -76,7 +92,7 @@ namespace TooYoung
 
                 routes.MapSpaFallbackRoute(
                     name: "spa-fallback",
-                    defaults: new { controller = "Home", action = "Index" });
+                    defaults: new {controller = "Home", action = "Index"});
             });
         }
     }
