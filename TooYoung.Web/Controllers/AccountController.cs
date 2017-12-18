@@ -20,6 +20,11 @@ namespace TooYoung.Controllers
             AccountService = accountService;
         }
 
+        /// <summary>
+        /// 注册用户
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
         [HttpPost]
         public async Task<IActionResult> Register([FromBody] RegisterModel model)
         {

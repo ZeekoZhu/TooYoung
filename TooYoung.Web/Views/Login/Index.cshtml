@@ -1,0 +1,91 @@
+﻿@{ ViewBag.Title = "Too young, Too simple"; }
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>@ViewBag.Title</title>
+    <link rel="stylesheet" type="text/css" href="https://cdn3.devexpress.com/jslib/17.2.4/css/dx.common.css"/>
+    <link rel="stylesheet" type="text/css" href="https://cdn3.devexpress.com/jslib/17.2.4/css/dx.light.css"/>
+    <style>
+        .grid {
+            display: flex;
+            margin: 5vw auto;
+            flex-flow: row nowrap;
+            justify-content: center;
+        }
+        
+        .form-container {
+            display: flex;
+            flex-flow: column nowrap;
+            justify-content: center;
+            width: 300px;
+        }
+        
+        .col {
+            display: flex;
+            flex-flow: column nowrap;
+        }
+        .btn {
+            flex: 1 0 auto;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="grid">
+        <div class="form-container">
+            <div id="form"></div>
+            <div class="col">
+                <button id="loginBtn" class="btn"></button>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+    <script type="text/javascript" src="https://cdn3.devexpress.com/jslib/17.2.4/js/dx.all.js"></script>
+    <script>
+        let loginModel = {
+            userName: null,
+            password: null
+        };
+        $('#form').dxForm({
+            formData: loginModel,
+            colCount: 1,
+            items: [
+                {
+                    itemType: 'group',
+                    caption: '现在登录',
+                    validationGroup: "login",
+                    items: [
+                        {
+                            dataField:'userName',
+                            label: {text:'用户名'},
+                            validationRules: [{
+                                    type:'required',
+                                    message:'用户名是必填项'
+                            }]
+                        },
+                        {
+                            dataField: 'password',
+                            label: {text:'密码'},
+                            validationRules: [{
+                                    type:'required',
+                                    message:'密码是必填项'
+                            }]
+                        }
+                    ]
+                }
+            ]
+        });
+        $('#loginBtn').dxButton({
+            text: '登录',
+            type: 'success',
+            useSubmitBehavior: true,
+            validationGroup: 'login'
+        })
+    </script>
+</body>
+
+</html>
