@@ -7,22 +7,12 @@ before_script:
 build:
     stage: build
     script:
-        - >-
-            docker run -t --rm -v $(pwd):/app --workdir /app
-            microsoft/aspnetcore-build sh -c "cd /app/TooYoung.Web && dotnet
-            restore --configfile /app/Nuget.Config && dotnet publish -c Release
-            -o /app/TooYoung/PublishOutput"
-        - >-
-            docker run -t --rm -v $(pwd):/app --workdir /app
-            microsoft/aspnetcore-build sh -c "cd /app/Test && dotnet restore
-            --configfile /app/Nuget.Config && dotnet test"
+        - 'docker build -t too-young:$CI_COMMIT_TAG .'
     tags:
         - HK1
 publish:
     stage: publish
     script:
-        - cd ./TooYoung.Web
-        - 'docker build -t too-young:$CI_COMMIT_TAG .'
         - >-
             docker tag too-young:$CI_COMMIT_TAG
             zeekozhu/too-toung:$CI_COMMIT_TAG
