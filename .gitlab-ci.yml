@@ -13,6 +13,7 @@ build:
         - triggers
         - schedules
         - web
+    tags: HK1
 publish:
     stage: publish
     script:
@@ -29,3 +30,4 @@ publish:
         - triggers
         - schedules
         - web
+    tags: HK1
