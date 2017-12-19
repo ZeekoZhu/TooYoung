@@ -4,7 +4,7 @@
 docker run -t --rm \
     -v $(pwd):/app --workdir /app \
     microsoft/aspnetcore-build \
-    ba -c "cd ./TooYoung.Web && dotnet restore && dotnet publish -c Release -o ./bin/Release/PublishOutput"
+    sh -c "cd ./TooYoung.Web && dotnet restore && dotnet publish -c Release -o ./bin/Release/PublishOutput"
 
 # Build test
 cd ../Test
