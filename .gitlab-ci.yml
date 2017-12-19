@@ -4,7 +4,6 @@ stages:
     - publish
 before_script:
     - docker info
-    - ls
 build:
     stage: build
     script:
