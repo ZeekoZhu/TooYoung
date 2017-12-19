@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 # Build web site
 docker run -t --rm \

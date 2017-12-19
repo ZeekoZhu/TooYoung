@@ -7,7 +7,7 @@ before_script:
 build:
     stage: build
     script:
-        - bash ./ci.build.sh
+        - sh ./ci.build.sh
     tags:
         - HK1
 publish:
