@@ -1,6 +1,7 @@
 #!/bin/sh
 
 ls
+echo $(pwd)
 # Build web site
 docker run -t --rm \
     -v $(pwd):/app --workdir /app \
