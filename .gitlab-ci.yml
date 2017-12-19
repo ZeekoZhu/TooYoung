@@ -1,0 +1,31 @@
+image: 'docker:latest'
+stages:
+    - build
+    - publish
+before_script:
+    - docker info
+build:
+    stage: build
+    script:
+        - bash ./ci.build.sh
+    only:
+        - tags
+        - triggers
+        - schedules
+        - web
+publish:
+    stage: publish
+    script:
+        - cd ./TooYoung.Web
+        - 'docker build -t too-young:$CI_COMMIT_TAG .'
+        - >-
+            docker tag too-young:$CI_COMMIT_TAG
+            zeekozhu/too-toung:$CI_COMMIT_TAG
+        - 'docker tag too-young:$CI_COMMIT_TAG zeekozhu/too-toung:latest'
+        - 'docker push zeekozhu/too-young:$CI_COMMIT_TAG'
+        - 'docker push zeekozhu/too-young:latest'
+    only:
+        - tags
+        - triggers
+        - schedules
+        - web
