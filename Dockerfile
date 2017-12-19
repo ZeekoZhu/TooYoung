@@ -13,7 +13,9 @@ RUN ls -R && cd Test \
 
 # copies the rest of your code
 COPY . .
-RUN cd Test && dotnet test && cd ../TooYoung.Web \
+RUN cd Test && dotnet test \
+    && cd ../TooYoung.Web \
+    && npm i \
     && dotnet publish -c Release -o /app/
 
 # Stage 2 Build image
