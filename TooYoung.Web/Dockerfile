@@ -10,5 +10,5 @@ RUN curl -SLO "https://mirrors.ustc.edu.cn/node/v$NODE_VERSION/node-v$NODE_VERSI
   && ln -s /usr/local/bin/node /usr/local/bin/nodejs
 
 WORKDIR /app
-COPY ./bin/Release/netcoreapp2.0/publish .
+COPY ./PublishOutput .
 ENTRYPOINT ["dotnet", "TooYoung.dll"]
