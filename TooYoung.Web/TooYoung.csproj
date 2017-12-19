@@ -5,6 +5,15 @@
     <TypeScriptToolsVersion>Latest</TypeScriptToolsVersion>
     <IsPackable>false</IsPackable>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+        <DocumentationFile>bin\Debug\netcoreapp2.0\TooYoung.Web.xml</DocumentationFile>
+        <NoWarn>1701;1702;1705;1591</NoWarn>
+        <LangVersion>latest</LangVersion>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+        <LangVersion>latest</LangVersion>
+        <DocumentationFile>bin\Release\netcoreapp2.0\TooYoung.Web.xml</DocumentationFile>
+    </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="AgileObjects.AgileMapper" Version="0.17.0" />
     <PackageReference Include="Microsoft.AspNetCore.All" Version="2.0.3" />
