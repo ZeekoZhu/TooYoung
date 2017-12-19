@@ -7,7 +7,15 @@ before_script:
 build:
     stage: build
     script:
-        - sh ./ci.build.sh
+        - >-
+            docker run -t --rm -v $(pwd):/app --workdir /app
+            microsoft/aspnetcore-build sh -c "cd /app/TooYoung.Web && dotnet
+            restore --configfile /app/Nuget.Config && dotnet publish -c Release
+            -o /app/TooYoung/PublishOutput"
+        - >-
+            docker run -t --rm -v $(pwd):/app --workdir /app
+            microsoft/aspnetcore-build sh -c "cd /app/Test && dotnet restore
+            --configfile /app/Nuget.Config && dotnet test"
     tags:
         - HK1
 publish:
