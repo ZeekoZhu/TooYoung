@@ -7,6 +7,7 @@ before_script:
 build:
     stage: build
     script:
+        - echo $CI_COMMIT_TAG
         - 'docker build -t too-young:$CI_COMMIT_TAG .'
     tags:
         - HK1
