@@ -2,4 +2,4 @@
 
 $Env:ASPNETCORE_ENVIRONMENT = 'Development'
 $Env:ASPNETCORE_URLS = 'http://localhost:53148'
-dotnet run
+dotnet watch run
