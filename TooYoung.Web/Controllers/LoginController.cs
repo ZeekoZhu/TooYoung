@@ -1,7 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using TooYoung.Filters;
+using TooYoung.Services;
 using TooYoung.Web.ViewModels;
 using ZeekoUtilsPack.BCLExt;
 
@@ -10,10 +12,12 @@ namespace TooYoung.Controllers
     public class LoginController : Controller
     {
         private readonly ILogger _logger;
+        private readonly AccountService _accountService;
 
-        public LoginController(ILogger<LoginController> logger)
+        public LoginController(ILogger<LoginController> logger, AccountService accountService)
         {
             _logger = logger;
+            _accountService = accountService;
         }
 
         [HttpGet]
@@ -28,9 +32,10 @@ namespace TooYoung.Controllers
 
         [HttpPost]
         [ValidateModel]
-        public IActionResult Index([FromForm] LoginModel model)
+        public async Task<IActionResult> Index([FromForm] LoginModel model)
         {
-            if (model.UserName == "12345" && model.Password == "123".GetMd5())
+            var user = await _accountService.FindByUserName(model.UserName);
+            if (user != null && user.Password == model.Password)
             {
                 return Redirect("/");
             }
