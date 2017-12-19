@@ -8,12 +8,8 @@ build:
     stage: build
     script:
         - bash ./ci.build.sh
-    only:
-        - tags
-        - triggers
-        - schedules
-        - web
-    tags: HK1
+    tags:
+        - HK1
 publish:
     stage: publish
     script:
@@ -30,4 +26,5 @@ publish:
         - triggers
         - schedules
         - web
-    tags: HK1
+    tags:
+        - HK1
