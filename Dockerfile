@@ -14,7 +14,7 @@ RUN ls -R && cd Test \
 # copies the rest of your code
 COPY . .
 RUN cd TooYoung.Web && npm i \
-    cd ../Test && dotnet test \
+    && cd ../Test && dotnet test \
     && cd ../TooYoung.Web \
     && dotnet publish -c Release -o /app/
 
