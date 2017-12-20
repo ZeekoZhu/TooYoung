@@ -8,6 +8,7 @@ build:
     stage: build
     script:
         - 'docker build -t too-young:$CI_COMMIT_SHA .'
+        - 'docker rmi too-young:$CI_COMMIT_SHA'
     tags:
         - HK1
 publish:
