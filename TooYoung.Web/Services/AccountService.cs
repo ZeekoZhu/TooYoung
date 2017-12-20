@@ -2,7 +2,7 @@
 using MongoDB.Bson;
 using MongoDB.Driver;
 using MongoDB.Driver.Linq;
-using TooYoung.Models;
+using TooYoung.Web.Models;
 
 namespace TooYoung.Services
 {

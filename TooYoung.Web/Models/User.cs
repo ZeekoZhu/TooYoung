@@ -2,7 +2,7 @@
 using MongoDB.Bson.Serialization.Attributes;
 using MongoDB.Bson.Serialization.IdGenerators;
 
-namespace TooYoung.Models
+namespace TooYoung.Web.Models
 {
     public class User
     {

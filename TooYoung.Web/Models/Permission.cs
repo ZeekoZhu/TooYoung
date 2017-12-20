@@ -1,7 +1,7 @@
-﻿namespace TooYoung.Models
+﻿namespace TooYoung.Web.Models
 {
     public enum Permission
     {
-        AdminAll
+        AdminAll, ManageGroup
     }
 }

@@ -70,7 +70,7 @@ namespace TooYoung
             {
                 c.OperationFilter<SecurityRequirementsOperationFilter>();
                 // c.OperationFilter<FileParamTypeFilter>();
-                c.SwaggerDoc("v1", new Info { Title = "医疗报销管理系统 API", Version = "v1" });
+                c.SwaggerDoc("v1", new Info { Title = "TooYoung API", Version = "v1" });
                 var filePath = Path.Combine(PlatformServices.Default.Application.ApplicationBasePath, "TooYoung.Web.xml");
                 c.IncludeXmlComments(filePath);
             });
