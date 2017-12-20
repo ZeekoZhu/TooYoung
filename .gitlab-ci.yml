@@ -15,8 +15,8 @@ publish:
     script:
         - >-
             docker tag too-young:$CI_COMMIT_SHA
-            zeekozhu/too-toung:$CI_COMMIT_TAG
-        - 'docker tag too-young:$CI_COMMIT_SHA zeekozhu/too-toung:latest'
+            zeekozhu/too-young:$CI_COMMIT_TAG
+        - 'docker tag too-young:$CI_COMMIT_SHA zeekozhu/too-young:latest'
         - 'docker push zeekozhu/too-young:$CI_COMMIT_TAG'
         - 'docker push zeekozhu/too-young:latest'
     only:

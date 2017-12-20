@@ -6,15 +6,17 @@ WORKDIR /source
 COPY Test/*.csproj ./Test/
 COPY TooYoung.Web/*.csproj ./TooYoung.Web/
 COPY Nuget.Config .
-RUN ls -R && cd Test \
+RUN cd Test \
     && dotnet restore --configfile ../Nuget.Config \
     && cd ../TooYoung.Web \
     && dotnet restore --configfile ../Nuget.Config
 
+COPY TooYoung.Web/*.json ./TooYoung.Web/
+RUN ls -R && cd TooYoung.Web && npm i
+
 # copies the rest of your code
 COPY . .
-RUN cd TooYoung.Web && npm i \
-    && cd ../Test && dotnet test \
+RUN cd Test && dotnet test \
     && cd ../TooYoung.Web \
     && dotnet publish -c Release -o /app/
 
