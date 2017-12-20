@@ -12,7 +12,7 @@ using TooYoung.Services;
 using TooYoung.Web.ViewModels;
 using ZeekoUtilsPack.AspNetCore.Jwt;
 
-namespace TooYoung.Controllers
+namespace TooYoung.ApiControllers
 {
     [Consumes("application/json")]
     [Produces("application/json")]
