@@ -7,6 +7,7 @@ namespace TooYoung.Web.Models
     public class ImageInfo
     {
         [BsonId(IdGenerator = typeof(StringObjectIdGenerator))]
+        [BsonRepresentation(BsonType.ObjectId)]
         public string Id { get; set; }
 
         [BsonRepresentation(BsonType.ObjectId)]

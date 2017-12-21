@@ -1,10 +1,15 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
+using AgileObjects.AgileMapper;
 using Microsoft.AspNetCore.Mvc;
 using TooYoung.Filters;
 using TooYoung.Web.Filters;
 using TooYoung.Web.Models;
 using TooYoung.Web.Services;
+using TooYoung.Web.Utils;
+using TooYoung.Web.ViewModels;
 
 namespace TooYoung.Web.ApiControllers
 {
@@ -23,9 +28,28 @@ namespace TooYoung.Web.ApiControllers
 
         [HttpPost]
         [RequiredPermissions(Permission.ManageGroup, Permission.AdminAll)]
-        public IActionResult Post()
+        public async Task<IActionResult> Post([FromBody] GroupPostModel model)
         {
-            return Ok("Success");
+            do
+            {
+                if (await _imageManageService.HasGroupName(model.Name, User.Id()))
+                {
+                    ModelState.AddModelError(nameof(model.Name), "输入的组名已经存在，请输入一个新的组名");
+                    break;
+                }
+            } while (false);
+            if (ModelState.IsValid == false)
+            {
+                return BadRequest(ModelState);
+            }
+            var group = Mapper.Map(model).ToANew<Group>();
+            if (group.ACL == null || (group.ACL.Any() == false))
+            {
+                group.ACL = new List<string> { "*" };
+            }
+            group.OwnerId = User.Id();
+            var result = await _imageManageService.AddNewGroup(group);
+            return Json(result);
         }
     }
 }
