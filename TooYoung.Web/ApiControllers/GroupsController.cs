@@ -1,12 +1,17 @@
 using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using TooYoung.Filters;
 using TooYoung.Web.Filters;
 using TooYoung.Web.Models;
 using TooYoung.Web.Services;
 
 namespace TooYoung.Web.ApiControllers
 {
+    [Consumes("application/json")]
+    [Produces("application/json")]
+    [Route("api/[controller]")]
+    [ValidateModel]
     [JwtAuthorize]
     public class GroupsController : Controller
     {

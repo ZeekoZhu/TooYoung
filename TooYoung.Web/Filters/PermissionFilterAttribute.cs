@@ -22,6 +22,11 @@ namespace TooYoung.Web.Filters
     {
         private readonly PermissionRequirement _requirement;
 
+        public PermissionFilterAttribute(PermissionRequirement req)
+        {
+            _requirement = req;
+        }
+
         public void OnAuthorization(AuthorizationFilterContext context)
         {
             var permissionClaim = context.HttpContext.User.Claims.FirstOrDefault(c => c.Type == "per")?.Value ?? "";

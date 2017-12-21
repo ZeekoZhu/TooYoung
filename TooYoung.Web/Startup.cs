@@ -16,6 +16,7 @@ using TooYoung.Jwt;
 using TooYoung.Services;
 using TooYoung.Utils;
 using TooYoung.Web.Filters;
+using TooYoung.Web.Services;
 using ZeekoUtilsPack.AspNetCore.Jwt;
 
 namespace TooYoung
@@ -44,6 +45,7 @@ namespace TooYoung
                 provider.GetService<IMongoClient>().GetDatabase(dbName));
 
             services.AddScoped<AccountService>();
+            services.AddScoped<ImageManageService>();
 
 
             // 配置 JWT

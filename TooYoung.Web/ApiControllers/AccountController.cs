@@ -11,6 +11,7 @@ using TooYoung.Web.Models;
 using TooYoung.Services;
 using TooYoung.Web.ViewModels;
 using ZeekoUtilsPack.AspNetCore.Jwt;
+using Microsoft.AspNetCore.Authorization;
 
 namespace TooYoung.ApiControllers
 {
@@ -41,6 +42,7 @@ namespace TooYoung.ApiControllers
         }
 
         [HttpPost("Login")]
+        [AllowAnonymous]
         public async Task<IActionResult> Login([FromBody] LoginModel model)
         {
             var user = await _accountService.FindByUserName(model.UserName);
