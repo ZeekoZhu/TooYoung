@@ -40,12 +40,12 @@ namespace TooYoung.Web.Filters
                     }
                     return null;
                 })
-                .Where(p => p != null)
+                .Where(p => p != null && Enum.IsDefined(typeof(Permission), p.Value))
                 .Select(p => (Permission)p);
-
-            if (permissions.Any(p => _requirement.Permissions.Contains(p)))
+            if (permissions.Any(p => _requirement.Permissions.Contains(p)) == false)
             {
-                context.Result = new ForbidResult();
+                context.HttpContext.Response.StatusCode = 403;
+                context.Result = new JsonResult(new { Required = _requirement });
             }
         }
     }

@@ -2,6 +2,6 @@
 {
     public enum Permission
     {
-        AdminAll, ManageGroup
+        AdminAll, ManageGroup, ManageImage
     }
 }

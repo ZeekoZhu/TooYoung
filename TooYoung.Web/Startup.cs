@@ -63,6 +63,7 @@ namespace TooYoung
                 .AddCookie(options =>
                 {
                     options.LoginPath = "/Login";
+                    options.AccessDeniedPath = "/Login";
                     options.Cookie.Name = "tk";
                     options.Cookie.Path = "/";
                     options.TicketDataFormat = new JwtCookieDataFormat(tokenOptions.TokenOptions);

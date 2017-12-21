@@ -12,6 +12,7 @@ using TooYoung.Services;
 using TooYoung.Web.ViewModels;
 using ZeekoUtilsPack.AspNetCore.Jwt;
 using Microsoft.AspNetCore.Authorization;
+using System.Linq;
 
 namespace TooYoung.ApiControllers
 {
@@ -34,7 +35,7 @@ namespace TooYoung.ApiControllers
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
-        [HttpPost]
+        [HttpPost("Register")]
         public async Task<IActionResult> Register([FromBody] RegisterModel model)
         {
             var result = await _accountService.Create(Mapper.Map(model).ToANew<User>());
@@ -42,7 +43,6 @@ namespace TooYoung.ApiControllers
         }
 
         [HttpPost("Login")]
-        [AllowAnonymous]
         public async Task<IActionResult> Login([FromBody] LoginModel model)
         {
             var user = await _accountService.FindByUserName(model.UserName);
@@ -69,8 +69,9 @@ namespace TooYoung.ApiControllers
             {
                 new Claim(ClaimTypes.NameIdentifier, user.Id, ClaimValueTypes.String),
                 // TODO: new Claim("jti", jti, ClaimValueTypes.String),
-                new Claim("per",string.Join(",", user.Permissions), ClaimValueTypes.String)
+                new Claim("per",string.Join(",", user.Permissions.Select(p=>(int)p)), ClaimValueTypes.String)
             };
+            identity.AddClaims(claims);
             var token = handler.CreateEncodedJwt(new SecurityTokenDescriptor
             {
                 Issuer = _jwtOptions.Issuer,
