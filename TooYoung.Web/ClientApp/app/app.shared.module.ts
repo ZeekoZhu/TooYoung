@@ -6,10 +6,14 @@ import { RouterModule } from '@angular/router';
 import { DxButtonModule } from 'devextreme-angular';
 
 import { AppComponent } from './components/app/app.component';
+import { HeaderComponent } from './components/header/header.component';
+import { SidebarComponent } from './components/sidebar/sidebar.component';
 
 @NgModule({
     declarations: [
         AppComponent,
+        HeaderComponent,
+        SidebarComponent
     ],
     imports: [
         CommonModule,
