@@ -8,5 +8,21 @@ import { Component, OnInit } from '@angular/core';
 
 export class SidebarComponent implements OnInit {
 
-    ngOnInit() { }
+    navItems: SideBarNavItem[] = [];
+    ngOnInit() {
+        this.navItems = [
+            {
+                text: '图床管理', routerLink: ['/group-panel'],
+                items: [
+                    { text: '分组管理', routerLink: ['/group-panel'] }
+                ]
+            }
+        ];
+    }
+}
+
+class SideBarNavItem {
+    text: string;
+    routerLink: any[];
+    items?: SideBarNavItem[];
 }

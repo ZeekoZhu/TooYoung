@@ -3,26 +3,29 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpModule } from '@angular/http';
 import { RouterModule } from '@angular/router';
-import { DxButtonModule } from 'devextreme-angular';
+import { DxButtonModule, DxTreeViewModule, DxTemplateModule } from 'devextreme-angular';
 
 import { AppComponent } from './components/app/app.component';
 import { HeaderComponent } from './components/header/header.component';
 import { SidebarComponent } from './components/sidebar/sidebar.component';
+import { GroupPanelComponent } from './components/group-panel/group-panel.component';
 
 @NgModule({
     declarations: [
         AppComponent,
         HeaderComponent,
-        SidebarComponent
+        SidebarComponent,
+        GroupPanelComponent
     ],
     imports: [
         CommonModule,
         HttpModule,
         FormsModule,
-        DxButtonModule,
+        DxButtonModule, DxTreeViewModule, DxTemplateModule,
         RouterModule.forRoot([
-            { path: '', redirectTo: 'home', pathMatch: 'full' },
-            { path: '**', redirectTo: 'home' }
+            { path: '', redirectTo: 'group-panel', pathMatch: 'full' },
+            { path: 'group-panel', component: GroupPanelComponent },
+            { path: '**', redirectTo: 'group-panel' }
         ])
     ]
 })
