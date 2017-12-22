@@ -2,7 +2,10 @@
     ViewData["Title"] = "Home Page";
     Layout = "_Layout";
 }
-
+@section styles {
+    <link rel="stylesheet" href="~/dist/vendor.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/dist/site.css" />
+}
 <div id="react-app" asp-prerender-module="ClientApp/dist/main-server">Loading...</div>
 
 <script src="~/dist/vendor.js" asp-append-version="true"></script>

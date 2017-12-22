@@ -23,6 +23,8 @@
     "extract-text-webpack-plugin": "2.1.2",
     "file-loader": "0.11.2",
     "history": "4.6.3",
+    "less": "^2.7.3",
+    "less-loader": "^4.0.5",
     "node-noop": "1.0.0",
     "react": "15.6.1",
     "react-dom": "15.6.1",
@@ -32,11 +34,13 @@
     "react-router-redux": "5.0.0-alpha.6",
     "redux": "3.7.1",
     "redux-thunk": "2.2.0",
-    "style-loader": "0.18.2",
     "typescript": "2.4.1",
     "url-loader": "0.5.9",
     "webpack": "2.5.1",
     "webpack-hot-middleware": "2.18.2",
     "webpack-merge": "4.1.0"
+  },
+  "dependencies": {
+    "office-ui-fabric-react": "^5.35.0"
   }
 }
