@@ -33,5 +33,11 @@ namespace TooYoung.Web.Services
             var result = await Users.CountAsync(userQuery);
             return result > 0;
         }
+
+        public async Task<List<Group>> GetGroups(string userId)
+        {
+            var user = await Users.AsQueryable().FirstAsync(u => u.Id == userId);
+            return user.Groups;
+        }
     }
 }

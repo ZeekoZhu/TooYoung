@@ -51,5 +51,14 @@ namespace TooYoung.Web.ApiControllers
             var result = await _imageManageService.AddNewGroup(group);
             return Json(result);
         }
+
+        [HttpGet]
+        [RequiredPermissions(Permission.ManageGroup, Permission.AdminAll)]
+        public async Task<IActionResult> Get()
+        {
+            var userId = User.Id();
+            var result = await _imageManageService.GetGroups(userId);
+            return Json(result);
+        }
     }
 }
