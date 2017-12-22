@@ -88,7 +88,8 @@ namespace TooYoung
                 app.UseDeveloperExceptionPage();
                 app.UseWebpackDevMiddleware(new WebpackDevMiddlewareOptions
                 {
-                    HotModuleReplacement = true
+                    HotModuleReplacement = true,
+                    ReactHotModuleReplacement = true
                 });
                 app.UseSwagger();
                 app.UseSwaggerUI(c =>
