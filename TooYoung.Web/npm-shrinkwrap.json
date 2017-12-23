@@ -21,10 +21,15 @@
       "integrity": "sha1-+wrQS1tvbqvgNyoyqPH7ulwTDK4=",
       "dev": true
     },
+    "@types/prop-types": {
+      "version": "15.5.2",
+      "resolved": "http://registry.npm.taobao.org/@types/prop-types/download/@types/prop-types-15.5.2.tgz",
+      "integrity": "sha1-PGuNzrKQbMh/5DWOgJ+dIMjVm+E="
+    },
     "@types/react": {
-      "version": "15.0.35",
-      "resolved": "http://registry.npm.taobao.org/@types/react/download/@types/react-15.0.35.tgz",
-      "integrity": "sha1-RnKSPNUC0D4UgNA4FuvFpxn7hto=",
+      "version": "15.0.38",
+      "resolved": "http://registry.npm.taobao.org/@types/react/download/@types/react-15.0.38.tgz",
+      "integrity": "sha1-av6jGp/mYwSvR0EGujct2rpEmZU=",
       "dev": true
     },
     "@types/react-dom": {
@@ -33,7 +38,7 @@
       "integrity": "sha1-88PhTGgnhZI8fWRYNTffMZRC3sE=",
       "dev": true,
       "requires": {
-        "@types/react": "15.0.35"
+        "@types/react": "15.0.38"
       }
     },
     "@types/react-hot-loader": {
@@ -42,7 +47,7 @@
       "integrity": "sha1-7gKxmZwicTQY4ZjMPrCQt+ds5ZI=",
       "dev": true,
       "requires": {
-        "@types/react": "15.0.35"
+        "@types/react": "15.0.38"
       }
     },
     "@types/react-redux": {
@@ -51,7 +56,7 @@
       "integrity": "sha1-r62FHYWSEZIlqmvMQCx/a5x+QQY=",
       "dev": true,
       "requires": {
-        "@types/react": "15.0.35",
+        "@types/react": "15.0.38",
         "redux": "3.7.1"
       }
     },
@@ -62,7 +67,7 @@
       "dev": true,
       "requires": {
         "@types/history": "4.6.0",
-        "@types/react": "15.0.35"
+        "@types/react": "15.0.38"
       }
     },
     "@types/react-router-dom": {
@@ -72,7 +77,7 @@
       "dev": true,
       "requires": {
         "@types/history": "4.6.0",
-        "@types/react": "15.0.35",
+        "@types/react": "15.0.38",
         "@types/react-router": "4.0.12"
       }
     },
@@ -83,7 +88,7 @@
       "dev": true,
       "requires": {
         "@types/history": "4.6.0",
-        "@types/react": "15.0.35",
+        "@types/react": "15.0.38",
         "redux": "3.7.1"
       }
     },

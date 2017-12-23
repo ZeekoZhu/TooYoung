@@ -5,8 +5,10 @@ import { StaticRouter } from 'react-router-dom';
 import { replace } from 'react-router-redux';
 import { createMemoryHistory } from 'history';
 import { createServerRenderer, RenderResult } from 'aspnet-prerendering';
+import { styles } from './fabric-style-server';
 import { routes } from './routes';
 import configureStore from './configureStore';
+
 
 export default createServerRenderer(params => {
     return new Promise<RenderResult>((resolve, reject) => {
@@ -26,7 +28,6 @@ export default createServerRenderer(params => {
             </Provider>
         );
         renderToString(app);
-
         // If there's a redirection, just send this information back to the host application
         if (routerContext.url) {
             resolve({ redirectUrl: routerContext.url });
@@ -36,8 +37,10 @@ export default createServerRenderer(params => {
         // Once any async tasks are done, we can perform the final render
         // We also send the redux store state, so the client can continue execution where the server left off
         params.domainTasks.then(() => {
+            let result = renderToString(app);
+            let styleTag = `<style>${styles.join('')}</style>`;
             resolve({
-                html: renderToString(app),
+                html: styleTag + result,
                 globals: { initialReduxState: store.getState() }
             });
         }, reject); // Also propagate any errors back into the host application

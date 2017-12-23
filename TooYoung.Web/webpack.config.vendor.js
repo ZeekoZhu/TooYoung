@@ -26,8 +26,7 @@ module.exports = (env) => {
                 'react-redux',
                 'redux',
                 'redux-thunk',
-                'react-router-redux',
-                'office-ui-fabric-react/lib'
+                'react-router-redux'
             ],
         },
         output: {

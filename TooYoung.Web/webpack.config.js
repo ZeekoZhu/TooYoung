@@ -61,7 +61,10 @@ module.exports = (env) => {
     // Configuration for server-side (prerendering) bundle suitable for running in Node
     const serverBundleConfig = merge(sharedConfig(), {
         resolve: { mainFields: ['main'] },
-        entry: { 'main-server': './ClientApp/boot-server.tsx' },
+        entry: {
+            'main-server': './ClientApp/boot-server.tsx',
+            // 'fabric-style': './ClientApp/fabric-style-server.ts'
+        },
         plugins: [
             new webpack.DllReferencePlugin({
                 context: __dirname,

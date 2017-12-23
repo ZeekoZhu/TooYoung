@@ -33,6 +33,11 @@ namespace TooYoung
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddNodeServices(options =>
+            {
+                options.LaunchWithDebugging = true;
+                options.DebuggingPort = 9229;
+            });
             // 配置 MongoDB
             var connectStr = Configuration.GetConnectionString("Mongo");
             connectStr.ParseEnvVarParams()
