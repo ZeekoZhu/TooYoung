@@ -1,6 +1,6 @@
 using System;
 using FluentAssertions;
-using TooYoung.Utils;
+using TooYoung.Web.Utils;
 using Xunit;
 
 namespace Test

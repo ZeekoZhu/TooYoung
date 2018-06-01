@@ -14,7 +14,7 @@ namespace TooYoung.Web.Models
         public string GroupId { get; set; }
         public string Name { get; set; }
         public int Width { get; set; }
-        public int height { get; set; }
+        public int Height { get; set; }
 
         /// <summary>
         /// 图片大小，单位为字节

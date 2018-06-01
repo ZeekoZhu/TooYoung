@@ -1,7 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 
-namespace TooYoung.Filters
+namespace TooYoung.Web.Filters
 {
     public class ValidateModelAttribute : ActionFilterAttribute
     {

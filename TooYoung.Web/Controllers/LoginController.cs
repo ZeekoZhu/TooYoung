@@ -1,13 +1,11 @@
-﻿using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using TooYoung.Filters;
-using TooYoung.Services;
+using TooYoung.Web.Filters;
+using TooYoung.Web.Services;
 using TooYoung.Web.ViewModels;
-using ZeekoUtilsPack.BCLExt;
 
-namespace TooYoung.Controllers
+namespace TooYoung.Web.Controllers
 {
     public class LoginController : Controller
     {

@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.IdentityModel.Tokens;
 using ZeekoUtilsPack.AspNetCore.Jwt;
 
-namespace TooYoung.Jwt
+namespace TooYoung.Web.Jwt
 {
     public class JwtCookieDataFormat : ISecureDataFormat<AuthenticationTicket>
     {
@@ -47,7 +47,7 @@ namespace TooYoung.Jwt
                 var principal = jwtHandler.ValidateToken(protectedText, tokenParam, out SecurityToken validatedToken);
                 return new AuthenticationTicket(principal, new AuthenticationProperties(), CookieAuthenticationDefaults.AuthenticationScheme);
             }
-            catch (ArgumentException)
+            catch
             {
                 return null;
             }

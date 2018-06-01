@@ -1,10 +1,9 @@
-﻿using System.Threading.Tasks;
-using MongoDB.Bson;
+using System.Threading.Tasks;
 using MongoDB.Driver;
 using MongoDB.Driver.Linq;
 using TooYoung.Web.Models;
 
-namespace TooYoung.Services
+namespace TooYoung.Web.Services
 {
     public class AccountService
     {

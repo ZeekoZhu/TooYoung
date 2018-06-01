@@ -20,8 +20,7 @@ namespace TooYoung.Web.Models
         /// 该组别下包含的全部图片
         /// </summary>
         /// <returns></returns>
-
         [BsonRepresentation(BsonType.ObjectId)]
-        public List<string> Images { get; set; } = new List<string>();
+        public List<string> ImageInfos { get; set; } = new List<string>();
     }
 }

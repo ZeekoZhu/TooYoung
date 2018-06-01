@@ -1,8 +1,8 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 
-namespace TooYoung.Utils
+namespace TooYoung.Web.Utils
 {
     public static class EnvVarParamsParser
     {

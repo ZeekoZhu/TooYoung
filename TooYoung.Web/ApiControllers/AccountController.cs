@@ -1,21 +1,23 @@
-﻿using System;
+using System;
 using System.IdentityModel.Tokens.Jwt;
+using System.Linq;
 using System.Security.Claims;
 using System.Security.Principal;
 using System.Threading.Tasks;
 using AgileObjects.AgileMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
-using TooYoung.Filters;
+using TooYoung.Web.Filters;
 using TooYoung.Web.Models;
-using TooYoung.Services;
+using TooYoung.Web.Services;
 using TooYoung.Web.ViewModels;
 using ZeekoUtilsPack.AspNetCore.Jwt;
-using Microsoft.AspNetCore.Authorization;
-using System.Linq;
 
-namespace TooYoung.ApiControllers
+namespace TooYoung.Web.ApiControllers
 {
+    /// <summary>
+    /// 账户相关 API
+    /// </summary>
     [Consumes("application/json")]
     [Produces("application/json")]
     [Route("api/[controller]")]

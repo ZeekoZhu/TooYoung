@@ -17,6 +17,12 @@ namespace TooYoung.Web.Services
         {
             Users = db.GetCollection<User>(nameof(User));
         }
+
+        /// <summary>
+        /// 添加新的分组
+        /// </summary>
+        /// <param name="group"></param>
+        /// <returns></returns>
         public async Task<Group> AddNewGroup(Group group)
         {
             group.Id = ObjectId.GenerateNewId().ToString();
@@ -26,6 +32,12 @@ namespace TooYoung.Web.Services
             return group;
         }
 
+        /// <summary>
+        /// 判断分组是否存在
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="userId"></param>
+        /// <returns></returns>
         public async Task<bool> HasGroupName(string name, string userId)
         {
             var groupQuery = Builders<Group>.Filter.Eq(g => g.Name, name);
@@ -34,6 +46,11 @@ namespace TooYoung.Web.Services
             return result > 0;
         }
 
+        /// <summary>
+        /// 获取指定用户的全部分组
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <returns></returns>
         public async Task<List<Group>> GetGroups(string userId)
         {
             var user = await Users.AsQueryable().FirstAsync(u => u.Id == userId);
