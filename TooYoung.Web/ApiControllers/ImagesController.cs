@@ -1,5 +1,6 @@
 using System.IO;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
 using TooYoung.Web.Filters;
 using TooYoung.Web.Models;
@@ -69,7 +70,7 @@ namespace TooYoung.Web.ApiControllers
             var hasReferer = Request.Headers.TryGetValue("Referer", out var refererValue);
             var referer = hasReferer ? refererValue.ToString() : "";
             var accessible = group.IsAccessible(referer);
-            if (accessible == false) return Forbid();
+            if (accessible == false) return Forbid(JwtBearerDefaults.AuthenticationScheme);
             // get image binary
             var img = await _imgService.GetImageByImageInfo(info.Id);
             return File(img.Binary, info.GetMime(), name);
