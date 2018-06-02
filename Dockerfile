@@ -1,5 +1,5 @@
 # Stage 1 Build and test
-FROM microsoft/aspnetcore-build AS builder
+FROM zeekozhu/aspnetcore-build-yarn:2.1 AS builder
 WORKDIR /source
 
 # caches restore result by copying csproj file separately
@@ -11,8 +11,8 @@ RUN cd Test \
     && cd ../TooYoung.Web \
     && dotnet restore --configfile ../Nuget.Config
 
-COPY TooYoung.Web/*.json ./TooYoung.Web/
-RUN ls -R && cd TooYoung.Web && npm i
+COPY TooYoung.Web/ClientApp/yarn.lock ./TooYoung.Web/ClientApp/
+RUN ls -R && cd TooYoung.Web/ClientApp && yarn
 
 # copies the rest of your code
 COPY . .
@@ -21,17 +21,8 @@ RUN cd Test && dotnet test \
     && dotnet publish -c Release -o /app/
 
 # Stage 2 Build image
-FROM microsoft/aspnetcore:2.0.4-stretch
-
-ENV NODE_VERSION 9.3.0
-
-RUN curl -SLO "https://mirrors.ustc.edu.cn/node/v$NODE_VERSION/node-v$NODE_VERSION-linux-x64.tar.gz" \
-  && curl -SLO --compressed "https://mirrors.ustc.edu.cn/node/v$NODE_VERSION/SHASUMS256.txt" \
-  && grep " node-v$NODE_VERSION-linux-x64.tar.gz\$" SHASUMS256.txt | sha256sum -c - \
-  && tar -xf "node-v$NODE_VERSION-linux-x64.tar.gz" -C /usr/local --strip-components=1 --no-same-owner \
-  && rm "node-v$NODE_VERSION-linux-x64.tar.gz" SHASUMS256.txt \
-  && ln -s /usr/local/bin/node /usr/local/bin/nodejs
+FROM microsoft/dotnet:2.1-aspnetcore-runtime-alpine
 
 WORKDIR /app
 COPY --from=builder /app .
-ENTRYPOINT ["dotnet", "TooYoung.dll"]
+ENTRYPOINT ["dotnet", "TooYoung.Web.dll"]
