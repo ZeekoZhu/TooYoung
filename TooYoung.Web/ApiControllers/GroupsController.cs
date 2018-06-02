@@ -15,7 +15,7 @@ namespace TooYoung.Web.ApiControllers
     [Consumes("application/json")]
     [Produces("application/json")]
     [Route("api/[controller]")]
-    [ValidateModel]
+    [ApiController]
     [JwtAuthorize]
     public class GroupsController : Controller
     {

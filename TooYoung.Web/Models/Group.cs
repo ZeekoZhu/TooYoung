@@ -1,4 +1,6 @@
 using System.Collections.Generic;
+using System.Linq;
+using System.Text.RegularExpressions;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 using MongoDB.Bson.Serialization.IdGenerators;
@@ -22,5 +24,18 @@ namespace TooYoung.Web.Models
         /// <returns></returns>
         [BsonRepresentation(BsonType.ObjectId)]
         public List<string> ImageInfos { get; set; } = new List<string>();
+    }
+
+    public static class GroupFunc
+    {
+        public static bool IsAccessible(this Group g, string referer)
+        {
+            return g.ACL.Any(rule =>
+            {
+                if (rule == "*") return true;
+                var regex = new Regex(rule);
+                return regex.IsMatch(referer);
+            });
+        }
     }
 }

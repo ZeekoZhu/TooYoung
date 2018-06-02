@@ -1,6 +1,8 @@
+using System.IO;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 using MongoDB.Bson.Serialization.IdGenerators;
+using Newtonsoft.Json;
 
 namespace TooYoung.Web.Models
 {
@@ -23,8 +25,18 @@ namespace TooYoung.Web.Models
         public int SizeOfBytes { get; set; }
 
         [BsonRepresentation(BsonType.ObjectId)]
+        [JsonIgnore]
         public string Image { get; set; }
 
         // TODO: EXIF, Thumbnail
+    }
+
+    public static class ImageInfoFunc
+    {
+        public static string GetMime(this ImageInfo info)
+        {
+            var ext = Path.GetExtension(info.Name).Trim('.');
+            return $"image/{ext}";
+        }
     }
 }
