@@ -1,6 +1,7 @@
 using System.IO;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TooYoung.Web.Filters;
 using TooYoung.Web.Models;
@@ -56,6 +57,7 @@ namespace TooYoung.Web.ApiControllers
             }
         }
 
+        [AllowAnonymous]
         [HttpGet("{name}")]
         public async Task<IActionResult> Get([FromRoute]string name)
         {
