@@ -1,9 +1,9 @@
 using System.Threading.Tasks;
 using MongoDB.Driver;
 using MongoDB.Driver.Linq;
-using TooYoung.Web.Models;
+using TooYoung.Core.Models;
 
-namespace TooYoung.Web.Services
+namespace TooYoung.Provider.MongoDB.Services
 {
     public class AccountService
     {

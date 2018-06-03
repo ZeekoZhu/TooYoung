@@ -10,7 +10,11 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.PlatformAbstractions;
 using MongoDB.Driver;
 using Swashbuckle.AspNetCore.Swagger;
+using TooYoung.Core.Services;
+using TooYoung.Provider.MongoDB;
+using TooYoung.Provider.MongoDB.Services;
 using TooYoung.Web.Filters;
+using TooYoung.Web.Json;
 using TooYoung.Web.Jwt;
 using TooYoung.Web.Services;
 using TooYoung.Web.Utils;
@@ -36,7 +40,7 @@ namespace TooYoung.Web
             // 配置 MongoDB
             var connectStr = Configuration.GetConnectionString("Mongo");
             connectStr.ParseEnvVarParams()
-                .Select(p =>(Key: $"$({p})", Val : Configuration.GetSection(p).Value))
+                .Select(p => (Key: $"$({p})", Val: Configuration.GetSection(p).Value))
                 .ToList()
                 .ForEach(p => { connectStr = connectStr.Replace(p.Key, p.Val); });
             var dbName = Configuration.GetSection("MONGO_DBNAME").Value;
@@ -45,7 +49,9 @@ namespace TooYoung.Web
                 provider.GetService<IMongoClient>().GetDatabase(dbName));
 
             services.AddScoped<AccountService>();
-            services.AddScoped<ImageManageService>();
+            services.AddScoped<IImageProcessService, ImageSharpService>();
+            services.AddScoped<IImageManageService,ImageManageService>();
+            MongoDBProvider.Init();
 
             // 配置 JWT
             string keyDir = PlatformServices.Default.Application.ApplicationBasePath;
@@ -76,8 +82,12 @@ namespace TooYoung.Web
                 var filePath = Path.Combine(PlatformServices.Default.Application.ApplicationBasePath, "TooYoung.Web.xml");
                 c.IncludeXmlComments(filePath);
             });
-            services.AddMvc();
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+            services.AddMvc()
+                .AddJsonOptions(opt =>
+                    {
+                        opt.SerializerSettings.ContractResolver = PropertyIgnoreContractResolver.Instance;
+                    })
+                .SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
 
             // In production, the React files will be served from this directory
             services.AddSpaStaticFiles(configuration =>

@@ -3,9 +3,10 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using TooYoung.Core.Models;
+using TooYoung.Core.Services;
 using TooYoung.Web.Filters;
-using TooYoung.Web.Models;
-using TooYoung.Web.Services;
+using TooYoung.Web.Utils;
 using TooYoung.Web.ViewModels;
 
 namespace TooYoung.Web.ApiControllers
@@ -15,9 +16,9 @@ namespace TooYoung.Web.ApiControllers
     [JwtAuthorize]
     public class ImagesController : Controller
     {
-        private readonly ImageManageService _imgService;
+        private readonly IImageManageService _imgService;
 
-        public ImagesController(ImageManageService imgService)
+        public ImagesController(IImageManageService imgService)
         {
             _imgService = imgService;
         }
@@ -49,24 +50,22 @@ namespace TooYoung.Web.ApiControllers
             {
                 await imageFile.CopyToAsync(ms);
                 var result = await _imgService.UpdateImage(ms, infoId);
-                if (result == null)
-                {
-                    return NotFound();
-                }
-                return result;
+                return result.ToActionResult(BadRequest);
             }
         }
 
         [AllowAnonymous]
-        [HttpGet("{name}")]
-        public async Task<IActionResult> Get([FromRoute]string name)
+        [HttpGet("{user}/{name}")]
+        public async Task<IActionResult> Get([FromRoute]string user, [FromRoute]string name)
         {
             // get imageinfo
-            var info = await _imgService.GetImageInfoByName(name);
-            if (info == null)
+            var infoResult = await _imgService.GetImageInfoByName(user, name);
+            if (infoResult.IsFailure)
             {
-                return NotFound();
+                return NotFound(new ErrorMsg(infoResult.Error));
             }
+
+            var info = infoResult.Value;
             // check group ACL
             var group = await _imgService.GetGroupByImageInfo(info.Id);
             var hasReferer = Request.Headers.TryGetValue("Referer", out var refererValue);

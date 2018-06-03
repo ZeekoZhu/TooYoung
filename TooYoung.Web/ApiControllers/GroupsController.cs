@@ -4,9 +4,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using AgileObjects.AgileMapper;
 using Microsoft.AspNetCore.Mvc;
+using TooYoung.Core.Models;
+using TooYoung.Provider.MongoDB.Services;
 using TooYoung.Web.Filters;
-using TooYoung.Web.Models;
-using TooYoung.Web.Services;
 using TooYoung.Web.Utils;
 using TooYoung.Web.ViewModels;
 

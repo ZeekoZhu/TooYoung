@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using TooYoung.Web.Models;
+using TooYoung.Core.Models;
 
 namespace TooYoung.Web.ViewModels
 {

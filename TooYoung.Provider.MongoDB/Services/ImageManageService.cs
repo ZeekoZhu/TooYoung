@@ -1,26 +1,29 @@
-using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
+using CSharpFunctionalExtensions;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using MongoDB.Driver.Linq;
-using SixLabors.ImageSharp;
-using TooYoung.Web.Models;
-using TooYoung.Web.Utils;
-using Image = TooYoung.Web.Models.Image;
+using TooYoung.Core.Helpers;
+using TooYoung.Core.Models;
+using TooYoung.Core.Services;
+using Image = TooYoung.Core.Models.Image;
 
-namespace TooYoung.Web.Services
+namespace TooYoung.Provider.MongoDB.Services
 {
-    public class ImageManageService
+    public class ImageManageService : IImageManageService
     {
+        private readonly IImageProcessService _imgProcessor;
 
         public IMongoCollection<User> Users { get; set; }
         public IMongoCollection<Image> Images { get; set; }
         public IMongoCollection<ImageInfo> ImageInfos { get; set; }
 
-        public ImageManageService(IMongoDatabase db)
+        public ImageManageService(IMongoDatabase db, IImageProcessService imgProcessor)
         {
+            _imgProcessor = imgProcessor;
             Users = db.GetCollection<User>(nameof(User));
             Images = db.GetCollection<Image>(nameof(Image));
             ImageInfos = db.GetCollection<ImageInfo>(nameof(ImageInfo));
@@ -92,34 +95,55 @@ namespace TooYoung.Web.Services
             return info;
         }
 
-        public async Task<ImageInfo> UpdateImage(MemoryStream bin, string infoId)
+        public async Task<Result<ImageInfo>> UpdateImage(MemoryStream bin, string infoId)
         {
             // find imageinfo
-            var targetInfo = await ImageInfos.AsQueryable().FirstOrDefaultAsync(i => i.Id == infoId);
-            if (targetInfo == null)
-            {
-                return null;
-            }
-            // Save image binary
-            var bytes = bin.ToArray();
-            var img = new Image
-            {
-                Binary = bytes
-            };
-            await Images.InsertOneAsync(img);
-            bin.Seek(0, SeekOrigin.Begin);
-            // update imageinfo
-            IImageInfo imageInfo = SixLabors.ImageSharp.Image.Identify(bin);
-            targetInfo.Image = img.Id;
-            targetInfo.SizeOfBytes = bytes.Length;
-            targetInfo.Width = imageInfo.Width;
-            targetInfo.Height = imageInfo.Height;
-            var result = await ImageInfos.ReplaceOneAsync(i => i.Id == infoId, targetInfo);
-            if (result.ModifiedCount > 0)
-            {
-                return targetInfo;
-            }
-            return null;
+            var saveImageResult = await Maybe<ImageInfo>.From(await ImageInfos
+                    .AsQueryable()
+                    .FirstOrDefaultAsync(i => i.Id == infoId))
+                .ToResult("Image not found")
+                // Save image binary
+                .Flatten(async info =>
+                {
+                    var bytes = bin.ToArray();
+                    bin.Seek(0, SeekOrigin.Begin);
+                    var img = new Image
+                    {
+                        Binary = bytes
+                    };
+                    try
+                    {
+                        await Images.InsertOneAsync(img);
+                    }
+                    catch
+                    {
+                        return Result.Fail<(Image, ImageInfo)>("Can not save image");
+                    }
+
+                    return Result.Ok((img, info));
+                });
+            var boundResult = saveImageResult
+                .Flatten(_ => _imgProcessor.GetBound(bin));
+            return await Result.Combine(saveImageResult, boundResult)
+                // update imageinfo
+                .Flatten(async () =>
+                {
+                    var (img, targetInfo) = saveImageResult.Value;
+                    var (width, height) = boundResult.Value;
+                    targetInfo.Image = img.Id;
+                    targetInfo.SizeOfBytes = img.Binary.Length;
+                    targetInfo.Width = width;
+                    targetInfo.Height = height;
+                    var result = await ImageInfos.ReplaceOneAsync(i => i.Id == infoId, targetInfo);
+                    if (result.ModifiedCount > 0)
+                    {
+                        return Result.Ok(targetInfo);
+                    }
+
+                    return Result.Fail<ImageInfo>("Can not update image information");
+                });
+
+
         }
 
         public async Task<ImageInfo> GetImageInfo(string infoId)
@@ -128,10 +152,17 @@ namespace TooYoung.Web.Services
             return result;
         }
 
-        public async Task<ImageInfo> GetImageInfoByName(string name)
+        public async Task<Result<ImageInfo>> GetImageInfoByName(string userName, string name)
         {
-            var result = await ImageInfos.AsQueryable().FirstOrDefaultAsync(i => i.Name == name);
-            return result;
+            var user = await Users.AsQueryable().FirstOrDefaultAsync(u => u.UserName == userName);
+            return await Maybe<User>.From(user).ToResult($"{userName} not found")
+                .Map(u => u.Groups.SelectMany(g => g.ImageInfos).ToList())
+                .Flatten(async infosRange =>
+                {
+                    var result = await ImageInfos.AsQueryable()
+                        .FirstOrDefaultAsync(i => i.Name == name && infosRange.Contains(i.Id));
+                    return Maybe<ImageInfo>.From(result).ToResult($"{name} not found");
+                });
         }
 
         public async Task<Group> GetGroupByImageInfo(string infoId)

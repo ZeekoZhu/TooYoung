@@ -3,8 +3,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
+using TooYoung.Core.Models;
 using TooYoung.Web.Jwt;
-using TooYoung.Web.Models;
 
 namespace TooYoung.Web.Filters
 {

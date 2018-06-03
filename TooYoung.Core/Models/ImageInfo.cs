@@ -1,18 +1,11 @@
 using System.IO;
-using MongoDB.Bson;
-using MongoDB.Bson.Serialization.Attributes;
-using MongoDB.Bson.Serialization.IdGenerators;
-using Newtonsoft.Json;
 
-namespace TooYoung.Web.Models
+namespace TooYoung.Core.Models
 {
     public class ImageInfo
     {
-        [BsonId(IdGenerator = typeof(StringObjectIdGenerator))]
-        [BsonRepresentation(BsonType.ObjectId)]
         public string Id { get; set; }
-
-        [BsonRepresentation(BsonType.ObjectId)]
+        
         public string GroupId { get; set; }
         public string Name { get; set; }
         public int Width { get; set; }
@@ -23,9 +16,7 @@ namespace TooYoung.Web.Models
         /// </summary>
         /// <returns></returns>
         public int SizeOfBytes { get; set; }
-
-        [BsonRepresentation(BsonType.ObjectId)]
-        [JsonIgnore]
+        
         public string Image { get; set; }
 
         // TODO: EXIF, Thumbnail

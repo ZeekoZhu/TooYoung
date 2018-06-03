@@ -1,4 +1,4 @@
-namespace TooYoung.Web.Utils
+namespace TooYoung.Provider.MongoDB
 {
     public static class Constant
     {

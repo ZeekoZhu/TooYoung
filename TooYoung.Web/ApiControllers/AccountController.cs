@@ -7,9 +7,9 @@ using System.Threading.Tasks;
 using AgileObjects.AgileMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
+using TooYoung.Core.Models;
+using TooYoung.Provider.MongoDB.Services;
 using TooYoung.Web.Filters;
-using TooYoung.Web.Models;
-using TooYoung.Web.Services;
 using TooYoung.Web.ViewModels;
 using ZeekoUtilsPack.AspNetCore.Jwt;
 

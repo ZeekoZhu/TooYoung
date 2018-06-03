@@ -1,5 +1,5 @@
 using Microsoft.AspNetCore.Authorization;
-using TooYoung.Web.Models;
+using TooYoung.Core.Models;
 
 namespace TooYoung.Web.Jwt
 {

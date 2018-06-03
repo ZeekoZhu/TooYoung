@@ -1,4 +1,4 @@
-﻿namespace TooYoung.Web.Models
+namespace TooYoung.Core.Models
 {
     public enum Permission
     {

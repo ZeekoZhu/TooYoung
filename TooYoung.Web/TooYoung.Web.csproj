@@ -16,7 +16,7 @@
 
   <ItemGroup>
     <PackageReference Include="AgileObjects.AgileMapper" Version="0.23.3" />
-    <PackageReference Include="Microsoft.AspNetCore.App" Version="2.1.0"/>
+    <PackageReference Include="Microsoft.AspNetCore.App" Version="2.1.0" />
     <PackageReference Include="Microsoft.AspNetCore.SpaServices.Extensions" Version="2.1.0" />
     <PackageReference Include="Microsoft.Extensions.PlatformAbstractions" Version="1.1.0" />
     <PackageReference Include="MongoDB.Driver" Version="2.6.1" />
@@ -30,6 +30,11 @@
     <!-- Don't publish the SPA source files, but do show them in the project files list -->
     <Content Remove="$(SpaRoot)**" />
     <None Include="$(SpaRoot)**" Exclude="$(SpaRoot)node_modules\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\TooYoung.Core\TooYoung.Core.csproj" />
+    <ProjectReference Include="..\TooYoung.Provider.MongoDB\TooYoung.Provider.MongoDB.csproj" />
   </ItemGroup>
 
   <Target Name="DebugEnsureNodeEnv" BeforeTargets="Build" Condition=" '$(Configuration)' == 'Debug' And !Exists('$(SpaRoot)node_modules') ">
