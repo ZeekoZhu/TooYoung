@@ -10,12 +10,12 @@ namespace TooYoung.Web.Controllers
     public class LoginController : Controller
     {
         private readonly ILogger _logger;
-        private readonly AccountService _accountService;
+        private readonly AccountRepository _accountRepository;
 
-        public LoginController(ILogger<LoginController> logger, AccountService accountService)
+        public LoginController(ILogger<LoginController> logger, AccountRepository accountRepository)
         {
             _logger = logger;
-            _accountService = accountService;
+            _accountRepository = accountRepository;
         }
 
         [HttpGet]
@@ -32,7 +32,7 @@ namespace TooYoung.Web.Controllers
         [ValidateModel]
         public async Task<IActionResult> Index([FromForm] LoginModel model)
         {
-            var user = await _accountService.FindByUserName(model.UserName);
+            var user = await _accountRepository.FindByUserName(model.UserName);
             if (user != null && user.Password == model.Password)
             {
                 return Redirect("/");

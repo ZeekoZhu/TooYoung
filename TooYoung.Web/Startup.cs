@@ -9,15 +9,13 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.PlatformAbstractions;
 using MongoDB.Driver;
 using Swashbuckle.AspNetCore.Swagger;
-using TooYoung.Core.Repository;
+using TooYoung.Core.Helpers;
 using TooYoung.Core.Services;
 using TooYoung.Provider.MongoDB;
-using TooYoung.Provider.MongoDB.Services;
 using TooYoung.Web.Filters;
 using TooYoung.Web.Json;
 using TooYoung.Web.Jwt;
 using TooYoung.Web.Services;
-using TooYoung.Web.Utils;
 using ZeekoUtilsPack.AspNetCore.Jwt;
 
 namespace TooYoung.Web
@@ -37,21 +35,9 @@ namespace TooYoung.Web
         /// <param name="services"></param>
         public void ConfigureServices(IServiceCollection services)
         {
-            // 配置 MongoDB
-            var connectStr = Configuration.GetConnectionString("Mongo");
-            connectStr.ParseEnvVarParams()
-                .Select(p => (Key: $"$({p})", Val: Configuration.GetSection(p).Value))
-                .ToList()
-                .ForEach(p => { connectStr = connectStr.Replace(p.Key, p.Val); });
-            var dbName = Configuration.GetSection("MONGO_DBNAME").Value;
-            services.AddSingleton<IMongoClient>(provider => new MongoClient(connectStr));
-            services.AddScoped(provider =>
-                provider.GetService<IMongoClient>().GetDatabase(dbName));
-
-            services.AddScoped<AccountService>();
             services.AddScoped<IImageProcessService, ImageSharpService>();
-            services.AddScoped<IImageRepository,ImageRepository>();
-            MongoDBProvider.Init();
+            services.AddScoped<ImageManageService>();
+            services.AddYoungMongo();
 
             // 配置 JWT
             string keyDir = PlatformServices.Default.Application.ApplicationBasePath;

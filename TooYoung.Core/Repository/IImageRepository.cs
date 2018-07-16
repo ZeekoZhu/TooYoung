@@ -15,10 +15,10 @@ namespace TooYoung.Core.Repository
         Task<Group> AddNewGroup(Group group);
 
         /// <summary>
-        /// 判断分组是否存在
+        /// 根据分组名称获取分组信息
         /// </summary>
-        /// <param name="name"></param>
-        /// <param name="userId"></param>
+        /// <param name="name">分组名称</param>
+        /// <param name="userId">用户名或者用户 Id</param>
         /// <returns></returns>
         Task<bool> HasGroupNameAsync(string name, string userId);
 
@@ -66,9 +66,10 @@ namespace TooYoung.Core.Repository
         /// 查找指定用户的指定图片的信息
         /// </summary>
         /// <param name="userName">用户名</param>
+        /// <param name="groupName">分组名称</param>
         /// <param name="imageName">图片名称</param>
         /// <returns></returns>
-        Task<ImageInfo> GetImageInfoByName(string userName, string imageName);
+        Task<ImageInfo> GetImageInfoByName(string userName,string groupName, string imageName);
         Task<Group> GetGroupByImageInfo(string infoId);
         Task<Image> GetImageByImageInfo(string infoId);
     }

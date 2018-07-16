@@ -1,7 +1,5 @@
-using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Text;
 using System.Threading.Tasks;
 using TooYoung.Core.Exceptions;
 using TooYoung.Core.Models;
@@ -18,14 +16,24 @@ namespace TooYoung.Core.Services
             _imgRepo = imgRepo;
         }
 
-        /// <summary>
-        /// 添加新的分组
-        /// </summary>
-        /// <param name="group"></param>
-        /// <returns></returns>
-        public Task<Group> AddNewGroup(Group group)
+
+        public async Task<(Image, ImageInfo)> GetImage(string user, string groupName, string imageName, string referer)
         {
-            return _imgRepo.AddNewGroup(group);
+            // find group
+            var group = await _imgRepo.GetGroupByName(groupName, user);
+            if (group == null)
+            {
+                throw new AppException($"Group {groupName} not found", 404);
+            }
+            var isAllowed = group.IsAccessible(referer);
+            if (isAllowed == false)
+            {
+                throw new AppException("Access denied", 403);
+            }
+            // find image info
+            var imageInfo = await _imgRepo.GetImageInfoByName(user, groupName, imageName);
+            // find image
+            return (await _imgRepo.GetImageByImageInfo(imageInfo.Id), imageInfo);
         }
 
         /// <summary>
@@ -62,7 +70,7 @@ namespace TooYoung.Core.Services
             var group = await _imgRepo.GetGroupByName(groupName, userId);
             if (group == null)
             {
-                throw new BlogAppException($"{groupName} not found");
+                throw new AppException($"{groupName} not found");
             }
 
             // find images with same imageName in same group
@@ -70,11 +78,22 @@ namespace TooYoung.Core.Services
 
             if (imgExists)
             {
-                throw new BlogAppException($"{groupName} already contains {name}");
+                throw new AppException($"{groupName} already contains {name}");
             }
 
             return await _imgRepo.SaveImageInfo(name, group.Id);
 
+        }
+
+        /// <summary>
+        /// 更新一张图片的内容
+        /// </summary>
+        /// <param name="bin">图片内容</param>
+        /// <param name="infoId">图片信息 Id</param>
+        /// <returns></returns>
+        public async Task<ImageInfo> UpdateImage(MemoryStream bin, string infoId)
+        {
+            return await _imgRepo.UpdateImage(bin, infoId);
         }
     }
 }

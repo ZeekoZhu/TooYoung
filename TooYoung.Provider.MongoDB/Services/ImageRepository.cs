@@ -48,14 +48,17 @@ namespace TooYoung.Provider.MongoDB.Services
         /// <summary>
         /// 判断分组是否存在
         /// </summary>
-        /// <param name="name"></param>
-        /// <param name="userId"></param>
+        /// <param name="name">分组名</param>
+        /// <param name="userId">用户名或用户 Id</param>
         /// <returns></returns>
         public async Task<bool> HasGroupNameAsync(string name, string userId)
         {
+            var matchIdQuery = ObjectId.TryParse(userId, out _)
+                ? Builders<User>.Filter.Eq(u => u.Id, userId)
+                : Builders<User>.Filter.Eq(u => u.UserName, userId);
+
             var groupQuery = Builders<Group>.Filter.Eq(g => g.Name, name);
             var userQuery = Builders<User>.Filter.ElemMatch(u => u.Groups, groupQuery);
-            var matchIdQuery = Builders<User>.Filter.Eq(u => u.Id, userId);
             var result = await Users.Find(Builders<User>.Filter.And(matchIdQuery, userQuery)).CountDocumentsAsync();
             return result > 0;
         }
@@ -63,17 +66,24 @@ namespace TooYoung.Provider.MongoDB.Services
         /// <summary>
         /// 根据分组名称获取分组信息
         /// </summary>
-        /// <param name="name"></param>
-        /// <param name="userId"></param>
+        /// <param name="name">分组名称</param>
+        /// <param name="userId">用户名或者用户 Id</param>
         /// <returns></returns>
         public async Task<Group> GetGroupByName(string name, string userId)
         {
+            FilterDefinition<User> matchUserQuery = ObjectId.TryParse(userId, out _)
+                ? Builders<User>.Filter.Eq(u => u.Id, userId)
+                : Builders<User>.Filter.Eq(u => u.UserName, userId);
             var groupQuery = Builders<Group>.Filter.Eq(g => g.Name, name);
             var userQuery = Builders<User>.Filter.ElemMatch(u => u.Groups, groupQuery);
-            var matchIdQuery = Builders<User>.Filter.Eq(u => u.Id, userId);
-            var result = await Users.Find(Builders<User>.Filter.And(matchIdQuery, userQuery))
-                .Project(Builders<User>.Projection.ElemMatch(u => u.Groups, groupQuery)).As<Group>().FirstOrDefaultAsync();
-            return result;
+            var result = await Users.Find(Builders<User>.Filter.And(matchUserQuery, userQuery))
+                .Project(Builders<User>.Projection.ElemMatch(u => u.Groups, groupQuery)).As<User>().FirstOrDefaultAsync();
+            if (result == null)
+            {
+                throw new AppException($"Group {userId}:{name} not found", 404);
+            }
+            var group = result.Groups.FirstOrDefault();
+            return group;
         }
 
         /// <summary>
@@ -113,13 +123,14 @@ namespace TooYoung.Provider.MongoDB.Services
             return info;
         }
 
+        /// <inheritdoc />
         public async Task<ImageInfo> UpdateImage(MemoryStream bin, string infoId)
         {
             // find imageinfo
             var info = await ImageInfos.AsQueryable().FirstOrDefaultAsync(i => i.Id == infoId);
             if (info == null)
             {
-                throw new BlogAppException("Image not found");
+                throw new AppException("Image not found");
             }
 
             // Save image binary
@@ -135,7 +146,7 @@ namespace TooYoung.Provider.MongoDB.Services
             }
             catch (Exception ex)
             {
-                throw new BlogAppException("Can not save image", ex);
+                throw new AppException("Can not save image", ex);
             }
 
             // update imageinfo
@@ -147,7 +158,7 @@ namespace TooYoung.Provider.MongoDB.Services
             var updateInfoResult = await ImageInfos.ReplaceOneAsync(i => i.Id == infoId, info);
             if (updateInfoResult.ModifiedCount <= 0)
             {
-                throw new BlogAppException("Can not update image information");
+                throw new AppException("Can not update image information");
             }
             return info;
         }
@@ -172,22 +183,23 @@ namespace TooYoung.Provider.MongoDB.Services
             return result;
         }
 
-        public async Task<ImageInfo> GetImageInfoByName(string userName, string imageName)
+        public async Task<ImageInfo> GetImageInfoByName(string userName, string groupName, string imageName)
         {
-            var user = await Users.AsQueryable().FirstOrDefaultAsync(u => u.UserName == userName);
-            if (user == null)
+            // find group
+            var group = await Users.AsQueryable().Where(u => u.UserName == userName).SelectMany(u => u.Groups)
+                .Where(g => g.Name == groupName).FirstOrDefaultAsync();
+            if (group == null)
             {
-                throw new BlogAppException($"{userName} not found");
+                throw new AppException($"Group {groupName} not found", 404);
             }
-
-            var infoIds = user.Groups.SelectMany(g => g.ImageInfos);
+            var infoIds = group.ImageInfos;
             var infoIdFilter = Builders<ImageInfo>.Filter.In(i => i.Id, infoIds);
             var infoNameFilter = Builders<ImageInfo>.Filter.Eq(i => i.Name, imageName);
             var infoFilter = Builders<ImageInfo>.Filter.And(infoNameFilter, infoIdFilter);
             var result = await ImageInfos.Find(infoFilter).FirstOrDefaultAsync();
             if (result == null)
             {
-                throw new BlogAppException($"{imageName} not found");
+                throw new AppException($"Image {imageName} not found", 404);
             }
 
             return result;

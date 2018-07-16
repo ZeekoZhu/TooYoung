@@ -2,14 +2,15 @@ using System.Threading.Tasks;
 using MongoDB.Driver;
 using MongoDB.Driver.Linq;
 using TooYoung.Core.Models;
+using TooYoung.Core.Repository;
 
 namespace TooYoung.Provider.MongoDB.Services
 {
-    public class AccountService
+    public class AccountRepository : IAccountRepository
     {
         public IMongoCollection<User> Users { get; set; }
 
-        public AccountService(IMongoDatabase db)
+        public AccountRepository(IMongoDatabase db)
         {
             Users = db.GetCollection<User>(nameof(User));
         }

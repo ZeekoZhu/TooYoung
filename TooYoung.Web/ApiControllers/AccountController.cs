@@ -24,12 +24,12 @@ namespace TooYoung.Web.ApiControllers
     [ValidateModel]
     public class AccountController : Controller
     {
-        private readonly AccountService _accountService;
+        private readonly AccountRepository _accountRepository;
         private readonly JwtOptions _jwtOptions;
-        public AccountController(AccountService accountService, JwtOptions jwtOptions)
+        public AccountController(AccountRepository accountRepository, JwtOptions jwtOptions)
         {
             _jwtOptions = jwtOptions;
-            _accountService = accountService;
+            _accountRepository = accountRepository;
         }
 
         /// <summary>
@@ -40,14 +40,14 @@ namespace TooYoung.Web.ApiControllers
         [HttpPost("Register")]
         public async Task<IActionResult> Register([FromBody] RegisterModel model)
         {
-            var result = await _accountService.Create(Mapper.Map(model).ToANew<User>());
+            var result = await _accountRepository.Create(Mapper.Map(model).ToANew<User>());
             return Json(result);
         }
 
         [HttpPost("Login")]
         public async Task<IActionResult> Login([FromBody] LoginModel model)
         {
-            var user = await _accountService.FindByUserName(model.UserName);
+            var user = await _accountRepository.FindByUserName(model.UserName);
             if (user != null && user.Password == model.Password)
             {
                 var token = CreateToken(user, DateTime.Now.AddDays(7), "tooyoung");

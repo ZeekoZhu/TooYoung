@@ -1,4 +1,5 @@
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -6,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using TooYoung.Core.Exceptions;
 using TooYoung.Core.Models;
 using TooYoung.Core.Repository;
+using TooYoung.Core.Services;
 using TooYoung.Web.Filters;
 using TooYoung.Web.Utils;
 using TooYoung.Web.ViewModels;
@@ -17,11 +19,13 @@ namespace TooYoung.Web.ApiControllers
     [JwtAuthorize]
     public class ImagesController : Controller
     {
-        private readonly IImageRepository _imgService;
+        private readonly ImageManageService _imgService;
+        private readonly IImageRepository _imgRepo;
 
-        public ImagesController(IImageRepository imgService)
+        public ImagesController(ImageManageService imgService, IImageRepository imgRepo)
         {
             _imgService = imgService;
+            _imgRepo = imgRepo;
         }
 
         /// <summary>
@@ -33,7 +37,7 @@ namespace TooYoung.Web.ApiControllers
         [RequiredPermissions(Permission.ManageImage, Permission.AdminAll)]
         public async Task<ActionResult<ImageInfo>> Post([FromBody] ImagePostModel model)
         {
-            var result = await _imgService.SaveImageInfo(model.Name, model.GroupId);
+            var result = await _imgService.SaveImageInfo(model.Name, model.GroupId, User.Id());
             if (result == null)
             {
                 return NotFound();
@@ -55,30 +59,59 @@ namespace TooYoung.Web.ApiControllers
             }
         }
 
+        ///// <summary>
+        ///// 下载图片
+        ///// </summary>
+        ///// <param name="user">用户名</param>
+        ///// <param name="imgName">图片名</param>
+        ///// <returns></returns>
+        //[AllowAnonymous]
+        //[HttpGet("{user}/{imgName}")]
+        //public async Task<IActionResult> Get([FromRoute]string user, [FromRoute]string imgName)
+        //{
+        //    // get imageinfo
+        //    try
+        //    {
+        //        var info = await _imgRepo.GetImageInfoByName(user, imgName);
+        //        // check group ACL
+        //        var group = await _imgRepo.GetGroupByImageInfo(info.Id);
+        //        var hasReferer = Request.Headers.TryGetValue("Referer", out var refererValue);
+        //        var referer = hasReferer ? refererValue.ToString() : "";
+        //        var accessible = group.IsAccessible(referer);
+        //        if (accessible == false) return Forbid(JwtBearerDefaults.AuthenticationScheme);
+        //        // get image binary
+        //        var img = await _imgRepo.GetImageByImageInfo(info.Id);
+        //        return File(img.Binary, info.GetMime());
+        //    }
+        //    catch (BlogAppException e)
+        //    {
+        //        return NotFound(new ErrorMsg(e.Message));
+        //    }
+        //}
+
+        /// <summary>
+        /// 下载图片
+        /// </summary>
+        /// <param name="user">用户名或用户 Id</param>
+        /// <param name="groupName">分组名</param>
+        /// <param name="imgName">图片名</param>
+        /// <returns></returns>
         [AllowAnonymous]
-        [HttpGet("{user}/{name}")]
-        public async Task<IActionResult> Get([FromRoute]string user, [FromRoute]string name)
+        [HttpGet("{user}/{groupName}/{imgName}")]
+        public async Task<IActionResult> Get([FromRoute] string user, [FromRoute] string groupName, [FromRoute] string imgName)
         {
-            // get imageinfo
             try
             {
-                var info = await _imgService.GetImageInfoByName(user, name);
-                // check group ACL
-                var group = await _imgService.GetGroupByImageInfo(info.Id);
                 var hasReferer = Request.Headers.TryGetValue("Referer", out var refererValue);
                 var referer = hasReferer ? refererValue.ToString() : "";
-                var accessible = group.IsAccessible(referer);
-                if (accessible == false) return Forbid(JwtBearerDefaults.AuthenticationScheme);
-                // get image binary
-                var img = await _imgService.GetImageByImageInfo(info.Id);
-                return File(img.Binary, info.GetMime());
+                var (image, info) = await _imgService.GetImage(user, groupName, imgName, referer);
+                return File(image.Binary, info.GetMime());
             }
-            catch (BlogAppException e)
+            catch (AppException e)
             {
-                return NotFound(new ErrorMsg(e.Message));
+                Response.StatusCode = e.Code;
+                return Json(new ErrorMsg(e.Message));
             }
-
-            
         }
     }
 }

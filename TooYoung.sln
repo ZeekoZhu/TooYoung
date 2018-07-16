@@ -16,9 +16,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		README.md = README.md
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TooYoung.Core", "TooYoung.Core\TooYoung.Core.csproj", "{0C10E8D9-E156-4918-9ED8-74496260BD01}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TooYoung.Core", "TooYoung.Core\TooYoung.Core.csproj", "{0C10E8D9-E156-4918-9ED8-74496260BD01}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TooYoung.Provider.MongoDB", "TooYoung.Provider.MongoDB\TooYoung.Provider.MongoDB.csproj", "{70E57573-1A30-45F2-A4A7-612A3F3F4D75}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TooYoung.Provider.MongoDB", "TooYoung.Provider.MongoDB\TooYoung.Provider.MongoDB.csproj", "{70E57573-1A30-45F2-A4A7-612A3F3F4D75}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -1,5 +1,5 @@
 using FluentAssertions;
-using TooYoung.Web.Utils;
+using TooYoung.Core.Helpers;
 using Xunit;
 
 namespace Test

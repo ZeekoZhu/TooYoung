@@ -12,7 +12,7 @@ namespace TooYoung.Web.Services
             var result = Image.Identify(bin);
             if (result == null)
             {
-                throw new BlogAppException("Can not identify image format");
+                throw new AppException("Can not identify image format");
             }
 
             return (result.Width, result.Height);
