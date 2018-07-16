@@ -1,10 +1,14 @@
 using System.IO;
-using CSharpFunctionalExtensions;
+using TooYoung.Core.Exceptions;
 
 namespace TooYoung.Core.Services
 {
+    /// <summary>
+    /// 读取图片的宽度与高度
+    /// </summary>
+    /// <exception cref="BlogAppException"></exception>
     public interface IImageProcessService
     {
-        Result<(int Width, int Height)> GetBound(MemoryStream bin);
+        (int Width, int Height) GetBound(MemoryStream bin);
     }
 }

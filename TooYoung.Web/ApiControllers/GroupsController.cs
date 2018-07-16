@@ -1,11 +1,10 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AgileObjects.AgileMapper;
 using Microsoft.AspNetCore.Mvc;
 using TooYoung.Core.Models;
-using TooYoung.Provider.MongoDB.Services;
+using TooYoung.Core.Repository;
 using TooYoung.Web.Filters;
 using TooYoung.Web.Utils;
 using TooYoung.Web.ViewModels;
@@ -19,10 +18,10 @@ namespace TooYoung.Web.ApiControllers
     [JwtAuthorize]
     public class GroupsController : Controller
     {
-        private readonly ImageManageService _imageManageService;
-        public GroupsController(ImageManageService imageManageService)
+        private readonly IImageRepository _imageRepository;
+        public GroupsController(IImageRepository imageRepository)
         {
-            this._imageManageService = imageManageService;
+            this._imageRepository = imageRepository;
         }
 
         [HttpPost]
@@ -31,7 +30,7 @@ namespace TooYoung.Web.ApiControllers
         {
             do
             {
-                if (await _imageManageService.HasGroupName(model.Name, User.Id()))
+                if (await _imageRepository.HasGroupNameAsync(model.Name, User.Id()))
                 {
                     ModelState.AddModelError(nameof(model.Name), "输入的组名已经存在，请输入一个新的组名");
                     break;
@@ -47,7 +46,7 @@ namespace TooYoung.Web.ApiControllers
                 group.ACL = new List<string> { "*" };
             }
             group.OwnerId = User.Id();
-            var result = await _imageManageService.AddNewGroup(group);
+            var result = await _imageRepository.AddNewGroup(group);
             return Json(result);
         }
 
@@ -56,7 +55,7 @@ namespace TooYoung.Web.ApiControllers
         public async Task<IActionResult> Get()
         {
             var userId = User.Id();
-            var result = await _imageManageService.GetGroups(userId);
+            var result = await _imageRepository.GetGroupsAsync(userId);
             return Json(result);
         }
     }

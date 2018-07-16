@@ -26,7 +26,14 @@ namespace TooYoung.Web.Jwt
 
         public AuthenticationTicket Unprotect(string protectedText)
         {
-            return Unprotect(protectedText, null);
+            try
+            {
+                return Unprotect(protectedText, null);
+            }
+            catch (Exception)
+            {
+                return null;
+            }
         }
 
         public AuthenticationTicket Unprotect(string protectedText, string purpose)

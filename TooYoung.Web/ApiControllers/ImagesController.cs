@@ -3,8 +3,9 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using TooYoung.Core.Exceptions;
 using TooYoung.Core.Models;
-using TooYoung.Core.Services;
+using TooYoung.Core.Repository;
 using TooYoung.Web.Filters;
 using TooYoung.Web.Utils;
 using TooYoung.Web.ViewModels;
@@ -16,9 +17,9 @@ namespace TooYoung.Web.ApiControllers
     [JwtAuthorize]
     public class ImagesController : Controller
     {
-        private readonly IImageManageService _imgService;
+        private readonly IImageRepository _imgService;
 
-        public ImagesController(IImageManageService imgService)
+        public ImagesController(IImageRepository imgService)
         {
             _imgService = imgService;
         }
@@ -50,7 +51,7 @@ namespace TooYoung.Web.ApiControllers
             {
                 await imageFile.CopyToAsync(ms);
                 var result = await _imgService.UpdateImage(ms, infoId);
-                return result.ToActionResult(BadRequest);
+                return result;
             }
         }
 
@@ -59,22 +60,25 @@ namespace TooYoung.Web.ApiControllers
         public async Task<IActionResult> Get([FromRoute]string user, [FromRoute]string name)
         {
             // get imageinfo
-            var infoResult = await _imgService.GetImageInfoByName(user, name);
-            if (infoResult.IsFailure)
+            try
             {
-                return NotFound(new ErrorMsg(infoResult.Error));
+                var info = await _imgService.GetImageInfoByName(user, name);
+                // check group ACL
+                var group = await _imgService.GetGroupByImageInfo(info.Id);
+                var hasReferer = Request.Headers.TryGetValue("Referer", out var refererValue);
+                var referer = hasReferer ? refererValue.ToString() : "";
+                var accessible = group.IsAccessible(referer);
+                if (accessible == false) return Forbid(JwtBearerDefaults.AuthenticationScheme);
+                // get image binary
+                var img = await _imgService.GetImageByImageInfo(info.Id);
+                return File(img.Binary, info.GetMime());
+            }
+            catch (BlogAppException e)
+            {
+                return NotFound(new ErrorMsg(e.Message));
             }
 
-            var info = infoResult.Value;
-            // check group ACL
-            var group = await _imgService.GetGroupByImageInfo(info.Id);
-            var hasReferer = Request.Headers.TryGetValue("Referer", out var refererValue);
-            var referer = hasReferer ? refererValue.ToString() : "";
-            var accessible = group.IsAccessible(referer);
-            if (accessible == false) return Forbid(JwtBearerDefaults.AuthenticationScheme);
-            // get image binary
-            var img = await _imgService.GetImageByImageInfo(info.Id);
-            return File(img.Binary, info.GetMime(), name);
+            
         }
     }
 }

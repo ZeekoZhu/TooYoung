@@ -1,4 +1,3 @@
-using System;
 using FluentAssertions;
 using TooYoung.Web.Utils;
 using Xunit;

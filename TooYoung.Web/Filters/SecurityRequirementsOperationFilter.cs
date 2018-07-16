@@ -16,7 +16,11 @@ namespace TooYoung.Web.Filters
         {
             if (operation.Parameters == null)
                 operation.Parameters = new List<IParameter>();
-            var attrs = context.ApiDescription.ActionAttributes().Distinct();
+            if (context.ApiDescription.TryGetMethodInfo(out var methodInfo) == false)
+            {
+                return;
+            }
+            var attrs = methodInfo.GetCustomAttributes(true).Distinct();
             foreach (var attr in attrs)
             {
                 if (attr.GetType() == typeof(BearerAuthorizeAttribute))
