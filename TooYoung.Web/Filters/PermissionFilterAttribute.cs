@@ -36,7 +36,7 @@ namespace TooYoung.Web.Filters
                 {
                     if (int.TryParse(p, out int permission))
                     {
-                        return new Nullable<int>(permission);
+                        return new int?(permission);
                     }
                     return null;
                 })
