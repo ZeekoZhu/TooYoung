@@ -23,7 +23,7 @@ namespace TooYoung.Web.Filters
             var attrs = methodInfo.GetCustomAttributes(true).Distinct();
             foreach (var attr in attrs)
             {
-                if (attr.GetType() == typeof(BearerAuthorizeAttribute))
+                if (attr.GetType() == typeof(EasyJwtAuthorizeAttribute))
                 {
                     operation.Parameters.Add(new HeaderParameter
                     {

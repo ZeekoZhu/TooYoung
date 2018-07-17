@@ -1,14 +1,12 @@
 using System;
-using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
-using System.Security.Principal;
 using System.Threading.Tasks;
 using AgileObjects.AgileMapper;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.IdentityModel.Tokens;
 using TooYoung.Core.Models;
-using TooYoung.Provider.MongoDB.Services;
+using TooYoung.Core.Repository;
 using TooYoung.Web.Filters;
 using TooYoung.Web.ViewModels;
 using ZeekoUtilsPack.AspNetCore.Jwt;
@@ -24,12 +22,13 @@ namespace TooYoung.Web.ApiControllers
     [ValidateModel]
     public class AccountController : Controller
     {
-        private readonly AccountRepository _accountRepository;
-        private readonly JwtOptions _jwtOptions;
-        public AccountController(AccountRepository accountRepository, JwtOptions jwtOptions)
+        private readonly IAccountRepository _accountRepository;
+        private readonly EasyJwt _jwt;
+
+        public AccountController(IAccountRepository accountRepository, EasyJwt jwt)
         {
-            _jwtOptions = jwtOptions;
             _accountRepository = accountRepository;
+            _jwt = jwt;
         }
 
         /// <summary>
@@ -50,39 +49,18 @@ namespace TooYoung.Web.ApiControllers
             var user = await _accountRepository.FindByUserName(model.UserName);
             if (user != null && user.Password == model.Password)
             {
-                var token = CreateToken(user, DateTime.Now.AddDays(7), "tooyoung");
+                var claims = new[]
+                {
+                    new Claim(ClaimTypes.NameIdentifier, user.Id, ClaimValueTypes.String),
+                    // TODO: new Claim("jti", jti, ClaimValueTypes.String),
+                    new Claim("per",string.Join(",", user.Permissions.Select(p=>(int)p)), ClaimValueTypes.String)
+                };
+                var token = _jwt.GenerateToken(user.UserName, claims, DateTime.Now.AddDays(7));
+                var (principal, authProps) = _jwt.GenerateAuthTicket(user.UserName, claims, DateTime.Now.AddDays(7));
+                await HttpContext.SignInAsync(principal, authProps);
                 return Json(new { token });
             }
             return Unauthorized();
-        }
-
-        /// <summary>
-        /// 生成一个新的 Token
-        /// </summary>
-        /// <param name="user">用户信息实体</param>
-        /// <param name="expire">token 过期时间</param>
-        /// <param name="audience">Token 接收者</param>
-        /// <returns></returns>
-        private string CreateToken(User user, DateTime expire, string audience)
-        {
-            var handler = new JwtSecurityTokenHandler();
-            ClaimsIdentity identity = new ClaimsIdentity(new GenericIdentity(user.UserName, "TokenAuth"));
-            var claims = new[]
-            {
-                new Claim(ClaimTypes.NameIdentifier, user.Id, ClaimValueTypes.String),
-                // TODO: new Claim("jti", jti, ClaimValueTypes.String),
-                new Claim("per",string.Join(",", user.Permissions.Select(p=>(int)p)), ClaimValueTypes.String)
-            };
-            identity.AddClaims(claims);
-            var token = handler.CreateEncodedJwt(new SecurityTokenDescriptor
-            {
-                Issuer = _jwtOptions.Issuer,
-                Audience = audience,
-                SigningCredentials = _jwtOptions.Credentials,
-                Subject = identity,
-                Expires = expire
-            });
-            return token;
         }
     }
 }

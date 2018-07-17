@@ -8,6 +8,7 @@ using TooYoung.Core.Repository;
 using TooYoung.Web.Filters;
 using TooYoung.Web.Utils;
 using TooYoung.Web.ViewModels;
+using ZeekoUtilsPack.AspNetCore.Jwt;
 
 namespace TooYoung.Web.ApiControllers
 {
@@ -15,7 +16,7 @@ namespace TooYoung.Web.ApiControllers
     [Produces("application/json")]
     [Route("api/[controller]")]
     [ApiController]
-    [JwtAuthorize]
+    [EasyJwtAuthorize]
     public class GroupsController : Controller
     {
         private readonly IImageRepository _imageRepository;

@@ -11,12 +11,13 @@ using TooYoung.Core.Services;
 using TooYoung.Web.Filters;
 using TooYoung.Web.Utils;
 using TooYoung.Web.ViewModels;
+using ZeekoUtilsPack.AspNetCore.Jwt;
 
 namespace TooYoung.Web.ApiControllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [JwtAuthorize]
+    [EasyJwtAuthorize]
     public class ImagesController : Controller
     {
         private readonly ImageManageService _imgService;

@@ -40,26 +40,13 @@ namespace TooYoung.Web
             services.AddYoungMongo();
 
             // 配置 JWT
-            string keyDir = PlatformServices.Default.Application.ApplicationBasePath;
-            var tokenOptions = new JwtConfigOptions(keyDir, "tooyoung", "tooyoung");
-            services.AddSingleton(tokenOptions.TokenOptions);
-            services.AddJwtAuthorization(tokenOptions);
-            // 使用 JWT 保护 API
-            services.AddAuthentication().AddJwtBearer(options =>
+            var jwtOptions = new EasySymmetricOptions("tooyoung")
             {
-                options.TokenValidationParameters = tokenOptions.JwTokenValidationParameters;
-            });
-            // 使用 Cookie 保护页面
-            services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-                .AddCookie(options =>
-                {
-                    options.LoginPath = "/Login";
-                    options.AccessDeniedPath = "/Login";
-                    options.Cookie.Name = "tk";
-                    options.Cookie.Path = "/";
-                    options.TicketDataFormat = new JwtCookieDataFormat(tokenOptions.TokenOptions);
-                    options.ClaimsIssuer = "TooYoung";
-                });
+                Issuer = "too-young",
+                Audience = "too-young",
+                EnableCookie = true
+            };
+            services.AddEasyJwt(jwtOptions);
             services.AddSwaggerGen(c =>
             {
                 c.OperationFilter<SecurityRequirementsOperationFilter>();
@@ -85,6 +72,7 @@ namespace TooYoung.Web
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
+            app.UseAuthentication();
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
