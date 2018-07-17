@@ -2,12 +2,16 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
+#if DEBUG
+using System.Runtime.CompilerServices;
+[assembly: InternalsVisibleTo("Test")]
+#endif
 namespace TooYoung.Core.Permissions
 {
     /// <summary>
     /// 资源访问控制规则
     /// </summary>
-    public class ResourceRule
+    internal class ResourceRule
     {
         /// <summary>
         /// 资源名
@@ -24,7 +28,31 @@ namespace TooYoung.Core.Permissions
 
         public ResourceRule(string resource, ICollection<string> actions, ICollection<string> instances)
         {
+            Setup(resource, actions, instances);
+        }
+
+        private void Setup(string resource, ICollection<string> actions, ICollection<string> instances)
+        {
             Name = resource ?? throw new ArgumentNullException(nameof(resource));
+            actions = actions?.Where(s => string.IsNullOrWhiteSpace(s) == false).ToList();
+            if (actions != null && actions.Any())
+            {
+                Actions = new HashSet<string>(actions);
+            }
+            else
+            {
+                Actions = new HashSet<string>(new[] { "*" });
+            }
+
+            instances = instances?.Where(s => string.IsNullOrWhiteSpace(s) == false).ToList();
+            if (instances != null && instances.Any())
+            {
+                Instances = new HashSet<string>(instances);
+            }
+            else
+            {
+                Instances = new HashSet<string>(new[] { "*" });
+            }
         }
 
         public ResourceRule(string literalRule)
@@ -32,46 +60,26 @@ namespace TooYoung.Core.Permissions
             Actions = new HashSet<string>();
             Instances = new HashSet<string>();
             var levels = literalRule.Split(':');
-            if (levels.Length < 1)
+            if (levels.Length < 1 || levels.Length > 3)
             {
                 throw new ArgumentException($"Invalid permission statement: {literalRule}", nameof(literalRule));
             }
 
-            Name = levels[0];
-            if (levels.Length == 1)
-            {
-                Actions.Add("*");
-                Instances.Add("*");
-            }
-
-            if (levels.Length >= 2)
-            {
-                var actions = levels[1].Split(',');
-                foreach (var action in actions)
-                {
-                    Actions.Add(action);
-                }
-            }
-
-            if (levels.Length == 2)
-            {
-                Instances.Add("*");
-            }
-
-            if (levels.Length == 3)
-            {
-                var instances = levels[2].Split(',');
-                foreach (var instance in instances)
-                {
-                    Instances.Add(instance);
-                }
-            }
-
-            if (levels.Length > 3)
-            {
-                throw new ArgumentException($"Invalid permission statement: {literalRule}", nameof(literalRule));
-            }
+            var actions = levels.Length > 1 ? levels[1].Split(',') : null;
+            var instances = levels.Length == 3 ? levels[2]?.Split(',') : null;
+            Setup(levels[0], actions, instances);
         }
+
+        public bool SameWith(ResourceRule other)
+        {
+            if (other == null)
+            {
+                return false;
+            }
+
+            return Name == other.Name && Actions.SetEquals(other.Actions) && Instances.SetEquals(other.Instances);
+        }
+
 
         /// <summary>
         /// 合并两个规则
@@ -81,6 +89,7 @@ namespace TooYoung.Core.Permissions
         /// <exception cref="InvalidOperationException">合并的规则必须作用于同一种资源类型</exception>
         public ResourceRule Combine(ResourceRule other)
         {
+            if (other == null) throw new ArgumentNullException(nameof(other));
             if (other.Name != Name)
             {
                 throw new InvalidOperationException($"Can not combine resource permission on different resources: {Name}, {other.Name}");
@@ -92,8 +101,14 @@ namespace TooYoung.Core.Permissions
             return new ResourceRule(Name, actions, instances);
         }
 
+        /// <summary>
+        /// 判断是否包含指定权限
+        /// </summary>
+        /// <param name="other"></param>
+        /// <returns></returns>
         public bool Contains(ResourceRule other)
         {
+            if (other == null) throw new ArgumentNullException(nameof(other));
             if (other.Name != Name)
             {
                 return false;
@@ -125,7 +140,7 @@ namespace TooYoung.Core.Permissions
     /// </summary>
     public class Permission
     {
-        private Dictionary<string, ResourceRule> Resources { get; set; }
+        internal Dictionary<string, ResourceRule> Resources { get; set; }
         public Permission(string resource, ICollection<string> actions, ICollection<string> instances)
         {
             var resourceAcl = new ResourceRule(resource, actions, instances);
@@ -173,6 +188,10 @@ namespace TooYoung.Core.Permissions
             }
         }
 
+        internal Permission()
+        {
+        }
+
         public Permission(string literalPermission)
         {
             // split by ;
@@ -202,6 +221,34 @@ namespace TooYoung.Core.Permissions
                 }
             }
 
+            return true;
+        }
+
+        public bool SameWith(Permission other)
+        {
+            if (other == null)
+            {
+                return false;
+            }
+
+            if (Resources.Keys.Count != other.Resources.Count)
+            {
+                return false;
+            }
+
+            foreach (var pair in Resources)
+            {
+                var r1 = pair.Value;
+                if (other.Resources.TryGetValue(pair.Key, out var r2) == false)
+                {
+                    return false;
+                }
+
+                if (r1.SameWith(r2) == false)
+                {
+                    return false;
+                }
+            }
             return true;
         }
 
