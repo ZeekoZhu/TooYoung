@@ -10,6 +10,7 @@ using TooYoung.Core.Repository;
 using TooYoung.Web.Filters;
 using TooYoung.Web.ViewModels;
 using ZeekoUtilsPack.AspNetCore.Jwt;
+using ZeekoUtilsPack.BCLExt;
 
 namespace TooYoung.Web.ApiControllers
 {
@@ -39,6 +40,7 @@ namespace TooYoung.Web.ApiControllers
         [HttpPost("Register")]
         public async Task<IActionResult> Register([FromBody] RegisterModel model)
         {
+            model.Password = (model.Password + model.UserName).GetMd5();
             var result = await _accountRepository.Create(Mapper.Map(model).ToANew<User>());
             return Json(result);
         }
@@ -47,7 +49,7 @@ namespace TooYoung.Web.ApiControllers
         public async Task<IActionResult> Login([FromBody] LoginModel model)
         {
             var user = await _accountRepository.FindByUserName(model.UserName);
-            if (user != null && user.Password == model.Password)
+            if (user != null && user.Password == (model.Password + model.UserName).GetMd5())
             {
                 var claims = new[]
                 {
