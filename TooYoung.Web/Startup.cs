@@ -1,20 +1,15 @@
 using System.IO;
-using System.Linq;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.PlatformAbstractions;
-using MongoDB.Driver;
 using Swashbuckle.AspNetCore.Swagger;
-using TooYoung.Core.Helpers;
 using TooYoung.Core.Services;
 using TooYoung.Provider.MongoDB;
 using TooYoung.Web.Filters;
 using TooYoung.Web.Json;
-using TooYoung.Web.Jwt;
 using TooYoung.Web.Services;
 using ZeekoUtilsPack.AspNetCore.Jwt;
 
