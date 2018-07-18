@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using FluentAssertions;
+using Test.Permissions.Helpers;
 using TooYoung.Core.Permissions;
 using Xunit;
 using Xunit.Abstractions;
@@ -11,49 +12,110 @@ namespace Test.Permissions
 {
     public class ResourceRuleTests
     {
+        public static TheoryData GetStringConstructionData()
+        {
+            return new TheoryData<string, ResourceRule>
+            {
+                {
+                    "book", new ResourceRule
+                    {
+                        Actions = new Dictionary<string, ActionRule>
+                        {
+                            ["*"] = new ActionRule(null, null)
+                        },
+                        Name = "book"
+                    }
+                },
+                {
+                    "book:read", new ResourceRule
+                    {
+                        Actions = new Dictionary<string, ActionRule>
+                        {
+                            ["read"] = new ActionRule("read", null)
+                        },
+                        Name = "book"
+                    }
+                },
+                {
+                    "book:read,delete", new ResourceRule
+                    {
+                        Actions = new Dictionary<string, ActionRule>
+                        {
+                            ["read"] = new ActionRule("read", null),
+                            ["delete"] = new ActionRule("delete", null)
+                        },
+                        Name = "book"
+                    }
+                },
+                {
+                    "book:read:123", new ResourceRule
+                    {
+                        Actions = new Dictionary<string, ActionRule>
+                        {
+                            ["read"] = new ActionRule("read", new []{"123"})
+                        },
+                        Name = "book"
+                    }
+                },
+                {
+                    "book:read:123,233", new ResourceRule
+                    {
+                        Actions = new Dictionary<string, ActionRule>
+                        {
+                            ["read"] = new ActionRule("read", new []{"123","233"})
+                        },
+                        Name = "book"
+                    }
+                },
+                {
+                    "book:read,delete:123,233", new ResourceRule
+                    {
+                        Actions = new Dictionary<string, ActionRule>
+                        {
+                            ["read"] = new ActionRule("read", new []{"123","233"}),
+                            ["delete"] = new ActionRule("delete", new []{"123","233"})
+                        },
+                        Name = "book"
+                    }
+                },
+            };
+        }
+
+        [Theory]
+        [MemberData(nameof(GetStringConstructionData))]
+        void StringConstruction(string str, ResourceRule expected)
+        {
+            var result = new ResourceRule(str);
+            result.SameWith(expected).Should().BeTrue();
+        }
+
         [Fact]
         public void CreateOnlyResourceName()
         {
             var rule = new ResourceRule("foo");
 
-            rule.Actions.Should().OnlyContain(s => s == "*");
-            rule.Instances.Should().OnlyContain(s => s == "*");
+            rule.ShouldBeSameWith("foo");
         }
 
-        public static IEnumerable<object[]> GetCreateWithParamsData()
+        public static TheoryData GetCreateWithParamsData()
         {
-            yield return new[] { new[] { "download", "" }, new[] { "123", "" } };
-            yield return new[] { new[] { "download" }, new[] { "123" } };
-            yield return new[] { new[] { "download", "upload" }, new[] { "123", "21312" } };
-            yield return new[] { new[] { "download", "play", null }, new[] { "123", null } };
-            yield return new[] { new[] { "download", "play", null }, null };
-            yield return new[] { null, new[] { "123" } };
+            return new TheoryData<string[], string[], string[]>
+            {
+                { new[] { "download", "" }, new[] { "123", "" }, new[] { "music:download:123" } },
+                { new[] { "download" }, new[] { "123" }, new[] { "music:download:123" } },
+                { new[] { "download", "upload" }, new[] { "123", "21312" }, new[] { "music:download,upload:123,21312" } },
+                { new[] { "download", "play", null }, new[] { "123", null }, new[] { "music:download,play:123" } },
+                { new[] { "download", "play", null }, null, new[] { "music:play,download" } },
+                { null, new[] { "123" }, new[] { "music:*:123" } }
+            };
         }
 
         [Theory]
         [MemberData(nameof(GetCreateWithParamsData))]
-        public void CreateWithParams(ICollection<string> actions, ICollection<string> instances)
+        public void CreateWithParams(ICollection<string> actions, ICollection<string> instances, string[] expected)
         {
             var rule = new ResourceRule("music", actions, instances);
-            bool Predicate(string s) => string.IsNullOrWhiteSpace(s) == false;
-            var expectedActions = actions?.Where(Predicate).Distinct().ToList();
-            if (expectedActions != null && expectedActions.Any())
-            {
-                rule.Actions.Should().BeEquivalentTo(expectedActions);
-            }
-            else
-            {
-                rule.Actions.Should().OnlyContain(s => s == "*");
-            }
-            var expectedInstances = instances?.Where(Predicate).Distinct().ToList();
-            if (expectedInstances != null && expectedInstances.Any())
-            {
-                rule.Instances.Should().BeEquivalentTo(expectedInstances);
-            }
-            else
-            {
-                rule.Instances.Should().OnlyContain(s => s == "*");
-            }
+            rule.ShouldBeSameWith(expected);
         }
 
         [Fact]
@@ -85,54 +147,47 @@ namespace Test.Permissions
             {
                 new ResourceRule("book", null, null),
                 new ResourceRule("book", new[] {"read"}, null),
-                new[] {"*", "read"},
-                new[] {"*"}
+                new [] {"book:*,read"}
             };
             yield return new object[]
             {
                 new ResourceRule("book", null, null),
                 new ResourceRule("book", null, null),
-                new[] {"*"},
-                new[] {"*"}
+                new [] {"book"}
             };
             yield return new object[]
             {
                 new ResourceRule("book", new[] {"read"}, null),
                 new ResourceRule("book", new[] {"read"}, null),
-                new[] {"read"},
-                new[] {"*"}
+                new[] {"book:read"}
             };
             yield return new object[]
             {
                 new ResourceRule("book", new[] {"delete"}, null),
                 new ResourceRule("book", new[] {"read"}, null),
-                new[] {"read", "delete"},
-                new[] {"*"}
+                new[] {"book:read,delete"}
             };
             yield return new object[]
             {
                 new ResourceRule("book", new[] {"delete"}, new[] {"123123"}),
                 new ResourceRule("book", new[] {"read"}, new[] {"23333"}),
-                new[] {"read", "delete"},
-                new[] {"123123", "23333"}
+                new[] {"book:delete:123123", "book:read:23333"}
             };
             yield return new object[]
             {
                 new ResourceRule("book", new[] {"delete"}, new[] {"23333"}),
                 new ResourceRule("book", new[] {"read"}, new[] {"23333"}),
-                new[] {"read", "delete"},
-                new[] {"23333"}
+                new[] {"book:read,delete:23333"}
             };
         }
 
         [Theory]
         [MemberData(nameof(GetCombineRulesData))]
-        void CombineRules(ResourceRule fooRule, ResourceRule barRule, string[] combinedActions, string[] combinedInstances)
+        void CombineRules(ResourceRule fooRule, ResourceRule barRule, string[] combinedActions)
         {
             var combined = fooRule.Combine(barRule);
 
-            combined.Actions.Should().BeEquivalentTo(combinedActions);
-            combined.Instances.Should().BeEquivalentTo(combinedInstances);
+            combined.ShouldBeSameWith(combinedActions);
         }
 
         public static IEnumerable<object[]> GetContainsData()
@@ -187,10 +242,35 @@ namespace Test.Permissions
             };
             yield return new object[]
             {
-                new ResourceRule("book",new []{ "read"}, new[] {"2333", "1234"}),
-                new ResourceRule("book", new []{"read","delete"}, new []{"2333"}),
+                new ResourceRule("book", new[] {"read"}, new[] {"2333", "1234"}),
+                new ResourceRule("book", new[] {"read", "delete"}, new[] {"2333"}),
                 false
             };
+            yield return new object[]
+            {
+                new ResourceRule("book:read").Combine(new ResourceRule("book:delete:2333")),
+                new ResourceRule("book:read:2333"),
+                true
+            };
+            yield return new object[]
+            {
+                new ResourceRule("book:read").Combine(new ResourceRule("book:delete:2333")),
+                new ResourceRule("book:read:2333").Combine(new ResourceRule("book:delete")),
+                false
+            };
+            yield return new object[]
+            {
+                new ResourceRule("book:read").Combine(new ResourceRule("book:delete:2333")),
+                new ResourceRule("book:read:2333").Combine(new ResourceRule("book:delete:2333")),
+                true
+            };
+            yield return new object[]
+            {
+                new ResourceRule("book:read").Combine(new ResourceRule("book:delete,read")),
+                new ResourceRule("book:read:2333").Combine(new ResourceRule("book:delete:2341,2333")),
+                true
+            };
+
         }
 
         public static TheoryData GetSameWithData()
