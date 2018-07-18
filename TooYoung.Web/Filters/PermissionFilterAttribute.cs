@@ -16,7 +16,7 @@ namespace TooYoung.Web.Filters
         public RequiredPermissions(string permissionStr) : base(typeof(PermissionFilterAttribute))
         {
             var permission = new Permission(permissionStr);
-            Arguments = new[] { new PermissionRequirement(permission) };
+            Arguments = new object[] { new PermissionRequirement(permission) };
         }
     }
     public class PermissionFilterAttribute : IAuthorizationFilter
