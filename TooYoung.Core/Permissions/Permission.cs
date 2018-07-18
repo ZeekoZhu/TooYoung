@@ -267,7 +267,8 @@ namespace TooYoung.Core.Permissions
         public Permission(string literalPermission)
         {
             // split by ;
-            var rules = literalPermission.Split(';').Select(r => new ResourceRule("r"));
+            var rules = literalPermission.Split(';').Select(r => new ResourceRule(r));
+            Resources = new Dictionary<string, ResourceRule>();
             foreach (var rule in rules)
             {
                 AddRule(rule);
