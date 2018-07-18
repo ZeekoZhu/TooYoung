@@ -245,5 +245,52 @@ namespace Test.Permissions
         {
             p1.Combine(p2).SameWith(expected).Should().BeTrue();
         }
+
+
+        public static TheoryData GetContainsData()
+        {
+            return new TheoryData<Permission, Permission, bool>
+            {
+                {
+                    new Permission("book"),new Permission("music"),
+                    false
+                },
+                {
+                    new Permission("book"),new Permission("music;book"),
+                    false
+                },
+                {
+                    new Permission("music;book"),new Permission("book"),
+                    true
+                },
+                {
+                    new Permission("book:read"),new Permission("book:read"),
+                    true
+                },
+                {
+                    new Permission("book:read,delete"),new Permission("book:read"),
+                    true
+                },
+                {
+                    new Permission("book:read"),new Permission("book:read,delete"),
+                    false
+                },
+                {
+                    new Permission("book;music"),new Permission("book:read,delete;music:delete"),
+                    true
+                },
+                {
+                    new Permission("book;music:upload"),new Permission("book:read,delete;music:delete"),
+                    false
+                },
+            };
+        }
+
+        [Theory]
+        [MemberData(nameof(GetContainsData))]
+        void Contains(Permission p1, Permission p2, bool expected)
+        {
+            p1.Contains(p2).Should().Be(expected);
+        }
     }
 }
