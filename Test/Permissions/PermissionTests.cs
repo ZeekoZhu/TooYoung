@@ -62,6 +62,35 @@ namespace Test.Permissions
                         }
                     },
                     false
+                },
+                {
+                    new Permission
+                    {
+                        Resources = new Dictionary<string, ResourceRule>
+                        {
+                            ["book"] = new ResourceRule("book"),
+                            ["music"] = new ResourceRule("music"),
+                        }
+                    },
+                    null,
+                    false
+                },
+                {
+                    new Permission
+                    {
+                        Resources = new Dictionary<string, ResourceRule>
+                        {
+                            ["book"] = new ResourceRule("book"),
+                        }
+                    },
+                    new Permission
+                    {
+                        Resources = new Dictionary<string, ResourceRule>
+                        {
+                            ["music"] = new ResourceRule("music")
+                        }
+                    },
+                    false
                 }
             };
         }
