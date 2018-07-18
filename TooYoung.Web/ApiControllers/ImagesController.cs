@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TooYoung.Core.Exceptions;
 using TooYoung.Core.Models;
+using TooYoung.Core.Permissions;
 using TooYoung.Core.Repository;
 using TooYoung.Core.Services;
 using TooYoung.Web.Filters;
@@ -35,7 +36,7 @@ namespace TooYoung.Web.ApiControllers
         /// <param name="model"></param>
         /// <returns></returns>
         [HttpPost]
-        [RequiredPermissions(Permission.ManageImage, Permission.AdminAll)]
+        //[RequiredPermissions(Permission.ManageImage, Permission.AdminAll)]
         public async Task<ActionResult<ImageInfo>> Post([FromBody] ImagePostModel model)
         {
             var result = await _imgService.SaveImageInfo(model.Name, model.GroupId, User.Id());
@@ -46,7 +47,7 @@ namespace TooYoung.Web.ApiControllers
             return result;
         }
 
-        [RequiredPermissions(Permission.ManageImage, Permission.AdminAll)]
+        //[RequiredPermissions(Permission.ManageImage, Permission.AdminAll)]
         [HttpPut("{infoId}")]
         public async Task<ActionResult<ImageInfo>> Put([FromRoute]string infoId)
         {

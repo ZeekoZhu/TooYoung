@@ -3,6 +3,7 @@ using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using TooYoung.Core.Models;
+using TooYoung.Core.Permissions;
 using TooYoung.Web.Jwt;
 
 namespace TooYoung.Web.Filters
@@ -12,9 +13,10 @@ namespace TooYoung.Web.Filters
     /// </summary>
     public class RequiredPermissions : TypeFilterAttribute
     {
-        public RequiredPermissions(params Permission[] permissions) : base(typeof(PermissionFilterAttribute))
+        public RequiredPermissions(string permissionStr) : base(typeof(PermissionFilterAttribute))
         {
-            Arguments = new[] { new PermissionRequirement(permissions) };
+            var permission = new Permission(permissionStr);
+            Arguments = new[] { new PermissionRequirement(permission) };
         }
     }
     public class PermissionFilterAttribute : IAuthorizationFilter
@@ -29,23 +31,25 @@ namespace TooYoung.Web.Filters
         public void OnAuthorization(AuthorizationFilterContext context)
         {
             var permissionClaim = context.HttpContext.User.Claims.FirstOrDefault(c => c.Type == "per")?.Value ?? "";
-            var permissions = permissionClaim
-                .Split(',')
-                .Select(p =>
-                {
-                    if (int.TryParse(p, out int permission))
-                    {
-                        return new int?(permission);
-                    }
-                    return null;
-                })
-                .Where(p => p != null && Enum.IsDefined(typeof(Permission), p.Value))
-                .Select(p => (Permission)p);
-            if (permissions.Any(p => _requirement.Permissions.Contains(p)) == false)
+            try
             {
-                context.HttpContext.Response.StatusCode = 403;
-                context.Result = new JsonResult(new { Required = _requirement });
+                var userPermission = new Permission(permissionClaim);
+                if (userPermission.Contains(_requirement.Permissions) == false)
+                {
+                    AuthFailed(context);
+                }
             }
+            catch (Exception)
+            {
+                AuthFailed(context);
+            }
+            
+        }
+
+        private void AuthFailed(AuthorizationFilterContext context)
+        {
+            context.HttpContext.Response.StatusCode = 403;
+            context.Result = new JsonResult(new { Required = _requirement.Permissions });
         }
     }
 }

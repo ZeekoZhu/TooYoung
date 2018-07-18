@@ -55,7 +55,7 @@ namespace TooYoung.Web.ApiControllers
                 {
                     new Claim(ClaimTypes.NameIdentifier, user.Id, ClaimValueTypes.String),
                     // TODO: new Claim("jti", jti, ClaimValueTypes.String),
-                    new Claim("per",string.Join(",", user.Permissions.Select(p=>(int)p)), ClaimValueTypes.String)
+                    new Claim("per",string.Join(",", user.Permission.ToString()), ClaimValueTypes.String)
                 };
                 var token = _jwt.GenerateToken(user.UserName, claims, DateTime.Now.AddDays(7));
                 var (principal, authProps) = _jwt.GenerateAuthTicket(user.UserName, claims, DateTime.Now.AddDays(7));

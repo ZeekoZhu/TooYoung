@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using AgileObjects.AgileMapper;
 using Microsoft.AspNetCore.Mvc;
 using TooYoung.Core.Models;
+using TooYoung.Core.Permissions;
 using TooYoung.Core.Repository;
 using TooYoung.Web.Filters;
 using TooYoung.Web.Utils;
@@ -26,7 +27,7 @@ namespace TooYoung.Web.ApiControllers
         }
 
         [HttpPost]
-        [RequiredPermissions(Permission.ManageGroup, Permission.AdminAll)]
+        //[RequiredPermissions(Permission.ManageGroup, Permission.AdminAll)]
         public async Task<IActionResult> Post([FromBody] GroupPostModel model)
         {
             do
@@ -52,7 +53,7 @@ namespace TooYoung.Web.ApiControllers
         }
 
         [HttpGet]
-        [RequiredPermissions(Permission.ManageGroup, Permission.AdminAll)]
+        //[RequiredPermissions(Permission.ManageGroup, Permission.AdminAll)]
         public async Task<IActionResult> Get()
         {
             var userId = User.Id();
