@@ -15,6 +15,9 @@ namespace TooYoung.Core.Permissions
         public string Action { get; set; }
         public HashSet<string> Instances { get; set; }
 
+        /// <summary>
+        /// Test or Serialization ONLY
+        /// </summary>
         public ActionRule()
         {
 
@@ -94,6 +97,9 @@ namespace TooYoung.Core.Permissions
             }
         }
 
+        /// <summary>
+        /// Test or Serialization ONLY
+        /// </summary>
         public ResourceRule()
         {
         }
