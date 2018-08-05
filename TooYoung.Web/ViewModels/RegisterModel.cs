@@ -13,8 +13,6 @@ namespace TooYoung.Web.ViewModels
         [Required]
         public string DisplayName { get; set; }
         [Required]
-        public string Permissions { get; set; }
-        [Required]
         public string Email { get; set; }
     }
 }

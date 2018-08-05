@@ -2,14 +2,13 @@ using System;
 using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
-using TooYoung.Core.Models;
 using TooYoung.Core.Permissions;
 using TooYoung.Web.Jwt;
 
 namespace TooYoung.Web.Filters
 {
     /// <summary>
-    /// 权限校验，满足参数中的任意一个权限即可
+    /// 权限校验
     /// </summary>
     public class RequiredPermissions : TypeFilterAttribute
     {
