@@ -5,6 +5,7 @@ open Xunit
 open TooYoung.Domain
 open Sharing
 open FluentAssertions
+open Xunit
 
 type SharingTests() =
     
@@ -66,6 +67,31 @@ type SharingTests() =
         let tokenRule: TokenRule =
             { Token = "2333"
               ExpiredAt = DateTime(2018, 6, 1, 12, 0, 0) |> Some
+              Password = "password" }
+        entry.TokenRules <- tokenRule :: entry.TokenRules
+        
+        let result = claims |> canAccess entry
+        result.Should().Be(expected, null, null)
+
+
+    static member TokenNoExpiredTestData() =
+            let data = TheoryData<AccessClaim, bool>()
+            [ { Host = None; Token = Some ("2333", DateTime(2018, 5, 1), "password") }, true
+              { Host = None; Token = Some ("23333", DateTime(2018, 5, 1), "password") }, false
+              { Host = None; Token = Some ("2333", DateTime(2018, 5, 1), "23333") }, false
+              { Host = None; Token = None }, false
+              { Host = None; Token = Some ("2333", DateTime(2019, 1, 1), "password") }, true ]
+            |> List.iter data.Add
+            data
+
+    [<Theory>]
+    [<MemberData("TokenNoExpiredTestData")>]
+    member this.``Token with no exprired date tests`` (claims: AccessClaim, expected: bool) =
+        let entry = SharingEntry("2333", "owner", "file id")
+                
+        let tokenRule: TokenRule =
+            { Token = "2333"
+              ExpiredAt = None
               Password = "password" }
         entry.TokenRules <- tokenRule :: entry.TokenRules
         

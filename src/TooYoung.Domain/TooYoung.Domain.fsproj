@@ -5,7 +5,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="Resource.fs" />
+    <Compile Include="Domain.fs" />
+    <Compile Include="Repositories\IFileRepository.fs" />
+    <Compile Include="Services\FileService.fs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="FSharpx.Extras" Version="2.2.1" />
   </ItemGroup>
 
 </Project>

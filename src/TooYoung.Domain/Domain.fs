@@ -5,14 +5,15 @@ module Resource =
     open System.Collections.Generic
     
     /// 文件信息
-    type FileInfo(id: string, name: string) =
+    type FileInfo(id: string, ownerId: string, name: string) =
         member val Id = id
+        member val OwnerId = ownerId
         member val Name = name with get, set
 
         /// 文件大小
         member val FileSize = 0 with get, set
         member val BinaryId = "" with get, set
-        member val Metadatas = Dictionary()
+        member val Metadatas = Dictionary<string, string>()
         member val Extension = "" with get, set
 
     /// 文件二进制存储实体
