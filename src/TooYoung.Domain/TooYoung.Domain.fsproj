@@ -5,7 +5,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="Funx.fs" />
+    <Compile Include="Taskx.fs" />
     <Compile Include="Domain.fs" />
+    <Compile Include="Repositories\IUnitOfWork.fs" />
+    <Compile Include="Repositories\IRepository.fs" />
     <Compile Include="Repositories\IFileRepository.fs" />
     <Compile Include="Services\FileService.fs" />
   </ItemGroup>

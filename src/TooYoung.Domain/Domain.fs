@@ -12,9 +12,9 @@ module Resource =
 
         /// 文件大小
         member val FileSize = 0 with get, set
-        member val BinaryId = "" with get, set
+        member val BinaryId = String.Empty with get, set
         member val Metadatas = Dictionary<string, string>()
-        member val Extension = "" with get, set
+        member val Extension = String.Empty with get, set
 
     /// 文件二进制存储实体
     type FileBinary(id: string) =
