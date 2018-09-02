@@ -4,7 +4,7 @@ open System.Threading.Tasks
 open TooYoung.Domain.Repositories
 open TooYoung
 open TooYoung.Domain
-
+open TooYoung.Domain.Resource
 open System
 open System.Text.RegularExpressions
 open TaskxAlias
@@ -175,4 +175,30 @@ type DirectoryService (repo: IDirectoryRepository, fileSvc: FileService, bus: Ev
                     && dir.DirectoryChildren.IsEmpty)
                 then Ok dir
                 else Error "Directory is not empty"
+            )
+        =>> deattachFromParent
+
+    /// 递归删除指定文件夹，只用于在后台进程删除文件夹
+    member this.RmRf dirId =
+        ``rm -rf`` dirId
+
+    /// 向文件夹中添加文件
+    member this.AddFile (file: FileInfo) (dir: FileDirectory) =
+        dir.AddFile file
+        updateDir dir
+        >=> (fun  _ ->
+                dir.ApplyOperations() |> Ok
+            )
+
+    /// 从文件夹中删除文件
+    member this.DeleteFile (file: FileInfo) (dir: FileDirectory) =
+        repo.ContainsName file.Name dir
+        |> Taskx.map (function
+            | true -> Error "File already exists"
+            | false -> Ok ()
+            )
+        =>> (fun _ ->
+                dir.RemoveFile file.Id
+                updateDir dir
+                =>> just fileSvc.DeleteFile (file.Id, file.OwnerId)
             )
