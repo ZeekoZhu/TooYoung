@@ -6,6 +6,7 @@ open TooYoung.Domain.Resource
 
 type IFileRepository =
     inherit IRepository
+    abstract member ListByIdAsync: ids: string list -> Task<FileInfo list option>
 
     abstract member AddAsync: FileInfo -> Task<Result<FileInfo, string>>
     
@@ -22,3 +23,5 @@ type IFileRepository =
     abstract member ExistsAsync: fileInfoId: string -> userId: string -> Task<bool>
 
     abstract member DeleteFileAsync: fileInfoId: string -> Task<Result<unit, string>>
+
+    abstract member GetBinaryAsync: binaryId: string -> Task<Result<FileBinary, string>>

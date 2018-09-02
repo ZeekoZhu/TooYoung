@@ -76,7 +76,7 @@ type FileService(repo: IFileRepository) =
                 Ok info
             )
         =>> unitWork repo.UpdateAsync// 持久化
-        
+ 
 
     /// 删除一个文件
     member this.DeleteFile (fileinfoId: string, userId: string) =
@@ -86,3 +86,20 @@ type FileService(repo: IFileRepository) =
             | true ->
                 startWork (fun _ -> repo.DeleteFileAsync fileinfoId)
             )
+
+    /// 根据 id 获取文件信息
+    member this.GetByIds (ids: string list) =
+        repo.ListByIdAsync ids
+
+    /// 获取指定文件的内容
+    member this.GetFileBinary (fileInfoId: string) =
+        repo.GetByIdAsync fileInfoId
+        |> Taskx.map (function
+            | None -> Error "File not found"
+            | Some info -> Ok info.BinaryId
+            )
+        >=> (function
+            | x when String.IsNullOrEmpty x = false -> Ok x
+            | _ -> Error "File is empty"
+            )
+        =>> repo.GetBinaryAsync

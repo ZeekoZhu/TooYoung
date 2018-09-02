@@ -102,8 +102,47 @@ module FileDirectory =
     open Resource
 
     open System
-    type FileDirectory(id: string, ownerId: string) =
+    /// 考虑到在数据库层面的实现中，为了能够准确对文件夹下面的子项进行批量的移动操作，所以将这些东西抽象成了 Operation
+    type DirectoryOperaion =
+        | AddSubDir of string
+        | RemoveSubDir of string
+        | AddItem of FileInfo
+        | RemoveItem of string
+
+    type FileDirectory(id: string, ownerId: string, isRoot: bool) =
         member val Id = id
         member val OwnerId = ownerId
-        member val DirectoryChildren = List.empty<FileDirectory> with get, set
+        member val IsRoot = isRoot
+        member val Name = String.Empty with get, set
+        member val ParentId = String.Empty with get, set
+        member val DirectoryChildren = List.empty<string> with get, set
         member val FileChildren = List.empty<FileInfo> with get, set
+        member val PendingOperations = List.empty<DirectoryOperaion> with get, set
+        member this.ApplyOperations () =
+            for op in this.PendingOperations do
+                match op with
+                | AddSubDir x ->
+                    this.DirectoryChildren <- x :: this.DirectoryChildren
+                | RemoveSubDir x ->
+                    this.DirectoryChildren <-
+                        this.DirectoryChildren
+                        |> List.filter (fun d -> d = x)
+                | AddItem x ->
+                    this.FileChildren <- x :: this.FileChildren
+                | RemoveItem x ->
+                    this.FileChildren <-
+                        this.FileChildren
+                        |> List.filter (fun f -> f.Id = x)
+            this.PendingOperations <- List.empty<DirectoryOperaion>
+     
+        member this.AppendTo (other: FileDirectory) =
+            other.PendingOperations <- AddSubDir this.Id :: other.PendingOperations
+            this.ParentId <- other.Id
+        member this.RemoveFrom (other: FileDirectory) =
+            if this.ParentId <> other.Id then ()
+            else other.PendingOperations <-
+                    RemoveSubDir this.Id :: other.PendingOperations
+        member this.AddFile file =
+            this.PendingOperations <- AddItem file :: this.PendingOperations
+        member this.RemoveFile fileId =
+            this.PendingOperations <- RemoveItem fileId :: this.PendingOperations
