@@ -1,27 +1,26 @@
 namespace TooYoung.Domain.Repositories
-open System.Threading.Tasks
 open TooYoung.Domain.Resource
 
 
 
 type IFileRepository =
     inherit IRepository
-    abstract member ListByIdAsync: ids: string list -> Task<FileInfo list option>
+    abstract member ListByIdAsync: ids: string list -> Async<FileInfo list option>
 
-    abstract member AddAsync: FileInfo -> Task<Result<FileInfo, string>>
+    abstract member AddAsync: FileInfo -> Async<Result<FileInfo, string>>
     
-    abstract member GetByIdAsync: string -> Task<FileInfo option>
+    abstract member GetByIdAsync: string -> Async<FileInfo option>
     
-    abstract member CreateBinaryAsync: byte[] -> Task<Result<FileBinary, string>>
+    abstract member CreateBinaryAsync: byte[] -> Async<Result<FileBinary, string>>
 
-    abstract member DeleteBinaryAsync: string -> Task<Result<unit, string>>
+    abstract member DeleteBinaryAsync: string -> Async<Result<unit, string>>
 
-    abstract member GetByIdAndUserAsync: userId: string -> fileInfoId: string -> Task<FileInfo option>
+    abstract member GetByIdAndUserAsync: userId: string -> fileInfoId: string -> Async<FileInfo option>
 
-    abstract member UpdateAsync: FileInfo -> Task<Result<unit, string>>
+    abstract member UpdateAsync: FileInfo -> Async<Result<unit, string>>
 
-    abstract member ExistsAsync: fileInfoId: string -> userId: string -> Task<bool>
+    abstract member ExistsAsync: fileInfoId: string -> userId: string -> Async<bool>
 
-    abstract member DeleteFileAsync: fileInfoId: string -> Task<Result<unit, string>>
+    abstract member DeleteFileAsync: fileInfoId: string -> Async<Result<unit, string>>
 
-    abstract member GetBinaryAsync: binaryId: string -> Task<Result<FileBinary, string>>
+    abstract member GetBinaryAsync: binaryId: string -> Async<Result<FileBinary, string>>

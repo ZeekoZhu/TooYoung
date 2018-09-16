@@ -1,7 +1,6 @@
 namespace TooYoung.Domain.Services
 open System
 open System.Collections.Generic
-open System.Threading.Tasks
 open TooYoung.Domain.Repositories
 open TooYoung.Domain.Resource
 open TooYoung
@@ -13,11 +12,14 @@ type FileInfoAddDto =
       Metadatas: Dictionary<string, string>
     }
 
-open TaskxAlias
+open Asyncx
+open Cvdm.ErrorHandling.Helpers
+
+open Cvdm.ErrorHandling.Helpers
+
 open FunxAlias
 open TooYoung.Domain.Repositories
 open TooYoung.Domain.Repositories
-module Taskx = FSharpx.Task
 type FileService(repo: IFileRepository) =
     let startWork f = Repository.startWork repo f
     let unitWork f = Repository.unitWork repo f
@@ -32,24 +34,21 @@ type FileService(repo: IFileRepository) =
         >=> (fun bin ->
                 fileInfo.BinaryId <- bin.Id
                 fileInfo.FileSize <- bin.Binary.Length
-                Ok fileInfo
+                fileInfo
             )
 
     let deleteBinary (fileInfo: FileInfo) =
         if String.IsNullOrEmpty(fileInfo.BinaryId)
-        then fileInfo |> Ok |> Task.FromResult
+        then fileInfo |> Ok |> async.Return
         else repo.DeleteBinaryAsync fileInfo.BinaryId
              >=> (fun _ ->
                     fileInfo.BinaryId <- String.Empty
-                    Ok fileInfo
+                    fileInfo
                 )
 
     let tryGetFile fileInfoId userId =
         repo.GetByIdAndUserAsync userId fileInfoId
-        <!> (function 
-            | None -> Error "File not found"
-            | Some info -> Ok info
-            )
+        |> Async.fromOption (Error "File not found")
 
     /// 创建一个新的文件，但是并没有为其设置内容
     member this.Add (dto: FileInfoAddDto, ownerId) =
@@ -73,7 +72,7 @@ type FileService(repo: IFileRepository) =
                 info.Name <- dto.Name
                 info.Extension <- dto.Extension
                 copyMetadata dto.Metadatas info.Metadatas
-                Ok info
+                info
             )
         =>> unitWork repo.UpdateAsync// 持久化
  
@@ -81,8 +80,8 @@ type FileService(repo: IFileRepository) =
     /// 删除一个文件
     member this.DeleteFile (fileinfoId: string, userId: string) =
         repo.ExistsAsync fileinfoId userId
-        >>= (function
-            | false -> Error "File not found" |> Task.FromResult
+        |> Async.bind (function
+            | false -> Error "File not found" |> async.Return
             | true ->
                 startWork (fun _ -> repo.DeleteFileAsync fileinfoId)
             )
@@ -94,11 +93,11 @@ type FileService(repo: IFileRepository) =
     /// 获取指定文件的内容
     member this.GetFileBinary (fileInfoId: string) =
         repo.GetByIdAsync fileInfoId
-        |> Taskx.map (function
+        <!> (function
             | None -> Error "File not found"
             | Some info -> Ok info.BinaryId
             )
-        >=> (function
+        <!> Result.bind (function
             | x when String.IsNullOrEmpty x = false -> Ok x
             | _ -> Error "File is empty"
             )

@@ -1,5 +1,4 @@
 namespace TooYoung.Domain.Repositories
-open System.Threading.Tasks
 open System
 
 [<AbstractClass>]

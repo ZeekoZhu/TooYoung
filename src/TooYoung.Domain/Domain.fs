@@ -82,9 +82,14 @@ module Sharing =
         | None -> false
         | Some token -> canAccessVia isTokenMatch tokens token
 
+    type SharingType =
+        | File = 0
+        | Directory = 1
+
     /// 文件分享信息
     type SharingEntry(id: string, ownerId: string, resourceId: string) =
         member val Id = id
+        member val Type = SharingType.File
         member val ResourceId = resourceId
         member val OwnerId = ownerId
         member val TokenRules = List.empty<TokenRule> with get, set

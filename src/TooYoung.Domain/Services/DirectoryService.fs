@@ -7,11 +7,10 @@ open TooYoung.Domain
 open TooYoung.Domain.Resource
 open System
 open System.Text.RegularExpressions
-open TaskxAlias
 open FunxAlias
 open FileDirectory
-
-module Taskx = FSharpx.Task
+open TooYoung
+open Asyncx
 
 type DirectoryAddDto = {
     Name: string
@@ -24,17 +23,14 @@ type DirectoryService (repo: IDirectoryRepository, fileSvc: FileService, bus: Ev
 
     let getDir dirId userId =
         repo.GetDir dirId userId
-        |> Taskx.map (function
-            | None -> Error "Directory not found"
-            | Some dir -> Ok dir
-            )
+        |> Async.fromOption (Error "Directory not found")
     let rec getDirPath dirId userId =
         getDir dirId userId
         =>> (fun dir ->
             if dir.IsRoot
-            then Ok [dir] |> Task.FromResult
+            then [dir] |> Ok |> async.Return
             else (getDirPath dir.ParentId userId)
-                    >=> (fun parents -> Ok ( dir :: parents )))
+                    >=> (fun parents -> ( dir :: parents )))
 
     /// 更新文件夹的子项结构
     let updateDir (dir: FileDirectory) =
@@ -70,7 +66,7 @@ type DirectoryService (repo: IDirectoryRepository, fileSvc: FileService, bus: Ev
                     |> repo.AttachFilesAsync dir
                 )
         )
-        >=> (fun _ -> dir.ApplyOperations(); dir |> Ok)
+        >=> (fun _ -> dir.ApplyOperations(); dir)
 
     let createRootDir userId =
         let root = FileDirectory(Guid.NewGuid().ToString(), userId, true)
@@ -88,9 +84,10 @@ type DirectoryService (repo: IDirectoryRepository, fileSvc: FileService, bus: Ev
         )
 
     let allTaskComplete =
-        Taskx.sequence
-        >> Taskx.map 
-            (List.forall (function
+        Async.Parallel
+        >> Async.map (fun results ->
+            results
+            |> (Seq.forall (function
                | Ok _ -> true
                | Error _ -> false
                )
@@ -98,6 +95,7 @@ type DirectoryService (repo: IDirectoryRepository, fileSvc: FileService, bus: Ev
                    | true -> Ok() 
                    | false -> Error "Operation failed, please check log")
                )
+        )
 
     /// 彻底删除文件夹中直接包含的文件
     let deleteAllFilesOf (dir: FileDirectory) =
@@ -108,7 +106,7 @@ type DirectoryService (repo: IDirectoryRepository, fileSvc: FileService, bus: Ev
     /// 彻底递归删除指定的文件夹
     let rec ``rm -rf`` (dir: FileDirectory) =
         if dir.DirectoryChildren.IsEmpty
-        then () |> Ok |> Task.FromResult
+        then () |> Ok |> Async.fromValue
         else dir.DirectoryChildren
             |> List.map (flip getDir dir.OwnerId)
             |> List.map (bindResult ``rm -rf``)
@@ -128,10 +126,7 @@ type DirectoryService (repo: IDirectoryRepository, fileSvc: FileService, bus: Ev
     /// 获取用户的根文件夹
     member this.GetRootDirectory userId =
         repo.GetRootDir userId
-        |> Taskx.map (function
-            | None -> Error "Not initialized"
-            | Some dir -> Ok dir
-            )
+        |> Async.fromOption ( Error "Not initialized" )
 
     /// 获取指定的文件夹及其所有的父级文件夹
     member this.GetDirWithPath dirId userId =
@@ -148,7 +143,7 @@ type DirectoryService (repo: IDirectoryRepository, fileSvc: FileService, bus: Ev
         getDir dto.ParentId userId
         =>> (fun dir ->
             repo.ContainsName dto.Name dir
-            |> Taskx.map (function
+            <!> (function
                 | false -> Ok dir
                 | true -> Error "Directory already exists"
                 )
@@ -158,7 +153,7 @@ type DirectoryService (repo: IDirectoryRepository, fileSvc: FileService, bus: Ev
     /// 创建一个根目录
     member this.CreateRootDir userId =
         repo.GetRootDir userId
-        |> Taskx.map (function
+        <!> (function
             | Some _ -> Error "Root directory has been initialized"
             | None -> Ok userId
             )
@@ -167,7 +162,7 @@ type DirectoryService (repo: IDirectoryRepository, fileSvc: FileService, bus: Ev
     /// 删除一个文件夹
     member this.DeleteDir userId dirId force =
         repo.GetDir dirId userId
-        |> Taskx.map (function
+        <!> (function
             | None -> Error "Directory not found"
             | Some dir ->
                 if dir.IsRoot then Error "Can not delete root directory"
@@ -193,7 +188,7 @@ type DirectoryService (repo: IDirectoryRepository, fileSvc: FileService, bus: Ev
     /// 从文件夹中删除文件
     member this.DeleteFile (file: FileInfo) (dir: FileDirectory) =
         repo.ContainsName file.Name dir
-        |> Taskx.map (function
+        <!> (function
             | true -> Error "File already exists"
             | false -> Ok ()
             )

@@ -6,20 +6,23 @@
 
   <ItemGroup>
     <Compile Include="Funx.fs" />
-    <Compile Include="Taskx.fs" />
+    <Compile Include="Asyncx.fs" />
     <Compile Include="Domain.fs" />
     <Compile Include="EventBus.fs" />
     <Compile Include="Repositories\IUnitOfWork.fs" />
     <Compile Include="Repositories\IRepository.fs" />
     <Compile Include="Repositories\IFileRepository.fs" />
     <Compile Include="Repositories\IDirectoryRepository.fs" />
+    <Compile Include="Repositories\ISharingRepository.fs" />
     <Compile Include="Services\FileService.fs" />
     <Compile Include="Services\DirectoryService.fs" />
+    <Compile Include="Services\SharingService.fs" />
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Cvdm.ErrorHandling" Version="1.0.2" />
     <PackageReference Include="FSharp.Control.Reactive" Version="4.1.0" />
-    <PackageReference Include="FSharpx.Extras" Version="2.2.1" />
+    <PackageReference Include="FSharpPlus" Version="1.0.0" />
   </ItemGroup>
 
 </Project>

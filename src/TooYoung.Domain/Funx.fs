@@ -1,9 +1,9 @@
 namespace TooYoung
 
 module FunxAlias =
-    open FSharpx.Functional
+    open FSharpPlus
 
-    let flip = Prelude.flip
+    let flip = Operators.flip
     let inline just fn p _ = 
         fn p
     let inline tap fn p value =
