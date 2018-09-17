@@ -10,7 +10,7 @@ using System.Linq;
 using MongoDB.Driver;
 using TooYoung.Core.Repository;
 using TooYoung.Core.Services;
-using TooYoung.Provider.MongoDB.Services;
+using TooYoung.Provider.MongoDB.Repositories;
 
 namespace TooYoung.Provider.MongoDB
 {
@@ -18,29 +18,29 @@ namespace TooYoung.Provider.MongoDB
     {
         public static void Init()
         {
-            BsonClassMap.RegisterClassMap<Group>(cm =>
-            {
-                cm.AutoMap();
-                cm.MapIdMember(g => g.Id).MapStringAsId();
-                cm.MapMember(g => g.OwnerId).RepresentAsObjectId();
-                cm.MapMember(g => g.ImageInfos)
-                    .SetSerializer(new EnumerableInterfaceImplementerSerializer<List<string>>(new StringSerializer(BsonType.ObjectId)));
-            });
-
-            BsonClassMap.RegisterClassMap<Image>(cm =>
-            {
-                cm.AutoMap();
-                cm.MapIdMember(i => i.Id).MapStringAsId();
-
-            });
-
-            BsonClassMap.RegisterClassMap<ImageInfo>(cm =>
-            {
-                cm.AutoMap();
-                cm.MapIdMember(i => i.Id).MapStringAsId();
-                cm.MapMember(i => i.GroupId).RepresentAsObjectId();
-                cm.MapMember(i => i.Image).RepresentAsObjectId();
-            });
+//            BsonClassMap.RegisterClassMap<Group>(cm =>
+//            {
+//                cm.AutoMap();
+//                cm.MapIdMember(g => g.Id).MapStringAsId();
+//                cm.MapMember(g => g.OwnerId).RepresentAsObjectId();
+//                cm.MapMember(g => g.ImageInfos)
+//                    .SetSerializer(new EnumerableInterfaceImplementerSerializer<List<string>>(new StringSerializer(BsonType.ObjectId)));
+//            });
+//
+//            BsonClassMap.RegisterClassMap<Image>(cm =>
+//            {
+//                cm.AutoMap();
+//                cm.MapIdMember(i => i.Id).MapStringAsId();
+//
+//            });
+//
+//            BsonClassMap.RegisterClassMap<ImageInfo>(cm =>
+//            {
+//                cm.AutoMap();
+//                cm.MapIdMember(i => i.Id).MapStringAsId();
+//                cm.MapMember(i => i.GroupId).RepresentAsObjectId();
+//                cm.MapMember(i => i.Image).RepresentAsObjectId();
+//            });
 
             BsonClassMap.RegisterClassMap<User>(cm =>
             {
@@ -73,7 +73,6 @@ namespace TooYoung.Provider.MongoDB
                 return provider.GetService<IMongoClient>().GetDatabase(dbName);
             });
             services.AddScoped<IAccountRepository, AccountRepository>();
-            services.AddScoped<IImageRepository, ImageRepository>();
             return services;
         }
     }

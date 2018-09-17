@@ -1,7 +1,7 @@
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using TooYoung.Provider.MongoDB.Services;
+using TooYoung.Provider.MongoDB.Repositories;
 using TooYoung.Web.Filters;
 using TooYoung.Web.ViewModels;
 

@@ -5,7 +5,7 @@ open TooYoung.Domain.Resource
 
 type IFileRepository =
     inherit IRepository
-    abstract member ListByIdAsync: ids: string list -> Async<FileInfo list option>
+    abstract member ListByIdAsync: ids: string list -> Async<FileInfo list>
 
     abstract member AddAsync: FileInfo -> Async<Result<FileInfo, string>>
     

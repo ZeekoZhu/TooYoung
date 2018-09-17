@@ -19,7 +19,7 @@ namespace TooYoung.Web.Json
         {
             JsonProperty property = base.CreateProperty(member, memberSerialization);
 
-            property.Ignore((ImageInfo i) => i.Image);
+//            property.Ignore((ImageInfo i) => i.Image);
 
             return property;
         }

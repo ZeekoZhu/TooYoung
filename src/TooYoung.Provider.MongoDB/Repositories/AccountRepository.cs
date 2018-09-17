@@ -4,7 +4,7 @@ using MongoDB.Driver.Linq;
 using TooYoung.Core.Models;
 using TooYoung.Core.Repository;
 
-namespace TooYoung.Provider.MongoDB.Services
+namespace TooYoung.Provider.MongoDB.Repositories
 {
     public class AccountRepository : IAccountRepository
     {

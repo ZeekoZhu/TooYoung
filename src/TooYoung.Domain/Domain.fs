@@ -5,6 +5,7 @@ module Resource =
     open System.Collections.Generic
     
     /// 文件信息
+    [<AllowNullLiteral>]
     type FileInfo(id: string, ownerId: string, name: string) =
         member val Id = id
         member val OwnerId = ownerId
@@ -31,7 +32,7 @@ module Sharing =
     /// 来源引用规则
     type RefererRule =
         { AllowedHost: string
-          Id: int
+          Id: string
         }
 
     /// Token 规则
@@ -39,7 +40,7 @@ module Sharing =
         { Token: string
           ExpiredAt: DateTime option
           Password: string
-          Id: int
+          Id: string
          }
 
     /// 访问认证信息

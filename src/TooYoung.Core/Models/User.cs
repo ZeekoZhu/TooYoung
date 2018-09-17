@@ -11,7 +11,5 @@ namespace TooYoung.Core.Models
         public string DisplayName { get; set; }
         public string Email { get; set; }
         public Permission Permission { get; set; }
-
-        public List<Group> Groups { get; set; } = new List<Group>();
     }
 }

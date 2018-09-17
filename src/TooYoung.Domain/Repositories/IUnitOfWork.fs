@@ -7,14 +7,22 @@ type UnitOfWork() =
     member this.Finished
         with get() = finished
         and private set(value) = finished <- value
-    member this.Commit () =
-        this.Finished <- true
-    member this.Rollback() =
+
+    abstract member Commit: unit -> unit
+    default this.Commit () =
         this.Finished <- true
 
+    abstract member Rollback: unit -> unit
+    default  this.Rollback() =
+        this.Finished <- true
+
+    abstract member Close: unit -> unit 
+    default this.Close () =
+        if this.Finished = false then this.Commit()
+
     interface IDisposable with 
-        member this.Dispose() = 
-            if this.Finished = false then this.Commit()
+        member this.Dispose() = this.Close()
+            
 
 module UnitOfWork =
     let commit (uow: UnitOfWork) =

@@ -12,6 +12,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\TooYoung.Core\TooYoung.Core.csproj" />
+    <ProjectReference Include="..\TooYoung.Domain\TooYoung.Domain.fsproj" />
   </ItemGroup>
 
   <ItemGroup>

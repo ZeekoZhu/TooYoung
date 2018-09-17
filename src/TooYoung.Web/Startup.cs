@@ -31,7 +31,6 @@ namespace TooYoung.Web
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddScoped<IImageProcessService, ImageSharpService>();
-            services.AddScoped<ImageManageService>();
             services.AddYoungMongo();
 
             // 配置 JWT
