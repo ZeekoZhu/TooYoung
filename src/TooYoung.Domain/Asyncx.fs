@@ -30,6 +30,10 @@ module Asyncx =
     /// combine two async operation
     let inline (>+>) f1 f2 x = compose f1 f2 x
 
+module AsyncResult =
+    open Asyncx
+    let inline bind f x = x <!> Result.bind f
+
 module Async =
     open Asyncx
     let inline fromOption none x =

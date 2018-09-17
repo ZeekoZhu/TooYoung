@@ -90,6 +90,11 @@ type FileService(repo: IFileRepository) =
     member this.GetByIds (ids: string list) =
         repo.ListByIdAsync ids
 
+    /// 根据 id 获取文件信息
+    member this.GetById (id) =
+        repo.GetByIdAsync id
+        |> Async.fromOption (Error "File not found")
+
     /// 获取指定文件的内容
     member this.GetFileBinary (fileInfoId: string) =
         repo.GetByIdAsync fileInfoId

@@ -30,13 +30,17 @@ module Sharing =
 
     /// 来源引用规则
     type RefererRule =
-        { AllowedHost: string }
+        { AllowedHost: string
+          Id: int
+        }
 
     /// Token 规则
     type TokenRule =
         { Token: string
           ExpiredAt: DateTime option
-          Password: string }
+          Password: string
+          Id: int
+         }
 
     /// 访问认证信息
     type AccessClaim =
