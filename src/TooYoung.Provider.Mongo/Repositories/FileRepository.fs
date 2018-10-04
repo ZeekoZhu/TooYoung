@@ -1,6 +1,5 @@
 namespace TooYoung.Provider.Mongo.Repositories
 open System
-open System
 open System.IO
 open System.Linq
 open MongoDB.Driver

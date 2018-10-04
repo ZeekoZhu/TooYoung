@@ -92,6 +92,7 @@ module Sharing =
         | Directory = 1
 
     /// 文件分享信息
+    [<AllowNullLiteral>]
     type SharingEntry(id: string, ownerId: string, resourceId: string) =
         member val Id = id
         member val Type = SharingType.File

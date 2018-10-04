@@ -23,6 +23,7 @@
       <Compile Include="Repositories\AccountRepository.fs" />
       <Compile Include="Repositories\DirectoryRepository.fs" />
       <Compile Include="Repositories\FileRepository.fs" />
+      <Compile Include="Repositories\SharingRepository.fs" />
     </ItemGroup>
 
 </Project>
