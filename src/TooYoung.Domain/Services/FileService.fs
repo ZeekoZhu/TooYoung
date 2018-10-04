@@ -15,7 +15,6 @@ type FileInfoAddDto =
 open Asyncx
 open Cvdm.ErrorHandling.Helpers
 
-open Cvdm.ErrorHandling.Helpers
 
 open FunxAlias
 open TooYoung.Domain.Repositories
@@ -49,6 +48,28 @@ type FileService(repo: IFileRepository) =
     let tryGetFile fileInfoId userId =
         repo.GetByIdAndUserAsync userId fileInfoId
         |> Async.fromOption (Error "File not found")
+        
+    let prepareDownload fileInfoId =
+        repo.GetByIdAsync fileInfoId
+        <!> (function
+            | None -> Error "File not found"
+            | Some info -> Ok info
+            ) 
+        <!> Result.bind (function
+            | x when String.IsNullOrEmpty x.BinaryId = false -> Ok x
+            | _ -> Error "File is empty"
+            )
+
+    let downloadRange (fileInfoId: string) (fromPos: int64) (toPos: int64) =
+        prepareDownload fileInfoId
+        <!> Result.bind (fun file -> if int64 file.FileSize >= toPos then Ok file.BinaryId else Error "Out of range")
+        =>> repo.GetBinaryStreamAsync
+        =>> (fun stream ->
+                stream.Seek(fromPos, IO.SeekOrigin.Begin) |> ignore
+                let buffer = Array.zeroCreate(int (toPos - fromPos + 1L))
+                stream.AsyncRead(buffer, 0, buffer.Length)
+                <!> (fun x -> Ok buffer)
+            )
 
     /// 创建一个新的文件，但是并没有为其设置内容
     member this.Add (dto: FileInfoAddDto, ownerId) =
@@ -97,13 +118,13 @@ type FileService(repo: IFileRepository) =
 
     /// 获取指定文件的内容
     member this.GetFileBinary (fileInfoId: string) =
-        repo.GetByIdAsync fileInfoId
-        <!> (function
-            | None -> Error "File not found"
-            | Some info -> Ok info.BinaryId
-            )
-        <!> Result.bind (function
-            | x when String.IsNullOrEmpty x = false -> Ok x
-            | _ -> Error "File is empty"
-            )
+        prepareDownload fileInfoId
+        >=> (fun x -> x.BinaryId)
         =>> repo.GetBinaryAsync
+
+    /// 当文件大小超过 100M 的时候，应该使用这个方法来获取 Stream
+    member this.GetBinaryStream (binaryId: string) =
+        repo.GetBinaryStreamAsync binaryId
+
+    member this.GetFileBinaryRange (fileInfoId: string) (fromPos: int64) (toPos: int64) =
+         downloadRange fileInfoId fromPos toPos

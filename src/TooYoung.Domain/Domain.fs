@@ -11,7 +11,7 @@ module Resource =
         member val OwnerId = ownerId
         member val Name = name with get, set
 
-        /// 文件大小
+        /// 文件大小, bytes
         member val FileSize = 0 with get, set
         member val BinaryId = String.Empty with get, set
         member val Metadatas = Dictionary<string, string>()
@@ -119,6 +119,7 @@ module FileDirectory =
         | AddItem of FileInfo
         | RemoveItem of string
 
+    [<AllowNullLiteral>]
     type FileDirectory(id: string, ownerId: string, isRoot: bool) =
         member val Id = id
         member val OwnerId = ownerId

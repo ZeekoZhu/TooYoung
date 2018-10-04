@@ -9,3 +9,4 @@ let inline onError errorMsg fn x =
         | None -> Error e.Message |> Async.fromValue
         | Some err -> Error err |> Async.fromValue
 
+let inline asyncNone () = None |> Async.fromValue

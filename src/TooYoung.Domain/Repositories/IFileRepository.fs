@@ -1,4 +1,5 @@
 namespace TooYoung.Domain.Repositories
+open System.IO
 open TooYoung.Domain.Resource
 
 
@@ -24,3 +25,5 @@ type IFileRepository =
     abstract member DeleteFileAsync: fileInfoId: string -> Async<Result<unit, string>>
 
     abstract member GetBinaryAsync: binaryId: string -> Async<Result<FileBinary, string>>
+
+    abstract member GetBinaryStreamAsync: binaryId: string -> Async<Result<Stream, string>>

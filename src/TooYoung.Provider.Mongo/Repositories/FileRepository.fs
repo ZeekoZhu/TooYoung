@@ -1,5 +1,7 @@
 namespace TooYoung.Provider.Mongo.Repositories
 open System
+open System
+open System.IO
 open System.Linq
 open MongoDB.Driver
 open MongoDB.Driver.GridFS
@@ -62,9 +64,11 @@ type FileRepository(db: IMongoDatabase) =
         files.DeleteOneAsync(fun x -> x.Id = fileInfoId)
         |> Async.AwaitTask
         <!> (fun _ -> Ok())
+    
+    let filterByBinaryId binId = Builders<GridFSFileInfo>.Filter.Eq((fun f -> f.Filename), binId)
 
     let getBinaryAsync binaryId =
-        let filter = Builders<GridFSFileInfo>.Filter.Eq((fun f -> f.Filename), binaryId)
+        let filter = filterByBinaryId binaryId
         task {
             let! file = gridFs.DownloadAsBytesByNameAsync(binaryId)
             let result = FileBinary(binaryId)
@@ -73,6 +77,13 @@ type FileRepository(db: IMongoDatabase) =
         }
         |> Async.AwaitTask
         
+    let getBinStreamAsync binaryId =
+        let filter = filterByBinaryId binaryId
+        task {
+            let! stream = gridFs.OpenDownloadStreamByNameAsync(binaryId, GridFSDownloadByNameOptions(Seekable = Nullable(true)))
+            return Ok (stream :> Stream)
+        }
+        |> Async.AwaitTask
 
     interface IFileRepository with
         member this.BeginTransaction() =
@@ -119,3 +130,6 @@ type FileRepository(db: IMongoDatabase) =
         
         member this.GetBinaryAsync binId =
             onError None getBinaryAsync binId
+            
+        member this.GetBinaryStreamAsync binId =
+            onError None getBinStreamAsync binId
