@@ -5,7 +5,8 @@ open TooYoung.Domain
 open TooYoung.Domain.Repositories
 open TooYoung.Domain.Sharing
 open TooYoung.Domain.Resource
-open Asyncx
+open FsToolkit.ErrorHandling
+open FsToolkit.ErrorHandling.Operator.AsyncResult
 open FunxAlias
 
 type SharingService (repo: ISharingRepository, fileSvc: FileService) =
@@ -20,7 +21,7 @@ type SharingService (repo: ISharingRepository, fileSvc: FileService) =
     /// 在对分享入口进行操作前，先获取对应的实体
     let getEntryBeforeOperating resourceId userId =
         fileSvc.GetById resourceId
-        =>> (fun resource ->
+        >>= (fun resource ->
             repo.GetEntryAsync resourceId
             |> Async.map (function
                 | Some e when e.OwnerId = userId -> Some e
@@ -38,10 +39,10 @@ type SharingService (repo: ISharingRepository, fileSvc: FileService) =
         repo.GetEntryAsync resourceId
         |> Async.fromOption (Error "Resource is private")
         // 检查是否有权限，所有者可以直接通过检查
-        >=> (fun entry ->
+        |> AsyncResult.map (fun entry ->
             entry.OwnerId = userId || Sharing.canAccess entry claim
         )
-        =>> (function
+        >>= (function
             | true -> fileSvc.GetById resourceId
             | false -> "Access denied" |> Error |> Async.fromValue
         )
@@ -50,10 +51,11 @@ type SharingService (repo: ISharingRepository, fileSvc: FileService) =
     member this.GetEntryByResource (resourceId) (userId) =
         repo.GetEntryAsync resourceId
         |> Async.fromOption (Error "Resource is private")
-        >=> (fun entry -> (entry.OwnerId = userId, entry))
-        |> AsyncResult.bind (function
-            | (true, entry) -> Ok entry
-            | (false, _) -> Error ""
+        |> AsyncResult.map (fun entry -> (entry.OwnerId = userId, entry))
+        |> Async.map (function
+            | Ok (true, entry) -> Ok entry
+            | Ok (false, _) -> Error "Access denied"
+            | Error e -> Error e
             )
 
     /// 获取用户的所有分享入口
@@ -63,19 +65,19 @@ type SharingService (repo: ISharingRepository, fileSvc: FileService) =
     /// 添加一个 referer 规则
     member this.AddRefererRule resourceId userId referer =
         getEntryBeforeOperating resourceId userId
-        =>> flip repo.AddRefererRule referer
+        >>= flip repo.AddRefererRule referer
 
     /// 添加一个 token 规则
     member this.AddTokenRule resourceId userId token =
         getEntryBeforeOperating resourceId userId
-        =>> flip repo.AddTokenRule token
+        >>= flip repo.AddTokenRule token
 
     /// 删除一条 token 规则
     member this.RemoveTokenRule resourceId userId tokenId =
         getEntryBeforeOperating resourceId userId
-        =>> flip repo.RemoveTokenRule tokenId
+        >>= flip repo.RemoveTokenRule tokenId
 
     /// 删除一条 referer 规则
     member this.RemoveRefererRule resourceId userId refererId =
         getEntryBeforeOperating resourceId userId
-        =>> flip repo.RemoveRefererRule refererId
+        >>= flip repo.RemoveRefererRule refererId

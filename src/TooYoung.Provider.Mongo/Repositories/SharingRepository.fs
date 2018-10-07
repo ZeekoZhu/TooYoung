@@ -9,7 +9,7 @@ open FSharp.Control.Tasks.V2
 open TooYoung
 open TooYoung.Domain.Repositories
 open TooYoung.Provider.Mongo
-open Asyncx
+open FsToolkit.ErrorHandling
 open TooYoung.Domain.Sharing
 open Utils
 
@@ -31,7 +31,7 @@ type SharingRepository (db: IMongoDatabase) =
     let addEntry entry =
         entries.InsertOneAsync(entry)
         |> Async.AwaitTask
-        <!> (fun _ -> Ok entry)
+        |> Async.map (fun _ -> Ok entry)
 
     let addRefererRule (entry: SharingEntry) referer =
         let update = Builders<SharingEntry>.Update.Push
@@ -39,7 +39,7 @@ type SharingRepository (db: IMongoDatabase) =
         entries.FindOneAndUpdateAsync<SharingEntry, SharingEntry>
             ((fun x -> x.Id = entry.Id), update)
         |> Async.AwaitTask
-        <!> (fun _ ->
+        |> Async.map (fun _ ->
             entry.RefererRules <- referer :: entry.RefererRules
             Ok entry
         )
@@ -50,7 +50,7 @@ type SharingRepository (db: IMongoDatabase) =
         entries.FindOneAndUpdateAsync<SharingEntry, SharingEntry>
             ((fun x -> x.Id = entry.Id), update)
         |> Async.AwaitTask
-        <!> (fun _ ->
+        |> Async.map (fun _ ->
             entry.TokenRules <- token :: entry.TokenRules
             Ok entry
         )
@@ -63,7 +63,7 @@ type SharingRepository (db: IMongoDatabase) =
         entries.FindOneAndUpdateAsync<SharingEntry, SharingEntry>
             ((fun x -> x.Id = entry.Id), update)
         |> Async.AwaitTask
-        <!> (fun _ -> Ok ())
+        |> Async.map (fun _ -> Ok ())
 
     let removeRefererRule (entry: SharingEntry) refererId =
         let update = Builders<SharingEntry>.Update.PullFilter
@@ -73,7 +73,7 @@ type SharingRepository (db: IMongoDatabase) =
         entries.FindOneAndUpdateAsync<SharingEntry, SharingEntry>
             ((fun x -> x.Id = entry.Id), update)
         |> Async.AwaitTask
-        <!> (fun _ -> Ok ())
+        |> Async.map (fun _ -> Ok ())
 
     interface ISharingRepository with
         member this.BeginTransaction() =

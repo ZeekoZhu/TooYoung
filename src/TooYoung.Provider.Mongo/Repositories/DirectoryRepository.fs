@@ -7,9 +7,9 @@ open TooYoung
 open TooYoung.Domain.FileDirectory
 open TooYoung.Domain.Repositories
 open TooYoung.Provider.Mongo
+open FsToolkit.ErrorHandling
 
 open Utils
-open Asyncx
 open FunxAlias
 open AutoMapperBuilder
 
@@ -45,26 +45,26 @@ type DirectoryRepository(db: IMongoDatabase, mapper: IMapper, files: IFileReposi
             dirs.Find(fun x -> x.IsRoot && x.OwnerId = userId)
                 .FirstOrDefaultAsync()
             |> Async.AwaitTask
-            <!> Option.ofObj
+            |> Async.map Option.ofObj
             |> setFileChildren
 
     let getDir dirId userId =
         dirs.Find(fun x -> x.Id = dirId && x.OwnerId = userId)
             .FirstOrDefaultAsync()
         |> Async.AwaitTask
-        <!> Option.ofObj
+        |> Async.map Option.ofObj
         |> setFileChildren
 
     let saveNewNode (dir: FileDirectory) =
         dirs.InsertOneAsync(dir |> mapDir)
         |> Async.AwaitTask
-        <!> just Ok dir
+        |> Async.map (just Ok dir)
 
     let updateNode (dir: FileDirectory) =
         dirs.FindOneAndReplaceAsync<FileDirectoryEntity,FileDirectoryEntity>
             ((fun x -> x.Id = dir.Id), dir |> mapDir)
         |> Async.AwaitTask
-        <!> just Ok ()
+        |> Async.map (just Ok ())
 
     let containsName name (dir: FileDirectory) =
         dirs.Find(fun x -> x.ParentId = dir.Id && x.Name = name)
@@ -75,7 +75,7 @@ type DirectoryRepository(db: IMongoDatabase, mapper: IMapper, files: IFileReposi
         dirs.FindOneAndUpdateAsync<FileDirectoryEntity,FileDirectoryEntity>
             ((fun x -> x.Id = id), update)
             |> Async.AwaitTask
-             <!> just Ok ()
+             |> Async.map (just Ok ())
 
     let attachSubDirsAsync (dir: FileDirectory) (subDirIds: string list) =
         let update = Builders<FileDirectoryEntity>.Update.AddToSetEach((fun x -> x.DirectoryChildren :> IEnumerable<string>), subDirIds)
@@ -96,7 +96,7 @@ type DirectoryRepository(db: IMongoDatabase, mapper: IMapper, files: IFileReposi
     let deleteDir (dir: FileDirectory) =
         dirs.DeleteOneAsync(fun x -> x.Id = dir.Id)
         |> Async.AwaitTask
-        <!> just Ok ()
+        |> Async.map (just Ok ())
          
     interface IDirectoryRepository with
         member this.BeginTransaction() =

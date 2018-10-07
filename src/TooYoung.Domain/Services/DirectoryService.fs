@@ -7,10 +7,11 @@ open TooYoung.Domain
 open TooYoung.Domain.Resource
 open System
 open System.Text.RegularExpressions
+open FsToolkit.ErrorHandling
+open FsToolkit.ErrorHandling.Operator.AsyncResult
 open FunxAlias
 open FileDirectory
 open TooYoung
-open Asyncx
 
 type DirectoryAddDto = {
     Name: string
@@ -26,11 +27,13 @@ type DirectoryService (repo: IDirectoryRepository, fileSvc: FileService, bus: Ev
         |> Async.fromOption (Error "Directory not found")
     let rec getDirPath dirId userId =
         getDir dirId userId
-        =>> (fun dir ->
+        >>= (fun dir ->
             if dir.IsRoot
             then [dir] |> Ok |> async.Return
             else (getDirPath dir.ParentId userId)
-                    >=> (fun parents -> ( dir :: parents )))
+                    |> AsyncResult.map
+                        (fun parents -> ( dir :: parents ))
+            )
 
     /// 更新文件夹的子项结构
     let updateDir (dir: FileDirectory) =
@@ -41,7 +44,7 @@ type DirectoryService (repo: IDirectoryRepository, fileSvc: FileService, bus: Ev
                 | _ -> None
                 )
             |> repo.DeattachSubDirsAsync dir
-            =>> (fun _ ->
+            >>= (fun _ ->
                     dir.PendingOperations
                     |> List.choose (function
                         | AddSubDir sub -> Some sub
@@ -49,7 +52,7 @@ type DirectoryService (repo: IDirectoryRepository, fileSvc: FileService, bus: Ev
                         )
                     |>  repo.AttachSubDirsAsync dir
                 )
-            =>> (fun _ ->
+            >>= (fun _ ->
                     dir.PendingOperations
                     |> List.choose (function 
                         | RemoveItem file -> Some file
@@ -57,7 +60,7 @@ type DirectoryService (repo: IDirectoryRepository, fileSvc: FileService, bus: Ev
                         )
                     |> repo.DeattachFilesAsync dir
                 )
-            =>> (fun _ ->
+            >>= (fun _ ->
                     dir.PendingOperations
                     |> List.choose (function 
                         | AddItem file -> Some file.Id
@@ -66,7 +69,7 @@ type DirectoryService (repo: IDirectoryRepository, fileSvc: FileService, bus: Ev
                     |> repo.AttachFilesAsync dir
                 )
         )
-        >=> (fun _ -> dir.ApplyOperations(); dir)
+        |> AsyncResult.map (fun _ -> dir.ApplyOperations(); dir)
 
     let createRootDir userId =
         let root = FileDirectory(Guid.NewGuid().ToString(), userId, true)
@@ -78,9 +81,8 @@ type DirectoryService (repo: IDirectoryRepository, fileSvc: FileService, bus: Ev
         subDir.AppendTo parent
         startWork (fun _ ->
             repo.SaveNewNode subDir
-            =>> (fun newNode ->
-                updateDir parent
-                >=> (fun _ -> Ok subDir))
+            >>= (fun newNode -> updateDir parent)
+            |> AsyncResult.map (fun _ -> subDir)
         )
 
     let allTaskComplete =
@@ -108,20 +110,20 @@ type DirectoryService (repo: IDirectoryRepository, fileSvc: FileService, bus: Ev
         if dir.DirectoryChildren.IsEmpty
         then () |> Ok |> Async.fromValue
         else dir.DirectoryChildren
-            |> List.map (flip getDir dir.OwnerId)
-            |> List.map (bindResult ``rm -rf``)
-            |> allTaskComplete
-        =>> just deleteAllFilesOf dir
-        =>> just repo.DeleteDir dir
+                |> List.map (flip getDir dir.OwnerId)
+                |> List.map (AsyncResult.bind ``rm -rf``)
+                |> allTaskComplete
+        >>= just deleteAllFilesOf dir
+        >>= just repo.DeleteDir dir
 
     /// 将一个文件夹从父文件夹中移除，并在后台递归删除其中的内容
     let deattachFromParent (dir: FileDirectory) =
         getDir dir.ParentId dir.OwnerId
-        =>> (fun parent ->
+        >>= (fun parent ->
             dir.RemoveFrom parent
             unitWork updateDir parent
             )
-        >=> (fun _ -> Rmrf dir.Id |>  bus.Publish |> Ok)
+        |> AsyncResult.map (fun _ -> Rmrf dir.Id |>  bus.Publish |> Ok)
 
     /// 获取用户的根文件夹
     member this.GetRootDirectory userId =
@@ -131,7 +133,7 @@ type DirectoryService (repo: IDirectoryRepository, fileSvc: FileService, bus: Ev
     /// 获取指定的文件夹及其所有的父级文件夹
     member this.GetDirWithPath dirId userId =
         getDirPath dirId userId
-        >=> (List.rev >> Ok)
+        |> AsyncResult.map (List.rev)
 
     /// 获取指定的文件夹
     member this.GetDir (dirId, userId) =
@@ -141,28 +143,28 @@ type DirectoryService (repo: IDirectoryRepository, fileSvc: FileService, bus: Ev
     /// 创建一个文件夹
     member this.CreateDirectory (dto: DirectoryAddDto) (userId:string) =
         getDir dto.ParentId userId
-        =>> (fun dir ->
+        |> AsyncResult.bind (fun dir ->
             repo.ContainsName dto.Name dir
-            <!> (function
+            |> Async.map (function
                 | false -> Ok dir
                 | true -> Error "Directory already exists"
                 )
             )
-        =>> createAsSubSir dto
+        >>= createAsSubSir dto
 
     /// 创建一个根目录
     member this.CreateRootDir userId =
         repo.GetRootDir userId
-        <!> (function
+        |> Async.map (function
             | Some _ -> Error "Root directory has been initialized"
             | None -> Ok userId
             )
-        =>> createRootDir
+        >>= createRootDir
 
     /// 删除一个文件夹
     member this.DeleteDir userId dirId force =
         repo.GetDir dirId userId
-        <!> (function
+        |> Async.map (function
             | None -> Error "Directory not found"
             | Some dir ->
                 if dir.IsRoot then Error "Can not delete root directory"
@@ -171,7 +173,7 @@ type DirectoryService (repo: IDirectoryRepository, fileSvc: FileService, bus: Ev
                 then Ok dir
                 else Error "Directory is not empty"
             )
-        =>> deattachFromParent
+        >>= deattachFromParent
 
     /// 递归删除指定文件夹，只用于在后台进程删除文件夹
     member this.RmRf dirId =
@@ -181,19 +183,19 @@ type DirectoryService (repo: IDirectoryRepository, fileSvc: FileService, bus: Ev
     member this.AddFile (file: FileInfo) (dir: FileDirectory) =
         dir.AddFile file
         updateDir dir
-        >=> (fun  _ ->
+        |> Async.map (fun  _ ->
                 dir.ApplyOperations() |> Ok
             )
 
     /// 从文件夹中删除文件
     member this.DeleteFile (file: FileInfo) (dir: FileDirectory) =
         repo.ContainsName file.Name dir
-        <!> (function
+        |> Async.map (function
             | true -> Error "File already exists"
             | false -> Ok ()
             )
-        =>> (fun _ ->
+        >>= (fun _ ->
                 dir.RemoveFile file.Id
                 updateDir dir
-                =>> just fileSvc.DeleteFile (file.Id, file.OwnerId)
+                >>= just fileSvc.DeleteFile (file.Id, file.OwnerId)
             )

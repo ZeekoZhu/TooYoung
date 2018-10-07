@@ -21,9 +21,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Cvdm.ErrorHandling" Version="1.0.2" />
     <PackageReference Include="FSharp.Control.Reactive" Version="4.1.0" />
     <PackageReference Include="FSharpPlus" Version="1.0.0" />
+    <PackageReference Include="FsToolkit.ErrorHandling" Version="0.0.9" />
   </ItemGroup>
 
 </Project>

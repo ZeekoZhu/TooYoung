@@ -9,7 +9,7 @@ open TooYoung
 open TooYoung.Domain.Repositories
 open TooYoung.Domain.Resource
 open TooYoung.Provider.Mongo
-open Asyncx
+open FsToolkit.ErrorHandling
 open Utils
 
 type FileRepository(db: IMongoDatabase) =
@@ -19,7 +19,7 @@ type FileRepository(db: IMongoDatabase) =
     let addAsync fileInfo =
         files.InsertOneAsync(fileInfo)
         |> Async.AwaitTask
-        <!> (fun _ -> Ok fileInfo)
+        |> Async.map (fun _ -> Ok fileInfo)
 
     /// 插入一个文件的二进制信息
     let createBinaryAsync bytes =
@@ -27,7 +27,7 @@ type FileRepository(db: IMongoDatabase) =
         bin.Binary <- bytes
         gridFs.UploadFromBytesAsync(bin.Id, bin.Binary)
         |> Async.AwaitTask
-        <!> (fun _ -> Ok bin)
+        |> Async.map (fun _ -> Ok bin)
         
     /// 删除一个文件的二进制信息
     let deleteBinaryAsync binId =
@@ -45,13 +45,13 @@ type FileRepository(db: IMongoDatabase) =
             .Find(fun x -> x.Id = fileInfoId && x.OwnerId = userId)
             .FirstOrDefaultAsync()
             |> Async.AwaitTask
-            <!> Option.ofObj
+            |> Async.map Option.ofObj
 
     let updateAsync (fileInfo: FileInfo) =
         let filter = Builders<FileInfo>.Filter.Eq((fun x -> x.Id), fileInfo.Id)
         files.FindOneAndReplaceAsync(filter, fileInfo)
         |> Async.AwaitTask
-        <!> (fun _ -> Ok())
+        |> Async.map (fun _ -> Ok())
 
     let existsAsync fileInfoId userId =
         files
@@ -62,7 +62,7 @@ type FileRepository(db: IMongoDatabase) =
     let deleteFileAsync fileInfoId =
         files.DeleteOneAsync(fun x -> x.Id = fileInfoId)
         |> Async.AwaitTask
-        <!> (fun _ -> Ok())
+        |> Async.map (fun _ -> Ok())
     
     let filterByBinaryId binId = Builders<GridFSFileInfo>.Filter.Eq((fun f -> f.Filename), binId)
 
@@ -95,14 +95,14 @@ type FileRepository(db: IMongoDatabase) =
             try
                 files.Find(fun f -> ids.Contains(f.Id)).ToListAsync()
                 |> Async.AwaitTask
-                <!> List.ofSeq
+                |> Async.map List.ofSeq
             with _ -> Async.fromValue []
         
         member this.GetByIdAsync id =
             try
                 files.Find(fun f -> f.Id = id).FirstOrDefaultAsync()
                 |> Async.AwaitTask
-                <!> Option.ofObj
+                |> Async.map Option.ofObj
             with _ -> None |> Async.fromValue
             
         member this.CreateBinaryAsync bytes =

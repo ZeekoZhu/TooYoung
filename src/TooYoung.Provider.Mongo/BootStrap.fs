@@ -1,7 +1,9 @@
 module  TooYoung.Provider.Mongo.BootStrap
 open AutoMapper
 open AutoMapperBuilder
+open Microsoft.Extensions.DependencyInjection
 open TooYoung.Domain.FileDirectory
+open TooYoung.Domain.Repositories
 open TooYoung.Provider.Mongo.Repositories
 
 let addMongoProviderMapping (cfg: IMapperConfigurationExpression) =
@@ -23,3 +25,8 @@ let addMongoProviderMapping (cfg: IMapperConfigurationExpression) =
 
     cfg.AddProfile(dirProfile)
 
+let AddMongoDbRepository (services: IServiceCollection) =
+    services.AddTransient<IFileRepository, FileRepository>()
+            .AddTransient<ISharingRepository, SharingRepository>()
+            .AddTransient<IDirectoryRepository, DirectoryRepository>()
+            .AddTransient<AccountRepository>()

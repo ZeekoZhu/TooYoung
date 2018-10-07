@@ -41,7 +41,7 @@ type SharingTests() =
     [<MemberData("RefererHostTestData")>]
     member this.``Referer host tests`` (claims: AccessClaim, expected: bool) =
         let entry = SharingEntry("2333", "owner", "file id")
-        entry.RefererRules <- { AllowedHost = "(.+\.)*gianthard\.rocks" } :: entry.RefererRules
+        entry.RefererRules <- { AllowedHost = "(.+\.)*gianthard\.rocks"; Id = "" } :: entry.RefererRules
         let result = claims |> canAccess entry
         result.Should().Be(expected, null, null)
     
@@ -67,7 +67,9 @@ type SharingTests() =
         let tokenRule: TokenRule =
             { Token = "2333"
               ExpiredAt = DateTime(2018, 6, 1, 12, 0, 0) |> Some
-              Password = "password" }
+              Password = "password"
+              Id = ""
+            }
         entry.TokenRules <- tokenRule :: entry.TokenRules
         
         let result = claims |> canAccess entry
@@ -92,7 +94,9 @@ type SharingTests() =
         let tokenRule: TokenRule =
             { Token = "2333"
               ExpiredAt = None
-              Password = "password" }
+              Password = "password"
+              Id = ""
+             }
         entry.TokenRules <- tokenRule :: entry.TokenRules
         
         let result = claims |> canAccess entry
