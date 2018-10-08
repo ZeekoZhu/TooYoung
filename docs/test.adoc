@@ -11,7 +11,7 @@ A test
 **Auth**,**CORS**
 
 ----
-GET 
+GET /api/test
 ----
 
 .Params
@@ -38,7 +38,7 @@ Get all test item
 **Auth**,**CORS**
 
 ----
-GET /{test: String}/{id: Int32}
+GET /api/test/{test: String}/{id: Int32}
 ----
 
 .Params
@@ -69,7 +69,7 @@ GET /{test: String}/{id: Int32}
 **Auth**
 
 ----
-POST /{id: String}
+POST /api/test/{id: String}
 ----
 
 .Params

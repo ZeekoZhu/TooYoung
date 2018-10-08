@@ -80,10 +80,8 @@ let rec getRelatedTypes (type_: ModelType) =
             |> List.choose (function | Generic e -> Some e | _ -> None)
             |> List.map (Generic >> getRelatedTypes)
             |> List.concat
-        // printfn "related Generic %A" relatedGeneric
         entity :: relatedEnitty @ relatedGeneric
     | Generic g ->
-        printfn "get related Generic %A" g
         g.Nested
         |> List.map getRelatedTypes
         |> List.concat
@@ -160,7 +158,7 @@ let sprintTypeSection (type_: EntityType) =
 
 type HttpMethod = GET | POST | PUT | DELETE
 
-type Attribute = CORS | Auth
+type ApiAttribute = CORS | Auth
 
 type ParamsPosition = Url | Query | Header | Body
 
@@ -179,24 +177,43 @@ type Response = {
 
 type APISection = {
     Method: HttpMethod
-    Attributes: Attribute list
+    Attributes: ApiAttribute list
     Url: string
+    Base: string
     Title: string
     Description: string
     Params: ReqParam list
     Return: Response list
 }
 
+type APISection with
+    member this.Path() =
+        (this.Base.TrimEnd('/') + "/" + this.Url.TrimStart('/')).TrimEnd('/')
+
 type ResourceSection =
     { Name: string
+      Url: string
       Base: string
       Reqs: APISection list
     }
-
-let resource name base_ reqs =
-    { Name = name
-      Base = base_
-      Reqs = reqs
+type ResourceSection with
+    member this.Path() =
+        this.Base.TrimEnd('/') + "/" + this.Url.TrimStart('/')
+let setResourceBase base_ res =
+    let result: ResourceSection = { res with Base = base_ }
+    { result with
+        Reqs = result.Reqs |> List.map (fun x -> { x with Base = result.Path() })
+    }
+    
+let resource name url reqs =
+    let result =
+        { Name = name
+          Url = url
+          Base = ""
+          Reqs = reqs
+        }
+    { result with
+        Reqs = result.Reqs |> List.map (fun x -> { x with Base = result.Path() })
     }
     
 
@@ -219,6 +236,7 @@ let request title attrs method url params_ resp des: APISection =
       Attributes = attrs
       Method = method
       Url = url
+      Base = ""
       Params = params_
       Return = resp
       Description = des
@@ -265,7 +283,7 @@ let sprintApi (section: APISection) =
     sb.AppendLine(attrs)
         .AppendLine()
         .AppendLine("----")
-        .AppendLine(sprintf "%s %s" (GetUnionCaseName section.Method) (section.Url))
+        .AppendLine(sprintf "%s %s" (GetUnionCaseName section.Method) (section.Path()))
         .AppendLine("----")
         .AppendLine()
         .AppendLine(".Params")
@@ -318,13 +336,21 @@ type ApiDocument =
     { Title: string
       Description: string
       Sections: ResourceSection list
+      Url: string
     }
 
-let document title des sections =
+let updateApiPath doc =
+    { doc with
+        Sections = doc.Sections |> List.map (setResourceBase doc.Url)
+    }
+
+let document title url des sections =
     { Title = title
       Description = des
-      Sections = sections
+      Sections = sections |> List.map (fun x -> { x with Base = url })
+      Url = url
     }
+    |> updateApiPath
 
 let generateDoc (doc: ApiDocument) output =
     let sb = new StringBuilder()

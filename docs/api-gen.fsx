@@ -7,9 +7,9 @@ open TooYoung.Domain.Sharing
 
 let testDoc =
     document
-        "Test"
+        "Test" "/api"
         "A test"
-        [ resource "TestItem" "/api/test"
+        [ resource "TestItem" "/test"
             [ request "Get All"
                         [Auth; CORS]
                         GET ""
