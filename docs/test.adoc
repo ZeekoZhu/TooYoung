@@ -1,14 +1,44 @@
 # Test
 :toc:
+:table-caption!:
 
 A test
 
-## Get test
+## TestItem
+
+### Get All
 
 **Auth**,**CORS**
 
 ----
-GET /test/{test: String}/{id: Int32}
+GET 
+----
+
+.Params
+[%header,cols="1,^1,^1,3"]
+|===
+|Name  |Type   |Position   |Description
+
+|===
+
+.Response
+[%header,cols="1,^1,3"]
+|===
+|Status     |Type   |Description
+|200 |( <<SharingEntry>> ) list |list
+|===
+
+**Description**
+
+Get all test item
+
+
+### Get test
+
+**Auth**,**CORS**
+
+----
+GET /{test: String}/{id: Int32}
 ----
 
 .Params
@@ -30,15 +60,16 @@ GET /test/{test: String}/{id: Int32}
 |===
 
 **Description**
+
 2333
 
 
-## Post test
+### Post test
 
 **Auth**
 
 ----
-POST /test/{id: String}
+POST /{id: String}
 ----
 
 .Params
@@ -60,11 +91,76 @@ POST /test/{id: String}
 |===
 
 **Description**
+
 2333
 
 
 
+
 ## Model Types
+
+
+### SharingType
+
+----
+{
+}
+----
+
+#### Related Types
+
+
+
+
+### TokenRule
+
+----
+{
+    Token: String
+    ExpiredAt: (DateTime) FSharpOption`1
+    Password: String
+    Id: String
+}
+----
+
+#### Related Types
+
+
+
+
+### RefererRule
+
+----
+{
+    AllowedHost: String
+    Id: String
+}
+----
+
+#### Related Types
+
+
+
+
+### SharingEntry
+
+----
+{
+    Id: String
+    Type: SharingType
+    ResourceId: String
+    OwnerId: String
+    TokenRules: (TokenRule) list
+    RefererRules: (RefererRule) list
+}
+----
+
+#### Related Types
+
+. <<SharingType>>
+. <<TokenRule>>
+. <<RefererRule>>
+
 
 
 ### FileInfo
@@ -80,5 +176,8 @@ POST /test/{id: String}
     Extension: String
 }
 ----
+
+#### Related Types
+
 
 

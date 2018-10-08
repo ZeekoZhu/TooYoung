@@ -46,7 +46,6 @@ open System.IO
 open System.Reflection
 open System.Text
 open Microsoft.FSharp.Reflection
-open NJsonSchema
 
 ///Returns the case name of the object with union type 'ty.
 let GetUnionCaseName (x:'a) = 
@@ -56,6 +55,7 @@ let GetUnionCaseName (x:'a) =
 type EntityType = {
     Name: string
     Member: (string * ModelType) list
+    RelatedType: EntityType list
 }
 and GenericType =
     { Literal: string
@@ -68,10 +68,35 @@ and ModelType =
 
 let typeDict: System.Collections.Generic.Dictionary<Type, EntityType> = Dictionary()
 
+/// Get all related types include itself
+let rec getRelatedTypes (type_: ModelType) =
+    match type_ with
+    | Value _ -> []
+    | Entity entity ->
+        let relatedEnitty =
+            entity.Member
+            |> List.map snd
+            |> List.choose (function | Entity e -> Some e | _ -> None)
+        let relatedGeneric =
+            entity.Member
+            |> List.map snd
+            |> List.choose (function | Generic e -> Some e | _ -> None)
+            |> List.map (Generic >> getRelatedTypes)
+            |> List.concat
+        // printfn "related Generic %A" relatedGeneric
+        entity :: relatedEnitty @ relatedGeneric
+    | Generic g ->
+        printfn "get related Generic %A" g
+        g.Nested
+        |> List.map getRelatedTypes
+        |> List.concat
+    |> List.distinct
+
 let rec modelType (type_: Type) =
     if type_.IsGenericType then printfn "parse generic type %s" type_.Name; genericType type_ |> Generic
     else if type_.IsPrimitive || type_.Namespace.StartsWith("System") then type_.Name |> Value
     else printfn "parse entity type %s" type_.Name; entityType type_ |> Entity
+
 and genericType (type_: Type) =
     if  (typeof<IDictionary>).IsAssignableFrom type_
     then {Literal = "dict"; Nested = type_.GenericTypeArguments |> Seq.map modelType |> List.ofSeq }
@@ -87,18 +112,22 @@ and entityType (type_: Type) =
             type_.GetProperties(BindingFlags.Public ||| BindingFlags.Instance ||| BindingFlags.GetField)
             |> Seq.map (fun x -> x.Name, (modelType x.PropertyType))
             |> List.ofSeq
-        let result = { Name = name; Member = members }
+
+        let result =
+            { Name = name; Member = members; RelatedType = [] }
+        let relatedTypes = getRelatedTypes (Entity result) |> List.filter (fun x -> x <> result)
+        let result = { result with RelatedType = relatedTypes }
         typeDict.Add(type_, result)
         result
 
-let rec sprintTypeName = function
+let rec sprintTypeName refer = function
     | Value s -> s
     | Entity entity ->
-        " <<" + entity.Name + ">> "
+        if refer then " <<" + entity.Name + ">> " else entity.Name
     | Generic generic ->
         let types =
             generic.Nested
-            |> List.map sprintTypeName
+            |> List.map (sprintTypeName refer)
         let rendered = String.Join(" * ", types)
         "(" + rendered + ") " + generic.Literal
 
@@ -109,12 +138,28 @@ let sprintType (entity: EntityType) =
         entity.Member
         |> List.iter
             ( fun (name, type_) ->
-                sb.AppendLine(sprintf "    %s: %s" (name) (sprintTypeName type_))
+                sb.AppendLine(sprintf "    %s: %s" (name) (sprintTypeName false type_))
                 |> ignore
             )
-        sb.Append("}")
-            .ToString()
+        sb.Append("}").ToString()
 
+let sprintTypeSection (type_: EntityType) =
+    let sb = StringBuilder()
+    sb.AppendLine("### "+ type_.Name)
+        .AppendLine()
+        .AppendLine("----")
+        .AppendLine(sprintType type_)
+        .AppendLine("----")
+        .AppendLine()
+        .AppendLine("#### Related Types")
+        .AppendLine() |> ignore
+    type_.RelatedType
+    |> List.iter
+        ( fun x ->
+            sb.AppendLine(sprintf ". <<%s>>" x.Name) |> ignore
+        )
+    sb.AppendLine()
+        .ToString()
 
 type HttpMethod = GET | POST | PUT | DELETE
 
@@ -135,17 +180,6 @@ type Response = {
     Description: string
 }
 
-
-let sprintTypeSection (type_: EntityType) =
-    let sb = StringBuilder()
-    sb.AppendLine("### "+ type_.Name)
-        .AppendLine()
-        .AppendLine("----")
-        .AppendLine(sprintType type_)
-        .AppendLine("----")
-        .AppendLine()
-        .ToString()
-
 type APISection = {
     Method: HttpMethod
     Attributes: Attribute list
@@ -155,6 +189,19 @@ type APISection = {
     Params: ReqParam list
     Return: Response list
 }
+
+type ResourceSection =
+    { Name: string
+      Base: string
+      Reqs: APISection list
+    }
+
+let resource name base_ reqs =
+    { Name = name
+      Base = base_
+      Reqs = reqs
+    }
+    
 
 let param name (type_: Type) position des: ReqParam =
     { Name = name
@@ -192,6 +239,7 @@ let sortParams (params_: ReqParam list) =
 let sortResp (resp: Response list) =
     resp
     |> List.sortBy (fun x -> x.Code)
+
 let sprintApi (section: APISection) =
     let normalized = 
         { section with
@@ -199,7 +247,7 @@ let sprintApi (section: APISection) =
             Return = sortResp section.Return
         }
     let sb = StringBuilder()
-    sb.AppendLine(sprintf "## %s" section.Title)
+    sb.AppendLine(sprintf "### %s" section.Title)
         .AppendLine() |> ignore
     let rendered =
         section.Attributes
@@ -212,7 +260,7 @@ let sprintApi (section: APISection) =
         |> List.fold
                 ( fun (api: APISection) (x: ReqParam) ->
                     let pattern = sprintf "{%s}" x.Name
-                    let replacement = sprintf "{%s: %s}" (x.Name) ( sprintTypeName x.Type)
+                    let replacement = sprintf "{%s: %s}" (x.Name) ( sprintTypeName true x.Type)
                     let newUrl = api.Url.Replace(pattern, replacement)
                     { api with Url = newUrl }
                 )
@@ -232,7 +280,7 @@ let sprintApi (section: APISection) =
     section.Params
     |> List.iter
         (fun x ->
-            sb.AppendLine(sprintf "|%s |%s |%s |%s" (x.Name) ( sprintTypeName x.Type) (GetUnionCaseName x.Position) (x.Description))
+            sb.AppendLine(sprintf "|%s |%s |%s |%s" (x.Name) ( sprintTypeName true x.Type) (GetUnionCaseName x.Position) (x.Description))
             |> ignore
         )
     sb.AppendLine("|===")
@@ -245,20 +293,34 @@ let sprintApi (section: APISection) =
     section.Return
     |> List.iter
         ( fun x ->
-            sb.AppendLine( sprintf "|%s |%s |%s" (string x.Code) (match x.Type with Some t -> sprintTypeName t | None -> "empty") (x.Description) )
+            sb.AppendLine( sprintf "|%s |%s |%s" (string x.Code) (match x.Type with Some t -> sprintTypeName true t | None -> "empty") (x.Description) )
             |> ignore 
         )
     sb.AppendLine("|===")
         .AppendLine()
         .AppendLine("**Description**")
+        .AppendLine()
         .AppendLine(section.Description)
         .AppendLine()
         .ToString()
 
+let sprintResource (section: ResourceSection) =
+    let sb = StringBuilder()
+    sb.AppendLine("## " + section.Name)
+        .AppendLine()
+    |> ignore
+    section.Reqs
+    |> List.iter
+        ( fun x ->
+            sb.AppendLine(sprintApi x) |> ignore
+        )
+    sb.ToString()
+
+
 type ApiDocument =
     { Title: string
       Description: string
-      Sections: APISection list
+      Sections: ResourceSection list
     }
 
 let document title des sections =
@@ -271,6 +333,7 @@ let generateDoc (doc: ApiDocument) output =
     let sb = new StringBuilder()
     sb.AppendLine("# " + doc.Title)
         .AppendLine(":toc:")
+        .AppendLine(":table-caption!:")
         .AppendLine()
         .AppendLine(doc.Description)
         .AppendLine()
@@ -278,7 +341,7 @@ let generateDoc (doc: ApiDocument) output =
     doc.Sections
     |> List.iter
         ( fun x ->
-            sb.AppendLine(sprintApi x)
+            sb.AppendLine(sprintResource x)
             |> ignore
         )
     sb.AppendLine()
