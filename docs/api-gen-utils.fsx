@@ -35,10 +35,7 @@ GET url/{x: type}
 *)
 
 module APIGenUtils
-#r "packages/NJsonSchema/lib/netstandard1.0/NJsonSchema.dll"
-#r "packages/TaskBuilder.fs/lib/netstandard1.6/TaskBuilder.fs.dll"
 
-open FSharp.Control.Tasks
 open System
 open System.Collections
 open System.Collections.Generic
