@@ -29,16 +29,25 @@ let getDirWithPath (dirId: string) (next: HttpFunc) (ctx: HttpContext): HttpFunc
         return! jsonResult path 400 next ctx
     }
 
+let createDir (dto: DirectoryAddDto) (next: HttpFunc) (ctx: HttpContext): HttpFuncResult =
+    let dirSvc = getDirSvc ctx
+    task {
+        let! result = dirSvc.CreateDirectory dto (ctx.UserId())
+        return! jsonResult result 400 next ctx
+    }
+
+
+
 let routes: HttpHandler =
     subRouteCi "/dir"
         ( choose
             [ GET >=> choose
                 [ routeCi "/root" >=> getRootDir
-                  routeCif "/dir/%s" getDir
-                  routeCif "/dir/%s/path" getDirWithPath
+                  routeCif "/%s" getDir
+                  routeCif "/%s/path" getDirWithPath
                 ]
               POST >=> choose
-                [ 
+                [ routeCi "/" >=> bindJson<DirectoryAddDto> createDir
                 ]
             ]
         )
