@@ -1,0 +1,7 @@
+AutoMapper
+FsToolkit.ErrorHandling
+Microsoft.Extensions.DependencyInjection.Abstractions
+MongoDB.Driver
+MongoDB.Driver.GridFS
+TaskBuilder.fs
+FSharp.Core

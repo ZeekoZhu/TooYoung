@@ -1,17 +1,17 @@
-# Test
+# Too young
 :toc:
 :table-caption!:
 
-A test
+Web api for too young
 
-## TestItem
+## Directory
 
-### Get All
+### Get root directory
 
-**Auth**,**CORS**
+**Auth**
 
 ----
-GET /api/test
+GET /api/dir/root
 ----
 
 .Params
@@ -25,7 +25,8 @@ GET /api/test
 [%header,cols="1,^1,3"]
 |===
 |Status     |Type   |Description
-|200 |( <<SharingEntry>> ) list |list
+|200 | <<FileDirectory>>  |Get root directory for current user
+|404 | <<ErrorMessage>>  |Can not find root directory
 |===
 
 **Description**
@@ -38,7 +39,7 @@ Get all test item
 **Auth**,**CORS**
 
 ----
-GET /api/test/{test: String}/{id: Int32}
+GET /api/dir/{test: String}/{id: Int32}
 ----
 
 .Params
@@ -69,7 +70,7 @@ GET /api/test/{test: String}/{id: Int32}
 **Auth**
 
 ----
-POST /api/test/{id: String}
+POST /api/dir/{id: String}
 ----
 
 .Params
@@ -100,69 +101,6 @@ POST /api/test/{id: String}
 ## Model Types
 
 
-### SharingType
-
-----
-{
-}
-----
-
-#### Related Types
-
-
-
-
-### TokenRule
-
-----
-{
-    Token: String
-    ExpiredAt: (DateTime) FSharpOption`1
-    Password: String
-    Id: String
-}
-----
-
-#### Related Types
-
-
-
-
-### RefererRule
-
-----
-{
-    AllowedHost: String
-    Id: String
-}
-----
-
-#### Related Types
-
-
-
-
-### SharingEntry
-
-----
-{
-    Id: String
-    Type: SharingType
-    ResourceId: String
-    OwnerId: String
-    TokenRules: (TokenRule) list
-    RefererRules: (RefererRule) list
-}
-----
-
-#### Related Types
-
-. <<SharingType>>
-. <<TokenRule>>
-. <<RefererRule>>
-
-
-
 ### FileInfo
 
 ----
@@ -174,6 +112,58 @@ POST /api/test/{id: String}
     BinaryId: String
     Metadatas: (String * String) dict
     Extension: String
+}
+----
+
+#### Related Types
+
+
+
+
+### DirectoryOperaion
+
+----
+{
+    Tag: Int32
+    IsAddSubDir: Boolean
+    IsRemoveSubDir: Boolean
+    IsAddItem: Boolean
+    IsRemoveItem: Boolean
+}
+----
+
+#### Related Types
+
+
+
+
+### FileDirectory
+
+----
+{
+    Id: String
+    OwnerId: String
+    IsRoot: Boolean
+    Name: String
+    ParentId: String
+    DirectoryChildren: (String) list
+    FileChildren: (FileInfo) list
+    PendingOperations: (DirectoryOperaion) list
+}
+----
+
+#### Related Types
+
+. <<FileInfo>>
+. <<DirectoryOperaion>>
+
+
+
+### ErrorMessage
+
+----
+{
+    Message: String
 }
 ----
 

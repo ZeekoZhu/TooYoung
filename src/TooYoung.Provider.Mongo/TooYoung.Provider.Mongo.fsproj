@@ -1,31 +1,23 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-
-    <PropertyGroup>
-        <TargetFramework>netstandard2.0</TargetFramework>
-    </PropertyGroup>
-
-    <ItemGroup>
-      <PackageReference Include="AutoMapper" Version="7.0.1" />
-      <PackageReference Include="FsToolkit.ErrorHandling" Version="0.0.9" />
-      <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="2.1.1" />
-      <PackageReference Include="MongoDB.Driver" Version="2.7.0" />
-      <PackageReference Include="MongoDB.Driver.GridFS" Version="2.7.0" />
-      <PackageReference Include="TaskBuilder.fs" Version="2.1.0" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <ProjectReference Include="..\TooYoung.Core\TooYoung.Core.csproj" />
-      <ProjectReference Include="..\TooYoung.Domain\TooYoung.Domain.fsproj" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <Compile Include="AutoMapperHelper.fs" />
-      <Compile Include="MongoUnitOfWork.fs" />
-      <Compile Include="Repositories\AccountRepository.fs" />
-      <Compile Include="Repositories\DirectoryRepository.fs" />
-      <Compile Include="Repositories\FileRepository.fs" />
-      <Compile Include="Repositories\SharingRepository.fs" />
-      <Compile Include="BootStrap.fs" />
-    </ItemGroup>
-
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\TooYoung.Core\TooYoung.Core.csproj" />
+    <ProjectReference Include="..\TooYoung.Domain\TooYoung.Domain.fsproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AutoMapperHelper.fs" />
+    <Compile Include="MongoUnitOfWork.fs" />
+    <Compile Include="Repositories\AccountRepository.fs" />
+    <Compile Include="Repositories\DirectoryRepository.fs" />
+    <Compile Include="Repositories\FileRepository.fs" />
+    <Compile Include="Repositories\SharingRepository.fs" />
+    <Compile Include="BootStrap.fs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="paket.references" />
+  </ItemGroup>
+  <Import Project="..\..\.paket\Paket.Restore.targets" />
 </Project>

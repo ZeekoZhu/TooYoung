@@ -3,6 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.26124.0
 MinimumVisualStudioVersion = 15.0.26124.0
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".paket", ".paket", "{B76084B8-1B9F-493A-875D-273D36C7B3D0}"
+	ProjectSection(SolutionItems) = preProject
+		paket.dependencies = paket.dependencies
+	EndProjectSection
+EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TooYoung.Core", "src\TooYoung.Core\TooYoung.Core.csproj", "{3C8CE204-A493-454A-941B-1BAF447A9CDC}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{E9F76A7C-ADDF-44B3-A478-662FB3980D55}"
@@ -27,8 +32,8 @@ ProjectSection(SolutionItems) = preProject
 	.gitlab-ci.yml = .gitlab-ci.yml
 	.dockerignore = .dockerignore
 	.gitignore = .gitignore
-	Nuget.Config = Nuget.Config
 	README.adoc = README.adoc
+	paket.dependencies = paket.dependencies
 EndProjectSection
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "TooYoung.Api", "src\TooYoung.Api\TooYoung.Api.fsproj", "{D961F458-A6A9-42E4-AFDB-6A89ABAFC89F}"

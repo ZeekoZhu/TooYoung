@@ -1,9 +1,8 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
-
   <ItemGroup>
     <Compile Include="Funx.fs" />
     <Compile Include="Asyncx.fs" />
@@ -19,11 +18,8 @@
     <Compile Include="Services\DirectoryService.fs" />
     <Compile Include="Services\SharingService.fs" />
   </ItemGroup>
-
   <ItemGroup>
-    <PackageReference Include="FSharp.Control.Reactive" Version="4.1.0" />
-    <PackageReference Include="FSharpPlus" Version="1.0.0" />
-    <PackageReference Include="FsToolkit.ErrorHandling" Version="0.0.9" />
+    <None Include="paket.references" />
   </ItemGroup>
-
+  <Import Project="..\..\.paket\Paket.Restore.targets" />
 </Project>
