@@ -1,5 +1,5 @@
-#load "../.paket/load/netstandard2.0/main.group.fsx"
-#r "netstandard"
+#load "env.fsx"
+#r "Facades/netstandard"
 #load "../src/TooYoung.Domain/Domain.fs"
 #load "./api-gen-utils.fsx"
 #load "../src/WebCommon/Library.fs"
