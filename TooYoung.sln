@@ -45,9 +45,8 @@ ProjectSection(SolutionItems) = preProject
 	docs\api-gen.fsx = docs\api-gen.fsx
 	docs\api-gen-utils.fsx = docs\api-gen-utils.fsx
 	docs\.gitignore = docs\.gitignore
-	docs\test.adoc = docs\test.adoc
-	docs\Api-demo.adoc = docs\Api-demo.adoc
 	docs\env.fsx = docs\env.fsx
+	docs\api.adoc = docs\api.adoc
 EndProjectSection
 EndProject
 Global

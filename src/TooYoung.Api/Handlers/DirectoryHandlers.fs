@@ -26,7 +26,7 @@ let getDirWithPath (dirId: string) (next: HttpFunc) (ctx: HttpContext): HttpFunc
     let dirSvc = getDirSvc ctx
     task {
         let! path = dirSvc.GetDirWithPath dirId (ctx.UserId())
-        return! jsonResult path 400 next ctx
+        return! jsonResult path 404 next ctx
     }
 
 let createDir (dto: DirectoryAddDto) (next: HttpFunc) (ctx: HttpContext): HttpFuncResult =

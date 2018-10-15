@@ -25,7 +25,7 @@ GET /api/dir/root
 [%header,cols="1,^1,3"]
 |===
 |Status     |Type   |Description
-|200 | <<FileDirectory>>  |Get root directory for current user
+|200 | <<FileDirectory>>  |Root directory for current user
 |404 | <<ErrorMessage>>  |Can not find root directory
 |===
 
@@ -34,43 +34,12 @@ GET /api/dir/root
 Get the root directory of current user
 
 
-### Get test
-
-**Auth**,**CORS**
-
-----
-GET /api/dir/{test: String}/{id: Int32}
-----
-
-.Params
-[%header,cols="1,^1,^1,3"]
-|===
-|Name  |Type   |Position   |Description
-
-|test |String |Header |233333
-|test |String |Url |test in url
-|id |Int32 |Url |some id
-|filter |String |Query |some id
-|===
-
-.Response
-[%header,cols="1,^1,3"]
-|===
-|Status     |Type   |Description
-|200 |String |23333
-|===
-
-**Description**
-
-2333
-
-
-### Post test
+### Get directory info by id for current user
 
 **Auth**
 
 ----
-POST /api/dir/{id: String}
+GET /api/dir/{dirId: String}
 ----
 
 .Params
@@ -78,22 +47,78 @@ POST /api/dir/{id: String}
 |===
 |Name  |Type   |Position   |Description
 
-|test |String |Header |233333
-|id |String |Url |233333
-|content | <<FileInfo>>  |Body |233333
+|dirId |String |Url |Directory Id
 |===
 
 .Response
 [%header,cols="1,^1,3"]
 |===
 |Status     |Type   |Description
-|200 |String |23333
-|400 |empty |23333
+|200 | <<FileDirectory>>  |Directory info
+|404 | <<ErrorMessage>>  |Directory not found
 |===
 
 **Description**
 
-2333
+Get directory info by id for current user
+
+
+### Get directory info with path by id for current user
+
+**Auth**
+
+----
+GET /api/dir/{dirId: String}/path
+----
+
+.Params
+[%header,cols="1,^1,^1,3"]
+|===
+|Name  |Type   |Position   |Description
+
+|dirId |String |Url |Directory Id
+|===
+
+.Response
+[%header,cols="1,^1,3"]
+|===
+|Status     |Type   |Description
+|200 |( <<FileDirectory>> ) list |A list of direcotries
+|404 | <<ErrorMessage>>  |Directory not found
+|===
+
+**Description**
+
+Get directory info with path by id for current user
+
+
+### Create new directory
+
+**Auth**
+
+----
+GET /api/dir
+----
+
+.Params
+[%header,cols="1,^1,^1,3"]
+|===
+|Name  |Type   |Position   |Description
+
+|dto | <<DirectoryAddDto>>  |Body |New directory info
+|===
+
+.Response
+[%header,cols="1,^1,3"]
+|===
+|Status     |Type   |Description
+|200 | <<FileDirectory>>  |New directory info after added
+|400 | <<ErrorMessage>>  |Some thing wrong with request body
+|===
+
+**Description**
+
+Create a new sub directory
 
 
 
@@ -164,6 +189,20 @@ POST /api/dir/{id: String}
 ----
 {
     Message: String
+}
+----
+
+#### Related Types
+
+
+
+
+### DirectoryAddDto
+
+----
+{
+    Name: String
+    ParentId: String
 }
 ----
 

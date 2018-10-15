@@ -1,6 +1,6 @@
 #load "env.fsx"
 #r "Facades/netstandard"
-#load "../src/TooYoung.Domain/Domain.fs"
+#r "../src/TooYoung.Domain/bin/Debug/netstandard2.0/TooYoung.Domain.dll"
 #load "./api-gen-utils.fsx"
 #load "../src/WebCommon/Library.fs"
 open APIGenUtils
@@ -9,6 +9,7 @@ open TooYoung.Domain.FileDirectory
 open TooYoung.Domain.Resource
 open TooYoung.Domain.Sharing
 open TooYoung.WebCommon.ErrorMessage
+open TooYoung.Domain.Services
 
 let generalError code =
     response code typeof<ErrorMessage>
@@ -22,33 +23,38 @@ let testDoc =
                         [Auth]
                         GET "/root"
                         []
-                        [ response 200 typeof<FileDirectory> "Get root directory for current user"
+                        [ response 200 typeof<FileDirectory> "Root directory for current user"
                           generalError 404 "Can not find root directory"
                         ]
                         "Get the root directory of current user"
-              request "Get test"
-                        [Auth; CORS]
-                        GET "/{test}/{id}"
-                        [ param "test" typeof<string> Header "233333"
-                          param "test" typeof<string> Url "test in url"
-                          param "id" typeof<int> Url "some id"
-                          param "filter" typeof<string> Query "some id"
-                        ]
-                        [ response 200 typeof<string> "23333"
-                        ]
-                        "2333"
-              request "Post test"
+              request "Get directory info by id for current user"
                         [Auth]
-                        POST "/{id}"
-                        [ param "test" typeof<string> Header "233333"
-                          param "id" typeof<string> Url "233333"
-                          param "content" typeof<FileInfo> Body "233333"
+                        GET "/{dirId}"
+                        [ param "dirId" typeof<string> Url "Directory Id"
                         ]
-                        [ response 200 typeof<string> "23333"
-                          response 400 null "23333"
+                        [ response 200 typeof<FileDirectory> "Directory info"
+                          generalError 404 "Directory not found"
                         ]
-                        "2333"
+                        "Get directory info by id for current user"
+              request "Get directory info with path by id for current user"
+                        [Auth]
+                        GET "/{dirId}/path"
+                        [ param "dirId" typeof<string> Url "Directory Id"
+                        ]
+                        [ response 200 typeof<FileDirectory list> "A list of direcotries"
+                          generalError 404 "Directory not found"
+                        ]
+                        "Get directory info with path by id for current user"
+              request "Create new directory"
+                        [Auth]
+                        GET ""
+                        [ param "dto" typeof<DirectoryAddDto> Body "New directory info"
+                        ]
+                        [ response 200 typeof<FileDirectory> "New directory info after added"
+                          generalError 400 "Some thing wrong with request body"
+                        ]
+                        "Create a new sub directory"
             ]
         ]
 
-generateDoc testDoc "test.adoc"
+generateDoc testDoc "api.adoc"
