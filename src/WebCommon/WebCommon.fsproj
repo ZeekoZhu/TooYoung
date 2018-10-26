@@ -4,6 +4,7 @@
     <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Helper.fs" />
     <Compile Include="Library.fs" />
   </ItemGroup>
   <ItemGroup>

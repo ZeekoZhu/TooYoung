@@ -1,10 +1,6 @@
-AgileObjects.AgileMapper
 Microsoft.AspNetCore.App
-Microsoft.AspNetCore.Authentication.JwtBearer
 Microsoft.AspNetCore.SpaServices.Extensions
 Microsoft.Extensions.PlatformAbstractions
-MongoDB.Driver
 SixLabors.ImageSharp
-Swashbuckle.AspNetCore
 ZeekoUtilsPack.AspNetCore
 ZeekoUtilsPack.BCLExt

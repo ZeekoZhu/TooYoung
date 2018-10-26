@@ -2,7 +2,6 @@ source https://www.myget.org/F/zeekoget/api/v3/index.json
 source https://api.nuget.org/v3/index.json
 
 nuget FSharp.Core
-nuget AgileObjects.AgileMapper 0.25.0
 nuget AutoMapper 7.0.1
 nuget FluentAssertions 5.4.1
 nuget FSharp.Control.Reactive 4.1.0
@@ -19,10 +18,11 @@ nuget Microsoft.NET.Test.Sdk 15.8.0
 nuget MongoDB.Driver 2.7.0
 nuget MongoDB.Driver.GridFS 2.7.0
 nuget SixLabors.ImageSharp 1.0.0-beta0004 prerelease
-nuget Swashbuckle.AspNetCore 3.0.0
 nuget TaskBuilder.fs 2.1.0
 nuget xunit 2.4.0
 nuget xunit.runner.visualstudio 2.4.0
 nuget Xunit.SerializedTheoryData 1.0.2
 nuget ZeekoUtilsPack.AspNetCore 3.0.1
 nuget ZeekoUtilsPack.BCLExt 1.1.0
+nuget FsUnit.xUnit 3.2.0
+nuget FsUnit 3.2.0

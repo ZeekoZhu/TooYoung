@@ -5,10 +5,16 @@
     <IsPackable>false</IsPackable>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="HelperTests.fs" />
     <Compile Include="SharingTests.fs" />
+    <Compile Include="UserGroupTests.fs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\TooYoung.Domain\TooYoung.Domain.fsproj" />
+    <ProjectReference Include="..\..\src\WebCommon\WebCommon.fsproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="paket.references" />
   </ItemGroup>
   <Import Project="..\..\.paket\Paket.Restore.targets" />
 </Project>

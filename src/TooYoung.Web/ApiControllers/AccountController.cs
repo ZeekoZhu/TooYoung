@@ -20,7 +20,7 @@ namespace TooYoung.Web.ApiControllers
     [Consumes("application/json")]
     [Produces("application/json")]
     [Route("api/[controller]")]
-    [ValidateModel]
+    [ApiController]
     public class AccountController : Controller
     {
         private readonly IAccountRepository _accountRepository;

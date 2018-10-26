@@ -108,7 +108,6 @@ module Sharing =
                 claims.Host
              || canAccessViaSharingToken entry.TokenRules claims.Token
 
-
 module FileDirectory =
     open Resource
 
@@ -158,3 +157,9 @@ module FileDirectory =
             this.PendingOperations <- AddItem file :: this.PendingOperations
         member this.RemoveFile fileId =
             this.PendingOperations <- RemoveItem fileId :: this.PendingOperations
+
+module User =
+    open System
+
+    type User(id: Guid) =
+        member val Id = id

@@ -33,34 +33,12 @@ namespace TooYoung.Web
             services.AddScoped<IImageProcessService, ImageSharpService>();
             services.AddYoungMongo();
 
-            // 配置 JWT
-            var jwtOptions = new EasySymmetricOptions("tooyoung")
-            {
-                Issuer = "too-young",
-                Audience = "too-young",
-                EnableCookie = true
-            };
-            services.AddEasyJwt(jwtOptions);
-            services.AddSwaggerGen(c =>
-            {
-                c.OperationFilter<SecurityRequirementsOperationFilter>();
-                // c.OperationFilter<FileParamTypeFilter>();
-                c.SwaggerDoc("v1", new Info { Title = "TooYoung API", Version = "v1" });
-                var filePath = Path.Combine(PlatformServices.Default.Application.ApplicationBasePath, "TooYoung.Web.xml");
-                c.IncludeXmlComments(filePath);
-            });
             services.AddMvc()
                 .AddJsonOptions(opt =>
                     {
                         opt.SerializerSettings.ContractResolver = PropertyIgnoreContractResolver.Instance;
                     })
                 .SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
-
-            // In production, the React files will be served from this directory
-            services.AddSpaStaticFiles(configuration =>
-            {
-                configuration.RootPath = "ClientApp/build";
-            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -70,12 +48,6 @@ namespace TooYoung.Web
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
-                app.UseSwagger();
-                app.UseSwaggerUI(c =>
-                {
-                    c.RoutePrefix = "doc/api";
-                    c.SwaggerEndpoint("/swagger/v1/swagger.json", "TooYoung API V1");
-                });
             }
             else
             {
@@ -91,16 +63,6 @@ namespace TooYoung.Web
                     name: "default",
                     template: "{controller}/{action=Index}/{id?}");
             });
-
-            //app.UseSpa(spa =>
-            //{
-            //    spa.Options.SourcePath = "ClientApp";
-
-            //    if (env.IsDevelopment())
-            //    {
-            //        spa.UseReactDevelopmentServer(npmScript: "start");
-            //    }
-            //});
         }
     }
 }
