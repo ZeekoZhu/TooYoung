@@ -1,5 +1,5 @@
 #load "env.fsx"
-#r "Facades/netstandard"
+#r "netstandard"
 #r "../src/TooYoung.Domain/bin/Debug/netstandard2.0/TooYoung.Domain.dll"
 #load "./api-gen-utils.fsx"
 #load "../src/WebCommon/Library.fs"

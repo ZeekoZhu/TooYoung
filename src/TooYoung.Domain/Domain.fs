@@ -161,5 +161,10 @@ module FileDirectory =
 module User =
     open System
 
+    [<AllowNullLiteral>]
     type User(id: Guid) =
         member val Id = id
+        member val UserName = String.Empty with get, set
+        member val Password = String.Empty with get, set
+        member val DisplayName = String.Empty with get, set
+        member val Email = String.Empty with get, set

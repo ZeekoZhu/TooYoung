@@ -51,5 +51,5 @@ type AuthorizationService(repo: IUserGroupRepository) =
         group.Users <- userId:: group.Users
         group
 
-    member this.GetAccessDefinitionsForUserAsync userId accessTypes =
-        repo.GetPermissionForUser userId accessTypes
+    member this.GetAccessDefinitionsForUserAsync userId accessType =
+        repo.GetPermissionForUser userId accessType

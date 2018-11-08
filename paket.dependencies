@@ -1,28 +1,20 @@
-source https://www.myget.org/F/zeekoget/api/v3/index.json
 source https://api.nuget.org/v3/index.json
+source https://www.myget.org/F/zeekoget/api/v3/index.json
+framework: netcoreapp20, netstandard20
 
-nuget FSharp.Core
-nuget AutoMapper 7.0.1
-nuget FluentAssertions 5.4.1
-nuget FSharp.Control.Reactive 4.1.0
-nuget FSharpPlus 1.0.0
-nuget FsToolkit.ErrorHandling 0.0.9
-nuget Giraffe 3.1.0
-nuget Microsoft.AspNetCore.App 2.1.2
-nuget Microsoft.AspNetCore.Authentication.JwtBearer 2.1.1
-nuget Microsoft.AspNetCore.SpaServices.Extensions 2.1.1
-nuget Microsoft.Extensions.Configuration.Abstractions 2.1.1
-nuget Microsoft.Extensions.DependencyInjection.Abstractions 2.1.1
-nuget Microsoft.Extensions.PlatformAbstractions 1.1.0
-nuget Microsoft.NET.Test.Sdk 15.8.0
-nuget MongoDB.Driver 2.7.0
-nuget MongoDB.Driver.GridFS 2.7.0
+nuget AutoMapper
+nuget FluentAssertions
+nuget FSharp.Control.Reactive
+nuget FSharpPlus
+nuget FsToolkit.ErrorHandling
+nuget Giraffe
+nuget Microsoft.AspNetCore.App
+nuget Microsoft.Extensions.PlatformAbstractions
+nuget MongoDB.Driver.GridFS
 nuget SixLabors.ImageSharp 1.0.0-beta0004 prerelease
-nuget TaskBuilder.fs 2.1.0
-nuget xunit 2.4.0
-nuget xunit.runner.visualstudio 2.4.0
-nuget Xunit.SerializedTheoryData 1.0.2
-nuget ZeekoUtilsPack.AspNetCore 3.0.1
-nuget ZeekoUtilsPack.BCLExt 1.1.0
-nuget FsUnit.xUnit 3.2.0
-nuget FsUnit 3.2.0
+nuget xunit.runner.visualstudio
+nuget Xunit.SerializedTheoryData
+nuget FsUnit.xUnit
+nuget FsUnit
+nuget ZeekoUtilsPack.BCLExt
+nuget Microsoft.AspNetCore.Cryptography.KeyDerivation

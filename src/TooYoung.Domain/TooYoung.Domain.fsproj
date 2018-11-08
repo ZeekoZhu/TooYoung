@@ -14,12 +14,13 @@
     <Compile Include="Repositories\IFileRepository.fs" />
     <Compile Include="Repositories\IDirectoryRepository.fs" />
     <Compile Include="Repositories\ISharingRepository.fs" />
-    <Compile Include="Authorization\UserGroup.fs" />
-    <Compile Include="Authorization\IUserGroupRepository.fs" />
+    <Compile Include="Repositories\IAccountRepository.fs" />
     <Compile Include="Services\FileService.fs" />
     <Compile Include="Services\DirectoryService.fs" />
     <Compile Include="Services\SharingService.fs" />
-    <Compile Include="Services\AuthorizationService.fs" />
+    <Compile Include="Authorization\UserGroup.fs" />
+    <Compile Include="Authorization\IUserGroupRepository.fs" />
+    <Compile Include="Authorization\AuthorizationService.fs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="paket.references" />

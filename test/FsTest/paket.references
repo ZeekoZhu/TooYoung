@@ -1,7 +1,4 @@
 FluentAssertions
-Microsoft.NET.Test.Sdk
-xunit
 xunit.runner.visualstudio
-FSharp.Core
 FsUnit.xUnit
 FsUnit

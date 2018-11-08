@@ -12,8 +12,7 @@ module MappingConfigBuilder =
     open System.Linq.Expressions
     type MappingProfile() =
         inherit Profile()
-    
-    
+
     let inline memberAccess<'instance, 'field> (expr: Expr<'field>) =
         expr
         |> LeafExpressionConverter.QuotationToExpression
