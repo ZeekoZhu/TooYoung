@@ -34,15 +34,6 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "TooYoung.Api", "src\TooYoun
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "WebCommon", "src\WebCommon\WebCommon.fsproj", "{EC25DC8D-EAAB-4638-81B0-3DBAB714B11D}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{82CD87C8-3B00-4D8B-8FB5-7E7BA05385B8}"
-ProjectSection(SolutionItems) = preProject
-	docs\api-gen.fsx = docs\api-gen.fsx
-	docs\api-gen-utils.fsx = docs\api-gen-utils.fsx
-	docs\.gitignore = docs\.gitignore
-	docs\env.fsx = docs\env.fsx
-	docs\api.adoc = docs\api.adoc
-EndProjectSection
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

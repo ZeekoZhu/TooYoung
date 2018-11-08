@@ -1,6 +1,6 @@
 source https://api.nuget.org/v3/index.json
 source https://www.myget.org/F/zeekoget/api/v3/index.json
-framework: netcoreapp20, netstandard20
+framework: netcoreapp2.1, netstandard2.0
 
 nuget AutoMapper
 nuget FluentAssertions
@@ -12,9 +12,8 @@ nuget Microsoft.AspNetCore.App
 nuget Microsoft.Extensions.PlatformAbstractions
 nuget MongoDB.Driver.GridFS
 nuget SixLabors.ImageSharp 1.0.0-beta0004 prerelease
-nuget xunit.runner.visualstudio
+nuget xunit.runner.visualstudio 2.3.1
 nuget Xunit.SerializedTheoryData
 nuget FsUnit.xUnit
 nuget FsUnit
 nuget ZeekoUtilsPack.BCLExt
-nuget Microsoft.AspNetCore.Cryptography.KeyDerivation
