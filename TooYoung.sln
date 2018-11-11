@@ -21,18 +21,20 @@ EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "TooYoung.Provider.Mongo", "src\TooYoung.Provider.Mongo\TooYoung.Provider.Mongo.fsproj", "{57250D52-C184-40C6-B55A-7DA7CC91B6D4}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{F7884561-11B0-4E51-8522-F3E68983A414}"
-ProjectSection(SolutionItems) = preProject
-	Dockerfile = Dockerfile
-	.gitlab-ci.yml = .gitlab-ci.yml
-	.dockerignore = .dockerignore
-	.gitignore = .gitignore
-	README.adoc = README.adoc
-	paket.dependencies = paket.dependencies
-EndProjectSection
+	ProjectSection(SolutionItems) = preProject
+		Dockerfile = Dockerfile
+		.gitlab-ci.yml = .gitlab-ci.yml
+		.dockerignore = .dockerignore
+		.gitignore = .gitignore
+		README.adoc = README.adoc
+		paket.dependencies = paket.dependencies
+	EndProjectSection
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "TooYoung.Api", "src\TooYoung.Api\TooYoung.Api.fsproj", "{D961F458-A6A9-42E4-AFDB-6A89ABAFC89F}"
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "WebCommon", "src\WebCommon\WebCommon.fsproj", "{EC25DC8D-EAAB-4638-81B0-3DBAB714B11D}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "TooYoung.Web", "src\TooYoung.Web\TooYoung.Web.fsproj", "{441D0496-B61F-410A-BBD3-F6A7270F8BE6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -119,6 +121,18 @@ Global
 		{EC25DC8D-EAAB-4638-81B0-3DBAB714B11D}.Release|x64.Build.0 = Release|Any CPU
 		{EC25DC8D-EAAB-4638-81B0-3DBAB714B11D}.Release|x86.ActiveCfg = Release|Any CPU
 		{EC25DC8D-EAAB-4638-81B0-3DBAB714B11D}.Release|x86.Build.0 = Release|Any CPU
+		{441D0496-B61F-410A-BBD3-F6A7270F8BE6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{441D0496-B61F-410A-BBD3-F6A7270F8BE6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{441D0496-B61F-410A-BBD3-F6A7270F8BE6}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{441D0496-B61F-410A-BBD3-F6A7270F8BE6}.Debug|x64.Build.0 = Debug|Any CPU
+		{441D0496-B61F-410A-BBD3-F6A7270F8BE6}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{441D0496-B61F-410A-BBD3-F6A7270F8BE6}.Debug|x86.Build.0 = Debug|Any CPU
+		{441D0496-B61F-410A-BBD3-F6A7270F8BE6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{441D0496-B61F-410A-BBD3-F6A7270F8BE6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{441D0496-B61F-410A-BBD3-F6A7270F8BE6}.Release|x64.ActiveCfg = Release|Any CPU
+		{441D0496-B61F-410A-BBD3-F6A7270F8BE6}.Release|x64.Build.0 = Release|Any CPU
+		{441D0496-B61F-410A-BBD3-F6A7270F8BE6}.Release|x86.ActiveCfg = Release|Any CPU
+		{441D0496-B61F-410A-BBD3-F6A7270F8BE6}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{3C8CE204-A493-454A-941B-1BAF447A9CDC} = {E9F76A7C-ADDF-44B3-A478-662FB3980D55}
@@ -127,5 +141,6 @@ Global
 		{57250D52-C184-40C6-B55A-7DA7CC91B6D4} = {E9F76A7C-ADDF-44B3-A478-662FB3980D55}
 		{D961F458-A6A9-42E4-AFDB-6A89ABAFC89F} = {E9F76A7C-ADDF-44B3-A478-662FB3980D55}
 		{EC25DC8D-EAAB-4638-81B0-3DBAB714B11D} = {E9F76A7C-ADDF-44B3-A478-662FB3980D55}
+		{441D0496-B61F-410A-BBD3-F6A7270F8BE6} = {E9F76A7C-ADDF-44B3-A478-662FB3980D55}
 	EndGlobalSection
 EndGlobal

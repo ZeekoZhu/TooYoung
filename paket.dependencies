@@ -1,6 +1,6 @@
+storage: none
 source https://api.nuget.org/v3/index.json
 source https://www.myget.org/F/zeekoget/api/v3/index.json
-framework: netcoreapp2.1, netstandard2.0
 
 nuget AutoMapper
 nuget FluentAssertions
@@ -9,10 +9,13 @@ nuget FSharpPlus
 nuget FsToolkit.ErrorHandling
 nuget Giraffe
 nuget Microsoft.AspNetCore.App
+nuget Microsoft.Extensions.Configuration
+nuget Microsoft.Extensions.DependencyInjection
 nuget Microsoft.Extensions.PlatformAbstractions
+nuget Microsoft.AspNetCore.Cryptography.KeyDerivation
 nuget MongoDB.Driver.GridFS
-nuget SixLabors.ImageSharp 1.0.0-beta0004 prerelease
-nuget xunit.runner.visualstudio 2.3.1
+nuget SixLabors.ImageSharp >= 1.0.0-beta0004 prerelease
+nuget xunit.runner.visualstudio >= 2.3.1
 nuget Xunit.SerializedTheoryData
 nuget FsUnit.xUnit
 nuget FsUnit

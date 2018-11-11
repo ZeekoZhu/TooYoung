@@ -1,7 +1,8 @@
-module  TooYoung.Provider.Mongo.BootStrap
+module TooYoung.Provider.Mongo.BootStrap
 open AutoMapper
 open AutoMapperBuilder
 open Microsoft.Extensions.DependencyInjection
+open Microsoft.Extensions.Configuration
 open TooYoung.Domain.Authorization.UserGroup
 open TooYoung.Domain.FileDirectory
 open TooYoung.Domain.Repositories
@@ -87,8 +88,8 @@ let addMongoProviderMapping (cfg: IMapperConfigurationExpression) =
 
     cfg.AddProfile(dirProfile)
 
-let AddMongoDbRepository (services: IServiceCollection) =
+let addMongoDbRepository (services: IServiceCollection) (configuration: IConfiguration) =
     services.AddTransient<IFileRepository, FileRepository>()
             .AddTransient<ISharingRepository, SharingRepository>()
             .AddTransient<IDirectoryRepository, DirectoryRepository>()
-            .AddTransient<AccountRepository>()
+            .AddTransient<IAccountRepository, AccountRepository>()

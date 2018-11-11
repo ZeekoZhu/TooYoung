@@ -52,3 +52,12 @@ let login (model: LoginModel) (next: HttpFunc) (ctx: HttpContext): HttpFuncResul
                         }
                     else Successful.OK "" next ctx
     }
+
+let routes: HttpHandler =
+    subRouteCi "/account"
+        ( choose
+            [ GET >=> choose
+                [ routeCi "/" >=> bindJson<LoginModel> login    
+                ]
+            ]
+        )
