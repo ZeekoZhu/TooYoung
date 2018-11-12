@@ -238,3 +238,5 @@ _Pvt_Extensions
 .fake/
 
 \.idea/
+
+**/.DS_Store

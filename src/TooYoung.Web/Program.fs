@@ -18,10 +18,15 @@ open TooYoung.Provider.Mongo
 // ---------------------------------
 // Web app
 // ---------------------------------
+let apiV1 = subRouteCi "/api/v1"
 let webApp =
     choose [
-        GET >=> route "/alive" >=> text "OK"
-        AccountHandlers.routes
+        route "/alive" >=> text "OK"
+        apiV1
+            ( choose
+                [ route "/alive" >=> text "OK"
+                  AccountHandlers.routes
+                ] )
         setStatusCode 404 >=> text "Not Found" ]
 
 // ---------------------------------
@@ -53,10 +58,10 @@ let configureApp (app : IApplicationBuilder) =
         .UseGiraffe(webApp)
 
 /// Configure services
-let configureServices (services : IServiceCollection) =
+let configureServices (hostBuilderCtx: WebHostBuilderContext) (services : IServiceCollection) =
 //    services.AddCors()    |> ignore
-    services.AddGiraffe()
-    |> BootStrap.addMongoDbRepository
+    services.AddGiraffe() |> ignore
+    services |> BootStrap.addMongoDbRepository hostBuilderCtx.Configuration
     |> ignore
 
 let configureLogging (builder : ILoggingBuilder) =
@@ -68,20 +73,12 @@ let main (args: string[]) =
     Mapper.Initialize(fun cfg -> BootStrap.addMongoProviderMapping cfg)
     let contentRoot = Directory.GetCurrentDirectory()
     let webRoot     = Path.Combine(contentRoot, "WebRoot")
-//    WebHostBuilder()
-//        .UseKestrel()
-//        .UseContentRoot(contentRoot)
-//        .UseWebRoot(webRoot)
-//        .Configure(Action<IApplicationBuilder> configureApp)
-//        .ConfigureServices(configureServices)
-//        .ConfigureLogging(configureLogging)
-//        .UseUrls()
-//        .Build()
-//        .Run()
     WebHost.CreateDefaultBuilder(args)
-           .ConfigureAppConfiguration(
-                fun hostingContext config ->
-                    ignore()
-           )
-    |> ignore
+           .UseWebRoot(webRoot)
+           .Configure(Action<IApplicationBuilder> configureApp)
+           .ConfigureServices(Action<WebHostBuilderContext, IServiceCollection> configureServices)
+           .ConfigureLogging(configureLogging)
+           .UseUrls("http://localhost:1503")
+           .Build()
+           .Run()
     0

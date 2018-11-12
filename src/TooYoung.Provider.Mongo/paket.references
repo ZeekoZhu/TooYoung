@@ -1,6 +1,5 @@
 AutoMapper
 FsToolkit.ErrorHandling
-Microsoft.Extensions.DependencyInjection.Abstractions
 MongoDB.Driver.GridFS
 TaskBuilder.fs
 Microsoft.Extensions.Configuration

@@ -13,7 +13,7 @@ open Microsoft.AspNetCore.Cryptography.KeyDerivation
 open TooYoung.Domain.User
 
 let getAccountRepo (ctx: HttpContext) = ctx.GetService<IAccountRepository>()
-let getGetHashSalt (ctx: HttpContext) = ctx.GetService<IConfiguration>().GetSection("hashSalt")
+let getGetHashSalt (ctx: HttpContext) = ctx.GetService<IConfiguration>().GetSection("HashSalt")
 
 [<CLIMutable>]
 type LoginModel = 
@@ -56,7 +56,7 @@ let login (model: LoginModel) (next: HttpFunc) (ctx: HttpContext): HttpFuncResul
 let routes: HttpHandler =
     subRouteCi "/account"
         ( choose
-            [ GET >=> choose
+            [ POST >=> choose
                 [ routeCi "/" >=> bindJson<LoginModel> login    
                 ]
             ]

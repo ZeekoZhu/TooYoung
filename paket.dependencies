@@ -1,6 +1,7 @@
 storage: none
 source https://api.nuget.org/v3/index.json
 source https://www.myget.org/F/zeekoget/api/v3/index.json
+framework: auto-detect
 
 nuget AutoMapper
 nuget FluentAssertions

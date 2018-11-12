@@ -6,16 +6,13 @@
     <AssemblyName>TooYoung.Web</AssemblyName>
     <OutputType>Exe</OutputType>
     <EnableDefaultContentItems>false</EnableDefaultContentItems>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
   </PropertyGroup>
-  <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.App" Version="2.1.*" />
-    <PackageReference Include="Giraffe" Version="3.2.*" />
-    <PackageReference Include="TaskBuilder.fs" Version="2.1.*" />
-  </ItemGroup>
   <ItemGroup>
     <Compile Include="Program.fs" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="appsettings.json" />
     <None Include="paket.references" />
     <Content Include="WebRoot\**\*">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

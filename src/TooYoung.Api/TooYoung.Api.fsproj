@@ -13,5 +13,8 @@
     <ProjectReference Include="..\TooYoung.Provider.Mongo\TooYoung.Provider.Mongo.fsproj" />
     <ProjectReference Include="..\WebCommon\WebCommon.fsproj" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="paket.references" />
+  </ItemGroup>
   <Import Project="..\..\.paket\Paket.Restore.targets" />
 </Project>
