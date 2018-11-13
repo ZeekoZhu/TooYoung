@@ -11,6 +11,7 @@ open Giraffe
 
 open AutoMapper
 open Microsoft.AspNetCore
+open Microsoft.AspNetCore.Authentication.Cookies
 open TooYoung.Api.Handlers
 open TooYoung.Api.Handlers
 open TooYoung.Provider.Mongo
@@ -54,13 +55,17 @@ let configureApp (app : IApplicationBuilder) =
     | true  -> app.UseDeveloperExceptionPage()
     | false -> app.UseGiraffeErrorHandler errorHandler)
 //        .UseCors(configureCors)
+        .UseAuthentication()
         .UseStaticFiles()
         .UseGiraffe(webApp)
 
 /// Configure services
 let configureServices (hostBuilderCtx: WebHostBuilderContext) (services : IServiceCollection) =
 //    services.AddCors()    |> ignore
-    services.AddGiraffe() |> ignore
+    services
+        .AddGiraffe()
+        .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie()
+    |> ignore
     services |> BootStrap.addMongoDbRepository hostBuilderCtx.Configuration
     |> ignore
 
