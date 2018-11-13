@@ -11,6 +11,7 @@ open Microsoft.Extensions.Configuration
 open Microsoft.AspNetCore.Authentication
 open Microsoft.AspNetCore.Cryptography.KeyDerivation
 open TooYoung.Domain.User
+open TooYoung.WebCommon
 
 let getAccountRepo (ctx: HttpContext) = ctx.GetService<IAccountRepository>()
 let getGetHashSalt (ctx: HttpContext) = ctx.GetService<IConfiguration>().GetSection("HashSalt")
@@ -35,6 +36,7 @@ let validateLogin ctx (model: LoginModel) (user: User) =
 let signIn (ctx: HttpContext) (user: User) =
     let identity = ClaimsIdentity()
     identity.AddClaim(Claim(ClaimTypes.NameIdentifier, user.Id.ToString(), ClaimValueTypes.String))
+    identity.AddClaim(Claim(ClaimTypes.Name, user.UserName, ClaimValueTypes.String))
     ClaimsPrincipal(identity)
     |> ctx.SignInAsync
 
@@ -52,6 +54,15 @@ let login (model: LoginModel) (next: HttpFunc) (ctx: HttpContext): HttpFuncResul
                             return! Successful.OK "Welcome~" next ctx
                         }
                     else deny next ctx
+    }
+
+let ping (next: HttpFunc) (ctx: HttpContext): HttpFuncResult =
+    let accountRepo = getAccountRepo ctx
+    task {
+        let! user = accountRepo.FindByUserName (ctx.UserName())
+        return! match user with
+                | Some user -> json user next ctx
+                | None -> text "Login first" next ctx
     }
 
 type RegisterModel =
@@ -101,5 +112,6 @@ let routes: HttpHandler =
         ( choose
             [ POST >=> routeCi "/login" >=> bindJson<LoginModel> login
               POST >=> routeCi "/register" >=> bindJson<RegisterModel> register
+              GET >=> routeCi "/ping" >=> ping
             ]
         )

@@ -3,10 +3,13 @@ open AutoMapper
 open AutoMapperBuilder
 open Microsoft.Extensions.DependencyInjection
 open Microsoft.Extensions.Configuration
+open MongoDB.Bson.Serialization
+open MongoDB.Bson.Serialization.IdGenerators
 open MongoDB.Driver
 open TooYoung.Domain.Authorization.UserGroup
 open TooYoung.Domain.FileDirectory
 open TooYoung.Domain.Repositories
+open TooYoung.Domain.User
 open TooYoung.Provider.Mongo.Repositories
 
 let addMongoProviderMapping (cfg: IMapperConfigurationExpression) =
@@ -110,6 +113,10 @@ let bindConfig (config: IConfiguration) =
 
 let addMongoDbRepository (configuration: IConfiguration) (services: IServiceCollection) =
     let config = bindConfig configuration
+    BsonClassMap.RegisterClassMap<User>(
+        fun cm -> cm.AutoMap()
+                  cm.MapIdMember(fun u -> u.Id).SetIdGenerator(GuidGenerator.Instance) |> ignore
+    ) |> ignore
     services.AddScoped<IFileRepository, FileRepository>()
             .AddScoped<ISharingRepository, SharingRepository>()
             .AddScoped<IDirectoryRepository, DirectoryRepository>()

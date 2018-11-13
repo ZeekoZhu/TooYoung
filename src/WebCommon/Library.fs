@@ -31,3 +31,9 @@ module HttpContextHelper =
     type HttpContext with
         member this.UserId () =
             UserId this
+        member this.UserName () =
+            this.User.Claims.FirstOrDefault(fun c -> c.Type = ClaimTypes.Name)
+            |> Option.ofObj
+            |> function
+                | Some claim -> claim.Value
+                | None -> String.Empty

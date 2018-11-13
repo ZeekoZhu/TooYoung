@@ -163,7 +163,7 @@ module User =
 
     [<AllowNullLiteral>]
     type User(id: Guid) =
-        member val Id = id
+        member val Id = id with get, set
         member val UserName = String.Empty with get, set
         member val Password = String.Empty with get, set
         member val DisplayName = String.Empty with get, set
