@@ -4,6 +4,7 @@
     <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Handlers\AuthGuard.fs" />
     <Compile Include="Handlers\AccountHandlers.fs" />
     <Compile Include="Handlers\DirectoryHandlers.fs" />
     <Compile Include="Handlers\FileHandlers.fs" />

@@ -12,6 +12,7 @@ open Giraffe
 open AutoMapper
 open Microsoft.AspNetCore
 open Microsoft.AspNetCore.Authentication.Cookies
+open Microsoft.AspNetCore.CookiePolicy
 open TooYoung.Api.Handlers
 open TooYoung.Api.Handlers
 open TooYoung.Provider.Mongo
@@ -55,6 +56,7 @@ let configureApp (app : IApplicationBuilder) =
     | true  -> app.UseDeveloperExceptionPage()
     | false -> app.UseGiraffeErrorHandler errorHandler)
 //        .UseCors(configureCors)
+        .UseCookiePolicy(CookiePolicyOptions(HttpOnly = HttpOnlyPolicy.Always))
         .UseAuthentication()
         .UseStaticFiles()
         .UseGiraffe(webApp)

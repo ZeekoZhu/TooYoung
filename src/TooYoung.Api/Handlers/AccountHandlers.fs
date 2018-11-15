@@ -10,8 +10,10 @@ open Microsoft.AspNetCore.Http
 open Microsoft.Extensions.Configuration
 open Microsoft.AspNetCore.Authentication
 open Microsoft.AspNetCore.Cryptography.KeyDerivation
+open TooYoung.Api.Handlers
 open TooYoung.Domain.User
 open TooYoung.WebCommon
+open TooYoung.Api.Handlers.AuthGuard
 
 let getAccountRepo (ctx: HttpContext) = ctx.GetService<IAccountRepository>()
 let getGetHashSalt (ctx: HttpContext) = ctx.GetService<IConfiguration>().GetSection("HashSalt")
@@ -34,15 +36,16 @@ let validateLogin ctx (model: LoginModel) (user: User) =
     && user.Password = hashPassword ctx (model.Password)
 
 let signIn (ctx: HttpContext) (user: User) =
-    let identity = ClaimsIdentity()
+    let identity = ClaimsIdentity(authenticationScheme)
     identity.AddClaim(Claim(ClaimTypes.NameIdentifier, user.Id.ToString(), ClaimValueTypes.String))
     identity.AddClaim(Claim(ClaimTypes.Name, user.UserName, ClaimValueTypes.String))
-    ClaimsPrincipal(identity)
-    |> ctx.SignInAsync
+    
+    let principal = ClaimsPrincipal(identity)
+    ctx.SignInAsync(authenticationScheme, principal,AuthenticationProperties(IsPersistent = true))
 
 let login (model: LoginModel) (next: HttpFunc) (ctx: HttpContext): HttpFuncResult =
     let accountRepo = getAccountRepo ctx
-    let deny = RequestErrors.UNAUTHORIZED "Cookie" "TooYoung" "Don't know who you are"
+    let deny = RequestErrors.FORBIDDEN "Don't know who you are"
     task {
         let! user = accountRepo.FindByUserName model.UserName
         return! match user with
@@ -112,6 +115,6 @@ let routes: HttpHandler =
         ( choose
             [ POST >=> routeCi "/login" >=> bindJson<LoginModel> login
               POST >=> routeCi "/register" >=> bindJson<RegisterModel> register
-              GET >=> routeCi "/ping" >=> ping
+              GET >=> routeCi "/ping" >=> requireLogin >=> ping
             ]
         )
