@@ -15,22 +15,6 @@ open TooYoung.Provider.Mongo.Repositories
 open TooYoung.Provider.Mongo.Enities
 
 let addMongoProviderMapping (cfg: IMapperConfigurationExpression) =
-    let dirProfile =
-        let dir = prepare<FileDirectory>
-        let entity = prepare<FileDirectoryEntity>
-        
-        automapper {
-            map dir entity
-            resolve
-                entity.FileChildren
-                (fun (src: FileDirectory) _ ->
-                    [])
-            reverseMap
-            swap
-            notMap dir.PendingOperations
-            notMap dir.FileChildren
-            create
-        }
 
     let accessDefProfile =
         let definition = prepare<AccessDefinition>
@@ -93,8 +77,6 @@ let addMongoProviderMapping (cfg: IMapperConfigurationExpression) =
         }
     cfg.AddProfile userGroupProfile
 
-    cfg.AddProfile(dirProfile)
-
 [<CLIMutable>]
 type MongoDbConfig =
     { Address: string
@@ -124,6 +106,7 @@ let addMongoDbRepository (configuration: IConfiguration) (services: IServiceColl
             .AddScoped<ISharingRepository, SharingRepository>()
             .AddScoped<IDirectoryRepository, DirectoryRepository>()
             .AddScoped<IAccountRepository, AccountRepository>()
+            .AddScoped<IUserGroupRepository, UserGroupRepository>()
             .AddSingleton<IMongoDatabase>(
                 fun provider ->
                     // using settings object to avoid url encoding

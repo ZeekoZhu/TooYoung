@@ -8,4 +8,5 @@ module RegisterDomainServices =
                 .AddScoped<DirectoryService>()
                 .AddScoped<SharingService>()
                 .AddSingleton<EventBus>()
+                .AddScoped<AuthorizationService>()
 

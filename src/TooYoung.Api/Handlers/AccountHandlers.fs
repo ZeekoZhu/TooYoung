@@ -20,6 +20,7 @@ open TooYoung.Api.Handlers.AuthGuard
 
 let getAccountRepo (ctx: HttpContext) = ctx.GetService<IAccountRepository>()
 let getDirService (ctx: HttpContext) = ctx.GetService<DirectoryService>()
+let getAuthService (ctx: HttpContext) = ctx.GetService<AuthorizationService>()
 let getGetHashSalt (ctx: HttpContext) = ctx.GetService<IConfiguration>().GetSection("HashSalt")
 
 [<CLIMutable>]
@@ -89,6 +90,17 @@ type RegisterModel =
              | Some msg -> Error (RequestErrors.badRequest (text msg))
              | None -> Ok this
 
+let initUserSpace ctx (user:User) =
+    let dirSvc = getDirService ctx
+    let authSvc = getAuthService ctx
+
+    authSvc.CreateGroupForUserAsync user
+    |> AsyncResult.bind
+        ( fun _ ->
+            dirSvc.CreateRootDir (user.Id.ToString())
+        )
+
+
 let createUser ctx (model:RegisterModel) =
     let password = hashPassword ctx model.Password
     User ( Guid.NewGuid(),
@@ -108,10 +120,7 @@ let register (model: RegisterModel) (next: HttpFunc) (ctx: HttpContext): HttpFun
                         let newUser = createUser ctx model
                         task {
                             let! fn = accountRepo.Create newUser
-                                    |> AsyncResult.bind
-                                        (fun user ->
-                                            let dirSvc = getDirService ctx
-                                            dirSvc.CreateRootDir (user.Id.ToString()))
+                                    |> AsyncResult.bind (initUserSpace ctx)
                                     |> Async.map
                                         ( function
                                         | Error e -> RequestErrors.BAD_REQUEST e
