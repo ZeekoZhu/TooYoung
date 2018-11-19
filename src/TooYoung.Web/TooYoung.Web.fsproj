@@ -20,6 +20,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\TooYoung.Api\TooYoung.Api.fsproj" />
+    <ProjectReference Include="..\TooYoung.Domain\TooYoung.Domain.fsproj" />
     <ProjectReference Include="..\TooYoung.Provider.Mongo\TooYoung.Provider.Mongo.fsproj" />
   </ItemGroup>
   <Import Project="..\..\.paket\Paket.Restore.targets" />

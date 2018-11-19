@@ -1,3 +1,5 @@
 FSharp.Control.Reactive
 FSharpPlus
 FsToolkit.ErrorHandling
+Microsoft.Extensions.DependencyInjection
+AutoMapper

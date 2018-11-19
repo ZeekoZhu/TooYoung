@@ -9,7 +9,9 @@
   <ItemGroup>
     <Compile Include="BsonHelper.fs" />
     <Compile Include="AutoMapperHelper.fs" />
+    <Compile Include="Enities\FileDirectoryEntity.fs" />
     <Compile Include="MongoUnitOfWork.fs" />
+    <Compile Include="Mapper.fs" />
     <Compile Include="Repositories\AccountRepository.fs" />
     <Compile Include="Repositories\DirectoryRepository.fs" />
     <Compile Include="Repositories\FileRepository.fs" />

@@ -1,7 +1,6 @@
 namespace TooYoung.Provider.Mongo.Repositories
 open System
 open System.Collections.Generic
-open AutoMapper
 open MongoDB.Driver
 open TooYoung
 open TooYoung.Domain.FileDirectory
@@ -11,21 +10,10 @@ open FsToolkit.ErrorHandling
 
 open Utils
 open FunxAlias
-open AutoMapperBuilder
+open TooYoung.Provider.Mongo.Enities
 
-/// 为了方便映射对目录下子文件的引用，所以为目录创建了一个用来表达存储关系的实体
-[<AllowNullLiteral>]
-type FileDirectoryEntity() =
-    member val Id = String.Empty with get, set
-    member val OwnerId = String.Empty with get, set
-    member val IsRoot = false with get, set
-    member val Name = String.Empty with get, set
-    member val ParentId = String.Empty with get, set
-    member val DirectoryChildren = List.empty<string> with get, set
-    member val FileChildren = List.empty<string> with get, set
-
-type DirectoryRepository(db: IMongoDatabase, mapper: IMapper, files: IFileRepository) =
-    let mapDir = mapper.Map<FileDirectoryEntity>
+type DirectoryRepository(db: IMongoDatabase, files: IFileRepository) =
+    let mapDir = Mapper.FileDirectory.toEntity
     let dirs = db.GetCollection<FileDirectoryEntity>("FileDirectory")
 
     let setFileChildren (x: Async<FileDirectoryEntity option>) =
@@ -34,7 +22,7 @@ type DirectoryRepository(db: IMongoDatabase, mapper: IMapper, files: IFileReposi
             | Some entity ->
               async {
                   let! children = files.ListByIdAsync entity.FileChildren
-                  let dir = mapper.Map<FileDirectory>(entity)
+                  let dir = Mapper.FileDirectory.toModel(entity)
                   dir.FileChildren <- children
                   return Some dir
               }

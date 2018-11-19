@@ -88,7 +88,12 @@ module MappingConfigBuilder =
                 wrapper
                 |> mapping (fun map ->
                     let fieldSelector = memberExpr<'target, 'field> field
-                    map.ForMember(fieldSelector, (fun opt -> opt.ResolveUsing<'field>(fn)))
+                    let valueResolver =
+                        { new IValueResolver<'src, 'target, 'field> with
+                          member vr.Resolve (src, dest, destMem, ctx) =
+                                    fn src dest
+                        }
+                    map.ForMember(fieldSelector, (fun (opt: IMemberConfigurationExpression<'src, 'target, 'field>) -> opt.ResolveUsing(valueResolver)))
                     )
     
         [<CustomOperation("ignoreRest")>]

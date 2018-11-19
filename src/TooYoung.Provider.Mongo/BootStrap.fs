@@ -1,4 +1,5 @@
 module TooYoung.Provider.Mongo.BootStrap
+open System
 open AutoMapper
 open AutoMapperBuilder
 open Microsoft.Extensions.DependencyInjection
@@ -11,6 +12,7 @@ open TooYoung.Domain.FileDirectory
 open TooYoung.Domain.Repositories
 open TooYoung.Domain.User
 open TooYoung.Provider.Mongo.Repositories
+open TooYoung.Provider.Mongo.Enities
 
 let addMongoProviderMapping (cfg: IMapperConfigurationExpression) =
     let dirProfile =
@@ -22,10 +24,11 @@ let addMongoProviderMapping (cfg: IMapperConfigurationExpression) =
             resolve
                 entity.FileChildren
                 (fun (src: FileDirectory) _ ->
-                    src.FileChildren |> List.map (fun x -> x.Id))
+                    [])
             reverseMap
             swap
             notMap dir.PendingOperations
+            notMap dir.FileChildren
             create
         }
 

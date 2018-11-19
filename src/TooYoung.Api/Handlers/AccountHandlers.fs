@@ -6,16 +6,20 @@ open Giraffe
 open System.Text
 open TooYoung.Domain.Repositories
 open FSharp.Control.Tasks.V2
+open FsToolkit.ErrorHandling
+open Giraffe.HttpStatusCodeHandlers
 open Microsoft.AspNetCore.Http
 open Microsoft.Extensions.Configuration
 open Microsoft.AspNetCore.Authentication
 open Microsoft.AspNetCore.Cryptography.KeyDerivation
 open TooYoung.Api.Handlers
 open TooYoung.Domain.User
+open TooYoung.Domain.Services
 open TooYoung.WebCommon
 open TooYoung.Api.Handlers.AuthGuard
 
 let getAccountRepo (ctx: HttpContext) = ctx.GetService<IAccountRepository>()
+let getDirService (ctx: HttpContext) = ctx.GetService<DirectoryService>()
 let getGetHashSalt (ctx: HttpContext) = ctx.GetService<IConfiguration>().GetSection("HashSalt")
 
 [<CLIMutable>]
@@ -101,13 +105,20 @@ let register (model: RegisterModel) (next: HttpFunc) (ctx: HttpContext): HttpFun
         return! match user with
                 | Some _ -> RequestErrors.BAD_REQUEST "UserName has been taken" next ctx
                 | None ->
-                     task {
                         let newUser = createUser ctx model
-                        let! result = accountRepo.Create newUser
-                        return! match result  with
-                                | Error e -> ServerErrors.INTERNAL_ERROR e next ctx
-                                | Ok user -> Successful.ok (json user) next ctx
-                    }
+                        task {
+                            let! fn = accountRepo.Create newUser
+                                    |> AsyncResult.bind
+                                        (fun user ->
+                                            let dirSvc = getDirService ctx
+                                            dirSvc.CreateRootDir (user.Id.ToString()))
+                                    |> Async.map
+                                        ( function
+                                        | Error e -> RequestErrors.BAD_REQUEST e
+                                        | Ok dir -> Successful.ok (json dir)
+                                        )
+                            return! fn next ctx
+                        }
     }
 
 let routes: HttpHandler =

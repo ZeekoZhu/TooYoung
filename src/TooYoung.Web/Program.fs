@@ -16,6 +16,7 @@ open Microsoft.AspNetCore.CookiePolicy
 open TooYoung.Api.Handlers
 open TooYoung.Api.Handlers
 open TooYoung.Provider.Mongo
+open TooYoung.Domain
 
 // ---------------------------------
 // Web app
@@ -65,10 +66,22 @@ let configureApp (app : IApplicationBuilder) =
 let configureServices (hostBuilderCtx: WebHostBuilderContext) (services : IServiceCollection) =
 //    services.AddCors()    |> ignore
     services
+        .AddSingleton<IMapper>(
+            fun sp ->
+                let mapperConfig =
+                    MapperConfiguration(
+                        fun mc ->
+                            mc
+                            |> BootStrap.addMongoProviderMapping
+                    )
+                mapperConfig.CreateMapper()
+        )
         .AddGiraffe()
         .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie()
     |> ignore
-    services |> BootStrap.addMongoDbRepository hostBuilderCtx.Configuration
+    services
+    |> BootStrap.addMongoDbRepository hostBuilderCtx.Configuration
+    |> RegisterDomainServices.register
     |> ignore
 
 let configureLogging (builder : ILoggingBuilder) =
@@ -77,7 +90,6 @@ let configureLogging (builder : ILoggingBuilder) =
 
 [<EntryPoint>]
 let main (args: string[]) =
-    Mapper.Initialize(fun cfg -> BootStrap.addMongoProviderMapping cfg)
     let contentRoot = Directory.GetCurrentDirectory()
     let webRoot     = Path.Combine(contentRoot, "WebRoot")
     WebHost.CreateDefaultBuilder(args)
