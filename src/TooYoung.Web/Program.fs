@@ -7,16 +7,17 @@ open Microsoft.AspNetCore.Cors.Infrastructure
 open Microsoft.AspNetCore.Hosting
 open Microsoft.Extensions.Logging
 open Microsoft.Extensions.DependencyInjection
+open Microsoft.AspNetCore.SpaServices.ReactDevelopmentServer
 open Giraffe
 
-open AutoMapper
 open Microsoft.AspNetCore
 open Microsoft.AspNetCore.Authentication.Cookies
 open Microsoft.AspNetCore.CookiePolicy
 open TooYoung.Api.Handlers
-open TooYoung.Api.Handlers
 open TooYoung.Provider.Mongo
 open TooYoung.Domain
+open Microsoft.Extensions.Options
+open Microsoft.AspNetCore.Http
 
 // ---------------------------------
 // Web app
@@ -32,7 +33,7 @@ let webApp =
                   DirectoryHandlers.routes
                   FileHandlers.routes
                 ] )
-        setStatusCode 404 >=> text "Not Found" ]
+           ]
 
 // ---------------------------------
 // Error handler
@@ -62,7 +63,17 @@ let configureApp (app : IApplicationBuilder) =
         .UseCookiePolicy(CookiePolicyOptions(HttpOnly = HttpOnlyPolicy.Always))
         .UseAuthentication()
         .UseStaticFiles()
-        .UseGiraffe(webApp)
+    |> ignore
+    app.UseSpaStaticFiles()
+    app.UseGiraffe(webApp)
+    app.Map(PathString("/app"), fun spaApp ->
+        app.UseSpa(fun spa ->
+            spa.Options.SourcePath <- "client-app"
+            if env.IsDevelopment() then
+                spa.UseProxyToSpaDevelopmentServer("http://localhost:3000")
+        )
+    )
+    |> ignore
 
 /// Configure services
 let configureServices (hostBuilderCtx: WebHostBuilderContext) (services : IServiceCollection) =
@@ -70,6 +81,10 @@ let configureServices (hostBuilderCtx: WebHostBuilderContext) (services : IServi
     services
         .AddGiraffe()
         .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie()
+        |> ignore
+    services.AddSpaStaticFiles(fun cfg ->
+            cfg.RootPath <- "client-app"
+        )
     |> ignore
     services
     |> BootStrap.addMongoDbRepository hostBuilderCtx.Configuration
