@@ -80,24 +80,22 @@ type SharingRepository (db: IMongoDatabase) =
             new MongoUnitOfWork(db.Client) :> UnitOfWork
 
         member this.GetEntryAsync resource =
-            try getEntry resource
-            with _ -> None |> Async.fromValue
+            getEntry resource
 
         member this.GetAllEntries user =
-            try getAllEntries user
-            with _ -> [] |> Async.fromValue
+            getAllEntries user
 
         member this.AddEntry entry =
-            onError None addEntry entry
+             addEntry entry
 
         member this.AddRefererRule entry referer =
-            onError None (addRefererRule entry) referer
+             (addRefererRule entry) referer
 
         member this.AddTokenRule entry token =
-            onError None (addTokenRule entry) token
+             (addTokenRule entry) token
 
         member this.RemoveTokenRule entry tokenId =
-            onError None (removeTokenRule entry) tokenId
+             (removeTokenRule entry) tokenId
 
         member this.RemoveRefererRule entry refererId =
-            onError None (removeRefererRule entry) refererId
+             (removeRefererRule entry) refererId

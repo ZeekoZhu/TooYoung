@@ -89,7 +89,7 @@ type FileRepository(db: IMongoDatabase) =
             new MongoUnitOfWork(db.Client) :> UnitOfWork
 
         member this.AddAsync fileInfo =
-            onError None addAsync fileInfo
+             addAsync fileInfo
 
         member this.ListByIdAsync ids =
             try
@@ -99,25 +99,21 @@ type FileRepository(db: IMongoDatabase) =
             with _ -> Async.fromValue []
         
         member this.GetByIdAsync id =
-            try
-                files.Find(fun f -> f.Id = id).FirstOrDefaultAsync()
-                |> Async.AwaitTask
-                |> Async.map Option.ofObj
-            with _ -> None |> Async.fromValue
+            files.Find(fun f -> f.Id = id).FirstOrDefaultAsync()
+            |> Async.AwaitTask
+            |> Async.map Option.ofObj
             
         member this.CreateBinaryAsync bytes =
-            onError None createBinaryAsync bytes
+             createBinaryAsync bytes
 
         member this.DeleteBinaryAsync binId =
-            onError None deleteBinaryAsync binId
+             deleteBinaryAsync binId
         
         member this.GetByIdAndUserAsync userId fileInfoId =
-            try
-                getByIdAndUserAsync userId fileInfoId
-            with _ -> None |> Async.fromValue
+            getByIdAndUserAsync userId fileInfoId
             
         member this.UpdateAsync fileInfo =
-            onError None updateAsync fileInfo
+             updateAsync fileInfo
 
         member this.ExistsAsync fileInfoId userId =
             try
@@ -125,10 +121,10 @@ type FileRepository(db: IMongoDatabase) =
             with _ -> false |> Async.fromValue
 
         member this.DeleteFileAsync fileInfoId =
-            onError None deleteFileAsync fileInfoId
+             deleteFileAsync fileInfoId
         
         member this.GetBinaryAsync binId =
-            onError None getBinaryAsync binId
+             getBinaryAsync binId
             
         member this.GetBinaryStreamAsync binId =
-            onError None getBinStreamAsync binId
+             getBinStreamAsync binId

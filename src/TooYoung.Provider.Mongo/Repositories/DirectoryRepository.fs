@@ -100,27 +100,26 @@ type DirectoryRepository(db: IMongoDatabase, files: IFileRepository) =
             with _ -> asyncNone()
 
         member this.SaveNewNode dir =
-            onError None saveNewNode dir
+            saveNewNode dir
 
         member this.UpdateNode dir =
-            onError None updateNode dir
+            updateNode dir
 
         member this.ContainsName name dir =
-            try containsName name dir
-            with _ -> Async.fromValue false
+            containsName name dir
 
         member this.AttachSubDirsAsync dir subDirs =
-            onError None (attachSubDirsAsync dir) subDirs
+            attachSubDirsAsync dir subDirs
 
         member this.AttachFilesAsync dir files =
-            onError None (attachFilesAsync dir) files
+            attachFilesAsync dir files
 
         member this.DeattachFilesAsync dir files =
-            onError None (deattachFiles dir) files
+            (deattachFiles dir) files
 
         member this.DeattachSubDirsAsync dir subDirs =
-            onError None (deattachSubDirs dir) subDirs
+            (deattachSubDirs dir) subDirs
 
         member this.DeleteDir dir =
-            onError None deleteDir dir
+            deleteDir dir
         

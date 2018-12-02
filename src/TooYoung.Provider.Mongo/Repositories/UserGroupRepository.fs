@@ -65,26 +65,20 @@ type UserGroupRepository(db: IMongoDatabase) =
             getGroupsByUserId userId
 
         member this.AddGroupAsync group =
-            try addGroupAsync (Mapper.UserGroup.toEntity group)
-                |> Async.map (fun _ -> group |> Ok)
-            with e ->
-                e.Message |> Error |> Async.fromValue
+            addGroupAsync (Mapper.UserGroup.toEntity group)
+            |> Async.map (fun _ -> group |> Ok)
         
         member this.DeleteGroupAsync groupId =
-            try deleteGroupAsync groupId
-                |> Async.map Ok
-            with e ->
-                e.Message |> Error |> Async.fromValue
+            deleteGroupAsync groupId
+            |> Async.map Ok
 
         member this.GetPermissionForUser userId accessType =
-            try getPermissionForUser userId accessType
-                |> Async.map Ok
-            with e -> e.Message |> Error |> Async.fromValue
+            getPermissionForUser userId accessType
+            |> Async.map Ok
         
         member this.UpdateGroupAsync group =
-            try updateGroupAsync group
-                |> Async.map Ok
-            with e -> e.Message |> Error |> Async.fromValue
+            updateGroupAsync group
+            |> Async.map Ok
         
         member this.GetGroupByName name =
             getGroupByName name
