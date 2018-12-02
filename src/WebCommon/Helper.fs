@@ -9,3 +9,10 @@ module Helper =
         let matches = regex.Matches(str).Cast<Match>();
         matches.Select(fun x -> x.Groups.[1].Value)
 
+module Impure =
+
+    type CsList<'t> = System.Collections.Generic.List<'t>
+    let ofCsList csList =
+        List.ofSeq csList
+    let toCsList<'t> (someList: seq<'t>) =
+        CsList(someList)

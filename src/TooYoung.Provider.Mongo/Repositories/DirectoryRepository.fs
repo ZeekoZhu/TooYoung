@@ -11,6 +11,7 @@ open FsToolkit.ErrorHandling
 open Utils
 open FunxAlias
 open TooYoung.Provider.Mongo.Enities
+open WebCommon.Impure
 
 type DirectoryRepository(db: IMongoDatabase, files: IFileRepository) =
     let mapDir = Mapper.FileDirectory.toEntity
@@ -21,7 +22,7 @@ type DirectoryRepository(db: IMongoDatabase, files: IFileRepository) =
         Async.bind (function
             | Some entity ->
               async {
-                  let! children = files.ListByIdAsync entity.FileChildren
+                  let! children = files.ListByIdAsync (entity.FileChildren |> ofCsList)
                   let dir = Mapper.FileDirectory.toModel(entity)
                   dir.FileChildren <- children
                   return Some dir

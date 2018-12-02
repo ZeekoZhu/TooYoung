@@ -7,19 +7,18 @@ module Resource =
     /// 文件信息
     [<AllowNullLiteral>]
     type FileInfo(id: string, ownerId: string, name: string) =
-        member val Id = id
-        member val OwnerId = ownerId
+        member val Id = id with get, set
+        member val OwnerId = ownerId with get, set
         member val Name = name with get, set
 
         /// 文件大小, bytes
         member val FileSize = 0 with get, set
         member val BinaryId = String.Empty with get, set
-        member val Metadatas = Dictionary<string, string>()
-        member val Extension = String.Empty with get, set
+        member val Metadatas = Dictionary<string, string>() with get, set
 
     /// 文件二进制存储实体
     type FileBinary(id: string) =
-        member val Id = id
+        member val Id = id with get, set
         member val Binary = Array.empty<byte> with get, set
 
 module Sharing =

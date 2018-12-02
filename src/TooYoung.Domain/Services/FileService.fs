@@ -10,7 +10,6 @@ open FunxAlias
 
 type FileInfoAddDto =
     { Name: string
-      Extension: string
       Metadatas: Dictionary<string, string>
     }
 
@@ -31,6 +30,10 @@ type FileService(repo: IFileRepository) =
                 fileInfo.FileSize <- bin.Binary.Length
                 fileInfo
             )
+        |> AsyncResult.bind (fun fileInfo ->
+                repo.UpdateAsync fileInfo
+            )
+        |> AsyncResult.map (fun _ -> fileInfo)
 
     let deleteBinary (fileInfo: FileInfo) =
         if String.IsNullOrEmpty(fileInfo.BinaryId)
@@ -74,7 +77,6 @@ type FileService(repo: IFileRepository) =
     member this.Add (dto: FileInfoAddDto, ownerId) =
         let fileInfo = FileInfo(Guid.NewGuid().ToString(), ownerId, dto.Name)
         copyMetadata dto.Metadatas fileInfo.Metadatas
-        fileInfo.Extension <- dto.Extension
         startWork (fun _ -> repo.AddAsync(fileInfo))
 
     /// 为一个文件设置文件内容，之前设置的内容会被彻底删除
@@ -92,7 +94,6 @@ type FileService(repo: IFileRepository) =
         tryGetFile fileInfoId userId
         |> AsyncResult.map (fun info ->    // 更新文件实体
                 info.Name <- dto.Name
-                info.Extension <- dto.Extension
                 copyMetadata dto.Metadatas info.Metadatas
                 info
             )

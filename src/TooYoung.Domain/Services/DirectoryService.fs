@@ -11,6 +11,7 @@ open FsToolkit.ErrorHandling
 open FsToolkit.ErrorHandling.Operator.AsyncResult
 open FunxAlias
 open FileDirectory
+open FsToolkit.ErrorHandling
 open TooYoung
 
 type DirectoryAddDto = {
@@ -161,6 +162,18 @@ type DirectoryService (repo: IDirectoryRepository, fileSvc: FileService, bus: Ev
             )
         >>= createRootDir
 
+    member this.Rename userId dirId newName =
+        repo.GetDir dirId userId
+        |> Async.bind (function
+            | None -> "Directory not found" |> AsyncResult.returnError
+            | Some dir ->
+                if dir.IsRoot then "Can not rename root directory" |> AsyncResult.returnError
+                elif dir.Name = newName then dir |> AsyncResult.retn
+                else dir.Name <- newName
+                     repo.UpdateNode dir
+                     |> AsyncResult.map (fun _ -> dir)
+            )
+
     /// 删除一个文件夹
     member this.DeleteDir userId dirId force =
         repo.GetDir dirId userId
@@ -183,8 +196,9 @@ type DirectoryService (repo: IDirectoryRepository, fileSvc: FileService, bus: Ev
     member this.AddFile (file: FileInfo) (dir: FileDirectory) =
         dir.AddFile file
         updateDir dir
-        |> Async.map (fun  _ ->
-                dir.ApplyOperations() |> Ok
+        |> AsyncResult.map (fun  _ ->
+                dir.ApplyOperations()
+                file
             )
 
     /// 从文件夹中删除文件

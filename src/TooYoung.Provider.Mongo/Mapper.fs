@@ -1,8 +1,10 @@
 module TooYoung.Provider.Mongo.Mapper
 open TooYoung.Provider.Mongo.Enities
+open WebCommon.Impure
 
 module FileDirectory =
     open TooYoung.Domain.FileDirectory
+    open TooYoung.Domain.Resource
 
     let toEntity (model: FileDirectory): FileDirectoryEntity =
         FileDirectoryEntity
@@ -11,15 +13,20 @@ module FileDirectory =
                Name = model.Name,
                OwnerId = model.OwnerId,
                ParentId = model.ParentId,
-               DirectoryChildren = model.DirectoryChildren,
-               FileChildren = (model.FileChildren |> List.map (fun x -> x.Id))
+               DirectoryChildren = toCsList model.DirectoryChildren,
+               FileChildren = (model.FileChildren |> List.map (fun x -> x.Id) |> toCsList)
              )
 
     let toModel (entity: FileDirectoryEntity): FileDirectory =
         FileDirectory
             ( entity.Id, entity.OwnerId, entity.IsRoot,
-              Name = entity.Name, DirectoryChildren = entity.DirectoryChildren,
-              ParentId = entity.ParentId, FileChildren = List.Empty
+              Name = entity.Name, DirectoryChildren = ofCsList entity.DirectoryChildren,
+              ParentId = entity.ParentId,
+              FileChildren =
+                ( entity.FileChildren
+                  |> Seq.map (fun x -> FileInfo(x, entity.OwnerId, ""))
+                  |> ofCsList
+                )
             )
 
 module AccessDefinition =
@@ -58,21 +65,23 @@ module UserGroup =
     let toEntity (model: UserGroup) =
         UserGroupEntity
             ( Id = model.Id,
-              Users = model.Users,
+              Users = toCsList model.Users,
               Name = model.Name,
               Definitions =
                 ( model.AccessDefinitions
                   |> List.map (AccessDefinition.toEntity)
+                  |> toCsList
                 )
             )
     
     let toModel (entity: UserGroupEntity): UserGroup =
         UserGroup
             ( entity.Id,
-              Users = entity.Users,
+              Users = ofCsList entity.Users,
               Name = entity.Name,
               AccessDefinitions =
                 ( entity.Definitions
-                  |> List.map (AccessDefinition.toModel)
+                  |> Seq.map (AccessDefinition.toModel)
+                  |> ofCsList
                 )
             )

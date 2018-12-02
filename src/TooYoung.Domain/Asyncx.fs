@@ -8,3 +8,13 @@ module Async =
                             | Some v -> Ok v)
 
     let fromValue = async.Return
+    let combine x y =
+        AsyncResult.bind
+            ( fun xResult ->
+                AsyncResult.map
+                    ( fun yResult ->
+                        (xResult, yResult)
+                    )
+                    y
+            )
+            x

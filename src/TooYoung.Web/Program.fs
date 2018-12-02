@@ -29,6 +29,8 @@ let webApp =
             ( choose
                 [ route "/alive" >=> text "OK"
                   AccountHandlers.routes
+                  DirectoryHandlers.routes
+                  FileHandlers.routes
                 ] )
         setStatusCode 404 >=> text "Not Found" ]
 
@@ -66,16 +68,6 @@ let configureApp (app : IApplicationBuilder) =
 let configureServices (hostBuilderCtx: WebHostBuilderContext) (services : IServiceCollection) =
 //    services.AddCors()    |> ignore
     services
-        .AddSingleton<IMapper>(
-            fun sp ->
-                let mapperConfig =
-                    MapperConfiguration(
-                        fun mc ->
-                            mc
-                            |> BootStrap.addMongoProviderMapping
-                    )
-                mapperConfig.CreateMapper()
-        )
         .AddGiraffe()
         .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie()
     |> ignore
