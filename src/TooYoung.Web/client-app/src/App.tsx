@@ -1,26 +1,41 @@
 import React, { Component } from 'react';
 import logo from './logo.svg';
 import './App.css';
+import { Provider, observer } from 'mobx-react';
+import { AuthService } from './Services/AuthService';
+import { AppRouter } from './AppRouter';
+import DevTools from 'mobx-react-devtools';
+import { observable } from 'mobx';
+
+export interface IAppModel {
+    isSignedIn: boolean;
+    services?: {
+        authSvc: AuthService
+    }
+}
+
+const defaultModel: IAppModel = {
+    isSignedIn: false
+}
+
 
 class App extends Component {
+    @observable model = defaultModel;
+
+    constructor(props: IAppModel) {
+        super(props);
+        this.model.services = {
+            authSvc: new AuthService(this.model)
+        }
+    }
     render() {
         return (
-            <div className="App">
-                <header className="App-header">
-                    <img src={logo} className="App-logo" alt="logo" />
-                    <p>
-                        Edit <code>src/App.tsx</code> and save to reload.
-                    </p>
-                    <a
-                        className="App-link"
-                        href="https://reactjs.org"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                    >
-                        Learn React
-                    </a>
-                </header>
-            </div>
+            <Provider appModel={this.model}>
+                <>
+                    <AppRouter />
+                    <DevTools />
+                </>
+            </Provider>
         );
     }
 }
