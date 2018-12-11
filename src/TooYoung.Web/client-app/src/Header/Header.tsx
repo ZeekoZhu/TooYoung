@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { observer, inject } from 'mobx-react';
 import { selectAppStore, WithAppStore } from '../Context';
 import { AuthStore } from '../stores/Auth.store';
+import './Header.less';
 
 interface IHeaderProps {
 }
@@ -18,13 +19,14 @@ export class Header extends Component<HeaderProps> {
     }
     public render() {
         return (
-            <div className="header">
+            <div className="header ms-bgColor-black ms-fontColor-neutralLighterAlt">
                 <div className="left-align">
-                    <span className="brand">YourDrive</span>
+                    <span className="brand ms-font-xxl ms-fontWeight-regular">YourDrive</span>
                 </div>
                 <div className="center-align"></div>
                 <div className="right-align">
-                    <span>你好，</span><span>{this.auth.userName}</span>
+                    <div className="user-info">
+                        <span>你好，</span><span>{this.auth.userName}</span></div>
                 </div>
             </div>
         );

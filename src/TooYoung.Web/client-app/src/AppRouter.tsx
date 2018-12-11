@@ -18,12 +18,15 @@ export interface IPrivateRouteProp {
 export class PrivateRoute extends Component<IPrivateRouteProp> {
     public render() {
         const { appStore, comp: Comp, ...rest } = this.props;
-        const guard = (props: any) => appStore!.auth.isUserSignedIn === true
-            ? (<Comp {...props} />)
-            : <Redirect to={{
-                pathname: '/login',
-                state: { from: props.location }
-            }} />;
+        const guard = (props: any) => {
+            console.log('2333', appStore!.auth.isUserSignedIn);
+            return appStore!.auth.isUserSignedIn === true
+                ? (<Comp {...props} />)
+                : <Redirect to={{
+                    pathname: '/login',
+                    state: { from: props.location }
+                }} />;
+        };
         return (
             <Route {...rest}
                 render={guard}

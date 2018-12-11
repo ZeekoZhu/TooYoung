@@ -1,0 +1,25 @@
+.flex-row() {
+    display: flex;
+    flex-flow: row nowrap;
+}
+
+.header {
+    .flex-row();
+    justify-content: space-between;
+    align-items: stretch;
+    height: 50px;
+    padding: 0 2rem;
+    .center-align {
+        flex: 1 0 auto;
+    }
+    .left-align {
+        .flex-row();
+        align-items: center;
+        justify-content: flex-start;
+    }
+    .right-align {
+        .flex-row();
+        align-items: center;
+        justify-content: flex-end;
+    }
+}

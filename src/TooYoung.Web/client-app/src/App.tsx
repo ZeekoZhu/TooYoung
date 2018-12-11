@@ -28,7 +28,6 @@ class App extends Component {
             <Provider {...appContext}>
                 <>
                     <AppRouter />
-                    <DevTools />
                 </>
             </Provider>
         );

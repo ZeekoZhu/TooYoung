@@ -71,7 +71,7 @@ class LoginComp extends React.Component<LoginProps> {
                         onClick={this.signOut}>登出</ActionButton>
                     <ActionButton
                         iconProps={{ iconName: 'Home' }}
-                        onClick={this.signOut}>返回首页</ActionButton>
+                        onClick={this.returnHome}>返回首页</ActionButton>
                 </div>
                 <div className="return-home">
 
