@@ -25,6 +25,9 @@ class LoginComp extends React.Component<LoginProps> {
     public signOut = () => {
         this.authSvc.signOut();
     }
+    public returnHome = () => {
+        this.props.history.push('/');
+    }
     public welcome = (fragment: JSX.Element) => {
         return (
             <div className="full-screen login">
@@ -60,12 +63,20 @@ class LoginComp extends React.Component<LoginProps> {
     }
     public welcomeSignOut = () => {
         return this.welcome(
-            <div className="sign-out">
-                <span className="ms-font-xl ms-fontWeight-regular">{this.authSvc.userName}, </span>
-                <ActionButton
-                    iconProps={{ iconName: 'SignOut' }}
-                    onClick={this.signOut}>登出</ActionButton>
-            </div>
+            <>
+                <div className="sign-out">
+                    <span className="ms-font-xl ms-fontWeight-regular">{this.authSvc.userName}, </span>
+                    <ActionButton
+                        iconProps={{ iconName: 'SignOut' }}
+                        onClick={this.signOut}>登出</ActionButton>
+                    <ActionButton
+                        iconProps={{ iconName: 'Home' }}
+                        onClick={this.signOut}>返回首页</ActionButton>
+                </div>
+                <div className="return-home">
+
+                </div>
+            </>
         );
     }
     public render() {

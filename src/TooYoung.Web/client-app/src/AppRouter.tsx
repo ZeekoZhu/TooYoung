@@ -3,7 +3,7 @@ import React, { Component } from 'react';
 import { BrowserRouter as Router, Redirect, Route, Switch } from 'react-router-dom';
 
 import { selectAppStore } from './Context';
-import { Home } from './Home';
+import { Home } from './Home/Home';
 import { Login } from './Login/Login';
 import { AppStore } from './stores/App.store';
 
