@@ -3,6 +3,8 @@ import { observer } from 'mobx-react';
 import { Nav, INavLink } from 'office-ui-fabric-react/lib/Nav';
 import { withRouter, RouteComponentProps } from 'react-router-dom';
 
+import './SideNav.less';
+
 interface ISideNavProps {
 }
 
@@ -25,17 +27,21 @@ class SideNavComp extends Component<SideNavProps> {
     ];
     public render() {
         return (
-            <Nav
-                groups={[
-                    {
-                        links: this.links
-                    }
-                ]}
-                onLinkClick={(event, link) => {
-                    event!.preventDefault();
-                    this.props.history.push(link!.url);
-                }}
-            />
+            <div className="side-nav">
+                <div className="placeholder">
+                </div>
+                <Nav
+                    groups={[
+                        {
+                            links: this.links
+                        }
+                    ]}
+                    onLinkClick={(event, link) => {
+                        event!.preventDefault();
+                        this.props.history.push(link!.url);
+                    }}
+                />
+            </div>
         );
     }
 }

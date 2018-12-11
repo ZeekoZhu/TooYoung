@@ -2,13 +2,19 @@
 .main-content() {
     .flex-row();
     justify-content: stretch;
+    align-items: stretch;
     flex: 1 1 auto;
     .side {
         width: 208px;
+        border-right: 1px solid @neutralQuaternary;
+    }
+    .content {
+        flex: 1 1 auto;
     }
 }
 
 .home {
+    height: 100vh;
     .flex-col();
     .main-content {
         .main-content();

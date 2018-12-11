@@ -12,7 +12,7 @@ export class Home extends Component {
             <div className="home">
                 <Header></Header>
                 <div className="main-content">
-                    <div className="side">
+                    <div className="side ms-borderColor-neutralLight">
                         <SideNav></SideNav>
                     </div>
                     <div className="content">
