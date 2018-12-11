@@ -20,10 +20,12 @@ export class Files extends Component<FilesProps> {
     public render() {
         return (
             <div className="files">
-                <CommandBar
-                    items={this.store.commandBarItems}
-                    farItems={this.store.farItems}
-                />
+                <div className="cmd-bar">
+                    <CommandBar
+                        items={this.store.commandBarItems}
+                        farItems={this.store.farItems}
+                    />
+                </div>
                 <div className="path-nav">
                     <Breadcrumb
                         items={this.store.pathNavItems}

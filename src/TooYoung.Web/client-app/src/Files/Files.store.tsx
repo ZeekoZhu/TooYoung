@@ -7,9 +7,11 @@ import { IColumn } from 'office-ui-fabric-react/lib/DetailsList';
 import { Icon } from 'office-ui-fabric-react/lib/Icon';
 import { Selection } from 'office-ui-fabric-react/lib/MarqueeSelection';
 import React from 'react';
+import { Link as FabricLink } from 'office-ui-fabric-react/lib/Link';
+import styled from 'styled-components';
 
 type DocumentIcon = 'FabricFolder' | 'Page';
-const dateFormat = 'MMM D, YYYY';
+const dateFormat = 'PPpp';
 export interface IDocument {
     name: string;
     value: string;
@@ -164,8 +166,8 @@ export class FilesStore {
             key: 'column3',
             name: '修改日期',
             fieldName: 'dateModifiedValue',
-            minWidth: 70,
-            maxWidth: 90,
+            minWidth: 100,
+            maxWidth: 150,
             isResizable: true,
             data: 'number',
             onRender: (item: IDocument) => {
@@ -180,20 +182,6 @@ export class FilesStore {
         },
         {
             key: 'column4',
-            name: '分享',
-            fieldName: 'sharedLinks',
-            minWidth: 70,
-            maxWidth: 90,
-            isResizable: true,
-            isCollapsable: true,
-            data: 'string',
-            onRender: (item: IDocument) => {
-                return <span>{item.sharedLinks}</span>;
-            },
-            isPadded: true
-        },
-        {
-            key: 'column5',
             name: '大小',
             fieldName: 'fileSizeRaw',
             minWidth: 70,
@@ -204,8 +192,40 @@ export class FilesStore {
             onRender: (item: IDocument) => {
                 return <span>{item.fileSize}</span>;
             }
-        }
+        },
+        {
+            key: 'column5',
+            name: '分享',
+            fieldName: 'sharedLinks',
+            minWidth: 70,
+            maxWidth: 90,
+            isResizable: true,
+            isCollapsable: true,
+            data: 'string',
+            onRender: (item: IDocument) => {
+                return (
+                    <SharedStatus links={item.sharedLinks} />
+                );
+            },
+            isPadded: true
+        },
     ];
 
 
+}
+
+
+const SharedStatus = (props: { links: number }) => {
+    const { links } = props;
+    if (links === 0) {
+        return (
+            <FabricLink>开始共享</FabricLink>
+        );
+    } else {
+        return (
+            <FabricLink>
+                管理 {links} 个共享
+            </FabricLink>
+        );
+    }
 }

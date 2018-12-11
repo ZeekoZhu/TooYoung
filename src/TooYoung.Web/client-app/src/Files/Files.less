@@ -1,9 +1,17 @@
+@import '../shared.less';
 .files {
+    .flex-col();
+    .content-root();
+    .cmd-bar {
+        .flex-fixed();
+    }
     .path-nav {
-        padding: 0 32px 32px 32px;
+        margin: 0 32px 32px 32px;
+        .flex-fixed();
     }
     .file-list {
-        padding: 0 32px 32px 32px;
+        overflow: auto;
+        margin: 0 32px 32px 32px;
         .icon {
             font-size: 140%;
         }

@@ -19,7 +19,7 @@ export class Header extends Component<HeaderProps> {
     }
     public render() {
         return (
-            <div className="header ms-bgColor-black ms-fontColor-neutralLighterAlt">
+            <div className="header ms-bgColor-black flex-fixed ms-fontColor-neutralLighterAlt">
                 <div className="left-align">
                     <span className="brand ms-font-xxl ms-fontWeight-regular">YourDrive</span>
                 </div>
