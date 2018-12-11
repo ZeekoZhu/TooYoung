@@ -1,0 +1,16 @@
+@import '../shared.less';
+.main-content() {
+    .flex-row();
+    justify-content: stretch;
+    flex: 1 1 auto;
+    .side {
+        width: 208px;
+    }
+}
+
+.home {
+    .flex-col();
+    .main-content {
+        .main-content();
+    }
+}
