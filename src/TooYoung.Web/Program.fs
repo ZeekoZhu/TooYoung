@@ -7,7 +7,6 @@ open Microsoft.AspNetCore.Cors.Infrastructure
 open Microsoft.AspNetCore.Hosting
 open Microsoft.Extensions.Logging
 open Microsoft.Extensions.DependencyInjection
-open Microsoft.AspNetCore.SpaServices.ReactDevelopmentServer
 open Giraffe
 
 open Microsoft.AspNetCore
@@ -16,7 +15,6 @@ open Microsoft.AspNetCore.CookiePolicy
 open TooYoung.Api.Handlers
 open TooYoung.Provider.Mongo
 open TooYoung.Domain
-open Microsoft.Extensions.Options
 open Microsoft.AspNetCore.Http
 
 // ---------------------------------

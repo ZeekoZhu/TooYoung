@@ -1,36 +1,31 @@
-import React, { Component } from 'react';
-import logo from './logo.svg';
-import './App.css';
-import { Provider, observer } from 'mobx-react';
-import { AuthService } from './Services/AuthService';
-import { AppRouter } from './AppRouter';
-import DevTools from 'mobx-react-devtools';
+import './App.less';
+
 import { observable } from 'mobx';
+import { Provider } from 'mobx-react';
+import DevTools from 'mobx-react-devtools';
+import React, { Component } from 'react';
 
-export interface IAppModel {
-    isSignedIn: boolean;
-    services?: {
-        authSvc: AuthService
-    }
-}
+import { AppRouter } from './AppRouter';
+import { IAppContext } from './Context';
+import { AppStore } from './stores/App.store';
 
-const defaultModel: IAppModel = {
-    isSignedIn: false
-}
 
+
+
+// Context
+
+
+const appContext: IAppContext = observable({
+    appStore: new AppStore()
+});
 
 class App extends Component {
-    @observable model = defaultModel;
-
-    constructor(props: IAppModel) {
-        super(props);
-        this.model.services = {
-            authSvc: new AuthService(this.model)
-        }
+    public componentDidMount() {
+        appContext.appStore.auth.checkSession();
     }
-    render() {
+    public render() {
         return (
-            <Provider appModel={this.model}>
+            <Provider {...appContext}>
                 <>
                     <AppRouter />
                     <DevTools />

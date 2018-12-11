@@ -1,90 +1,41 @@
-import { observer, inject } from 'mobx-react';
+import { inject, observer } from 'mobx-react';
 import React, { Component } from 'react';
-import { IAppModel } from './App';
-import {
-    BrowserRouter as Router,
-    Route,
-    Link,
-    Redirect,
-    withRouter,
-    RouteComponentProps
-} from 'react-router-dom';
-import { AuthService } from './Services/AuthService';
+import { BrowserRouter as Router, Redirect, Route, Switch } from 'react-router-dom';
 
-const selectAppModel = (appStore: any) => (appStore as IAppModel);
-
-export class Index extends Component {
-    render() {
-        return (
-            <h1>Index</h1>
-        );
-    }
-}
-
-// const Login = () => <h1>Login</h1>;
-interface ILoginProps {
-    appModel?: IAppModel;
-}
-
-type LoginProps = RouteComponentProps & ILoginProps;
-
-@inject(selectAppModel)
-@observer
-export class Login extends Component<LoginProps> {
-    private authSvc!: AuthService;
-    constructor(props: LoginProps) {
-        super(props);
-        this.authSvc = props.appModel!.services!.authSvc;
-    }
-    signIn() {
-        this.authSvc.signIn();
-    }
-    signOut() {
-        this.authSvc.signOut();
-    }
-    render() {
-        const { appModel } = this.props;
-        console.log(appModel!.isSignedIn);
-        return (<>
-            {
-                appModel!.isSignedIn === false
-                    ? <button onClick={() => this.signIn()}>Sign In</button>
-                    : <button onClick={() => this.signOut()}>Sign Out</button>
-            }
-        </>);
-    }
-}
+import { selectAppStore } from './Context';
+import { Home } from './Home';
+import { Login } from './Login/Login';
+import { AppStore } from './stores/App.store';
 
 export interface IPrivateRouteProp {
     comp: typeof Component,
-    appModel?: IAppModel,
+    appStore?: AppStore,
     path: string
 }
 
-@inject(appStore => ({
-    appModel: appStore as IAppModel
-}))
+@inject(selectAppStore)
 @observer
 export class PrivateRoute extends Component<IPrivateRouteProp> {
-    render() {
-        const { appModel, comp: Comp, ...rest } = this.props;
+    public render() {
+        const { appStore, comp: Comp, ...rest } = this.props;
+        const guard = (props: any) => appStore!.auth.isUserSignedIn === true
+            ? (<Comp {...props} />)
+            : <Redirect to={{
+                pathname: '/login',
+                state: { from: props.location }
+            }} />;
         return (
             <Route {...rest}
-                render={props => appModel!.isSignedIn
-                    ? (<Comp {...props} />)
-                    : <Redirect to={{
-                        pathname: '/login',
-                        state: { from: props.location }
-                    }} />}
+                render={guard}
             />);
     }
 }
 
 export const AppRouter = () => (
     <Router>
-        <>
+        <Switch>
             <Route path="/login" component={Login} />
-            <PrivateRoute path="/" comp={Index} />
-        </>
+            <PrivateRoute path="/" comp={Home} />
+        </Switch>
     </Router>
 );
