@@ -19,19 +19,19 @@ export class Files extends Component<FilesProps> {
     private store = new FilesStore();
     public render() {
         return (
-            <div className="files">
+            <div className="files cmd-bar-page">
                 <div className="cmd-bar">
                     <CommandBar
                         items={this.store.commandBarItems}
                         farItems={this.store.farItems}
                     />
                 </div>
-                <div className="path-nav">
+                <div className="title">
                     <Breadcrumb
                         items={this.store.pathNavItems}
                     />
                 </div>
-                <div className="file-list">
+                <div className="file-list" data-is-scrollable="true">
                     <DetailsList
                         items={this.store.fileListItems}
                         columns={this.store.columns}

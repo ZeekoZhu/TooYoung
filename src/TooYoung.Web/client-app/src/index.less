@@ -1,3 +1,4 @@
+@import './shared.less';
 html,
 body {
     min-height: 100%;
@@ -18,4 +19,14 @@ code {
 .full-screen {
     min-height: 100vh;
     width: 100vw;
+}
+
+.cmd-bar-page {
+    &>.cmd-bar {
+        .flex-fixed();
+    }
+    &>.title {
+        .flex-fixed();
+        margin:0 32px 32px 32px;
+    }
 }

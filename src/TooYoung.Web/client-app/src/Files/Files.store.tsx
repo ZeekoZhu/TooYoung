@@ -1,16 +1,16 @@
 import { format as formatDate } from 'date-fns';
 import filesize from 'filesize';
-import { observable } from 'mobx';
+import _ from 'lodash';
+import { action, computed, observable } from 'mobx';
 import { IBreadcrumbItem } from 'office-ui-fabric-react/lib/Breadcrumb';
 import { ICommandBarItemProps } from 'office-ui-fabric-react/lib/CommandBar';
-import { IColumn } from 'office-ui-fabric-react/lib/DetailsList';
+import { Selection, IColumn } from 'office-ui-fabric-react/lib/DetailsList';
 import { Icon } from 'office-ui-fabric-react/lib/Icon';
-import { Selection } from 'office-ui-fabric-react/lib/MarqueeSelection';
-import React from 'react';
 import { Link as FabricLink } from 'office-ui-fabric-react/lib/Link';
-import styled from 'styled-components';
+import React from 'react';
 
-type DocumentIcon = 'FabricFolder' | 'Page';
+import { ICommandBarItems, DocumentIcon } from '../CommonTypes';
+
 const dateFormat = 'PPpp';
 export interface IDocument {
     name: string;
@@ -26,15 +26,32 @@ export interface IDocument {
 
 
 export class FilesStore {
-    @observable public commandBarItems: ICommandBarItemProps[] = [
-        {
+    @observable private cmdBarButtons: ICommandBarItems = {
+        upload: {
             name: '上传',
-            key: 'upload',
+            key: '1-upload',
             iconProps: {
                 iconName: 'Upload'
             },
         }
-    ];
+    };
+    @observable private cmdDownloadBtn: ICommandBarItemProps = {
+        name: '下载',
+        key: '2-download',
+        iconProps: {
+            iconName: 'Download'
+        },
+    };
+    @observable private cmdDeleteBtn: ICommandBarItemProps = {
+        name: '删除',
+        key: '3-delete',
+        iconProps: {
+            iconName: 'Download'
+        },
+    };
+    @computed public get commandBarItems(): ICommandBarItemProps[] {
+        return _.sortBy(_.valuesIn(this.cmdBarButtons).filter(x => x !== null) as ICommandBarItemProps[], ['name']);
+    }
 
     @observable public farItems: ICommandBarItemProps[] = [
         {
@@ -58,8 +75,19 @@ export class FilesStore {
         }
     ];
 
+    @observable public seletedItem: IDocument | null = null;
+
     // todo: multiple select
-    public selection = new Selection();
+    public selection = new Selection({
+        onSelectionChanged: () => {
+            if (this.selection.count !== 0) {
+                const item = this.selection.getItems()[0] as IDocument;
+                this.setSelectedItem(item);
+            } else {
+                this.setSelectedItem(null);
+            }
+        }
+    });
 
     @observable public fileListItems: IDocument[] = [
         {
@@ -171,7 +199,6 @@ export class FilesStore {
             isResizable: true,
             data: 'number',
             onRender: (item: IDocument) => {
-                console.log(item.dateModified);
                 return (
                     <span>
                         {item.dateModified}
@@ -211,6 +238,18 @@ export class FilesStore {
         },
     ];
 
+    @action.bound
+    public setSelectedItem(item: IDocument | null) {
+        console.log(item);
+        this.seletedItem = item;
+        if (this.seletedItem === null) {
+            this.cmdBarButtons['2-download'] = null;
+            this.cmdBarButtons['3-delete'] = null;
+        } else {
+            this.cmdBarButtons['2-download'] = this.cmdDownloadBtn;
+            this.cmdBarButtons['3-delete'] = this.cmdDeleteBtn;
+        }
+    }
 
 }
 
