@@ -1,19 +1,20 @@
 import { format as formatDate } from 'date-fns';
 import filesize from 'filesize';
 import _ from 'lodash';
-import { action, computed, observable } from 'mobx';
+import { action, computed, observable, runInAction } from 'mobx';
 import { IBreadcrumbItem } from 'office-ui-fabric-react/lib/Breadcrumb';
 import { ICommandBarItemProps } from 'office-ui-fabric-react/lib/CommandBar';
-import { Selection, IColumn } from 'office-ui-fabric-react/lib/DetailsList';
+import { IColumn, Selection } from 'office-ui-fabric-react/lib/DetailsList';
 import { Icon } from 'office-ui-fabric-react/lib/Icon';
-import { Link as FabricLink } from 'office-ui-fabric-react/lib/Link';
 import React from 'react';
 
-import { ICommandBarItems, DocumentIcon } from '../CommonTypes';
+import { dateFormat } from '../Common';
+import { DocumentIcon, ICommandBarItems, ISharingEntry } from '../CommonTypes';
+import { SharedStatus } from '../SharedStatus/SharedStatus';
 
-const dateFormat = 'PPpp';
 export interface IDocument {
     name: string;
+    id: string;
     value: string;
     iconName: DocumentIcon;
     fileType: string;
@@ -46,7 +47,7 @@ export class FilesStore {
         name: '删除',
         key: '3-delete',
         iconProps: {
-            iconName: 'Download'
+            iconName: 'Delete'
         },
     };
     @computed public get commandBarItems(): ICommandBarItemProps[] {
@@ -91,6 +92,7 @@ export class FilesStore {
 
     @observable public fileListItems: IDocument[] = [
         {
+            id: 'bar111111',
             name: 'bar111111',
             dateModified: formatDate(new Date(), dateFormat),
             dateModifiedValue: +new Date(),
@@ -103,6 +105,7 @@ export class FilesStore {
         },
         {
             name: 'bar222222',
+            id: 'bar222222',
             dateModified: formatDate(new Date(), dateFormat),
             dateModifiedValue: +new Date(),
             fileSize: '-',
@@ -114,6 +117,7 @@ export class FilesStore {
         },
         {
             name: 'bar333333',
+            id: 'bar333333',
             dateModified: formatDate(new Date(), dateFormat),
             dateModifiedValue: +new Date(),
             fileSize: '-',
@@ -124,6 +128,7 @@ export class FilesStore {
             sharedLinks: 0
         },
         {
+            id: 'lorem file.txt',
             name: 'lorem file.txt',
             dateModified: formatDate(new Date(), dateFormat),
             dateModifiedValue: +new Date(),
@@ -136,6 +141,7 @@ export class FilesStore {
         },
         {
             name: 'test.jpg',
+            id: 'test.jpg',
             dateModified: formatDate(new Date(), dateFormat),
             dateModifiedValue: +new Date(),
             fileSize: filesize(2222),
@@ -146,6 +152,7 @@ export class FilesStore {
             sharedLinks: 1
         },
         {
+            id: 'data.zip',
             name: 'data.zip',
             dateModified: formatDate(new Date(), dateFormat),
             dateModifiedValue: +new Date(),
@@ -231,7 +238,11 @@ export class FilesStore {
             data: 'string',
             onRender: (item: IDocument) => {
                 return (
-                    <SharedStatus links={item.sharedLinks} />
+                    <SharedStatus
+                        onClick={() => {
+                            this.setSharingEntry(item.id);
+                        }}
+                        links={item.sharedLinks} />
                 );
             },
             isPadded: true
@@ -251,20 +262,36 @@ export class FilesStore {
         }
     }
 
-}
-
-
-const SharedStatus = (props: { links: number }) => {
-    const { links } = props;
-    if (links === 0) {
-        return (
-            <FabricLink>开始共享</FabricLink>
-        );
-    } else {
-        return (
-            <FabricLink>
-                管理 {links} 个共享
-            </FabricLink>
-        );
+    @observable public sharingEntry: null | ISharingEntry = null;
+    @computed public get showSharingPanel() {
+        return this.sharingEntry !== null;
     }
+
+    private getSharingEntry = async (fileId: string): Promise<ISharingEntry> => {
+        return Promise.resolve({
+            fileName: fileId,
+            id: '12312312',
+            refererRules: [],
+            tokenRules: [
+                {
+                    expiredAt: null,
+                    id: '12312312',
+                    password: 'password',
+                    token: 'asdfasdfasdfasdferwr23redfa'
+                }
+            ]
+        });
+    }
+
+    @action.bound
+    public setSharingEntry = async (fileId: string) => {
+        const entry = await this.getSharingEntry(fileId);
+        runInAction(() => {
+            this.sharingEntry = entry;
+        })
+    }
+
+
 }
+
+

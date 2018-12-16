@@ -4,9 +4,11 @@ import { observer } from 'mobx-react';
 import { Breadcrumb } from 'office-ui-fabric-react/lib/Breadcrumb';
 import { CommandBar } from 'office-ui-fabric-react/lib/CommandBar';
 import { DetailsList, DetailsListLayoutMode, SelectionMode } from 'office-ui-fabric-react/lib/DetailsList';
+import { Panel, PanelType } from 'office-ui-fabric-react/lib/Panel';
 import React, { Component } from 'react';
 
 import { FilesStore } from './Files.store';
+import { SharingPanel } from '../SharingPanel/SharingPanel';
 
 interface IFilesProps {
 }
@@ -44,6 +46,13 @@ export class Files extends Component<FilesProps> {
                         // onItemInvoked={this._onItemInvoked}
                         enterModalSelectionOnTouch={true}
                     />
+                    <Panel
+                        type={PanelType.medium}
+                        isOpen={this.store.showSharingPanel}>
+                        {this.store.sharingEntry === null
+                            ? <h1>请选择一个文件</h1>
+                            : <SharingPanel entry={this.store.sharingEntry} />}
+                    </Panel>
                 </div>
             </div>
         );

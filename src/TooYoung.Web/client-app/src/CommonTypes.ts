@@ -5,3 +5,27 @@ export interface ICommandBarItems {
 }
 
 export type DocumentIcon = 'FabricFolder' | 'Page';
+
+export interface ITokenRule {
+    token: string;
+    expiredAt: number | null;
+    password: string;
+    id: string;
+}
+
+
+export interface IRefererRule {
+    id: string;
+    allowedHost: string;
+}
+
+export type ISharingRule = IRefererRule | ITokenRule;
+
+export interface ISharingEntry {
+    id: string;
+    fileName: string;
+    tokenRules: ITokenRule[];
+    refererRules: IRefererRule[];
+}
+
+export type EventHandler<T> = (event: T) => void;
