@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk.Web">
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <TargetFramework>netcoreapp2.2</TargetFramework>
     <DebugType>portable</DebugType>
     <AssemblyName>TooYoung.Web</AssemblyName>
     <OutputType>Exe</OutputType>
@@ -9,16 +9,13 @@
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="Program.fs" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="appsettings.json" />
-    <None Include="paket.references" />
+    <Content Include="WebRoot\main.css" />
     <Content Include="WebRoot\**\*">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-  </ItemGroup>
-  <ItemGroup>
+    <Compile Include="Program.fs" />
+    <Content Include="appsettings.json" />
+    <None Include="paket.references" />
     <ProjectReference Include="..\TooYoung.Api\TooYoung.Api.fsproj" />
     <ProjectReference Include="..\TooYoung.Domain\TooYoung.Domain.fsproj" />
     <ProjectReference Include="..\TooYoung.Provider.Mongo\TooYoung.Provider.Mongo.fsproj" />

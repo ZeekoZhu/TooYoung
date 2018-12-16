@@ -9,7 +9,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BsonHelper.fs" />
-    <Compile Include="AutoMapperHelper.fs" />
     <Compile Include="Enities\FileDirectoryEntity.fs" />
     <Compile Include="Enities\UserGroupEntities.fs" />
     <Compile Include="MongoUnitOfWork.fs" />

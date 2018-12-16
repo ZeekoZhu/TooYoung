@@ -4,6 +4,7 @@
     <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Handlers\QrCodeHandlers.fs" />
     <Compile Include="Handlers\AuthGuard.fs" />
     <Compile Include="Handlers\AccountHandlers.fs" />
     <Compile Include="Handlers\DirectoryHandlers.fs" />

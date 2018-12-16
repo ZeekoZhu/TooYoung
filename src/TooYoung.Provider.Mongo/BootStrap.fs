@@ -1,7 +1,5 @@
 module TooYoung.Provider.Mongo.BootStrap
 open System
-open AutoMapper
-open AutoMapperBuilder
 open Microsoft.Extensions.DependencyInjection
 open Microsoft.Extensions.Configuration
 open MongoDB.Bson.Serialization

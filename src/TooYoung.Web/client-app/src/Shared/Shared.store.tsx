@@ -107,7 +107,8 @@ export class SharedStore {
                         expiredAt: null,
                         id: '12312312',
                         password: 'password',
-                        token: 'asdfasdfasdfasdferwr23redfa'
+                        token: 'asdfasdfasdfasdferwr23redfa',
+                        resourceId: 'resource id uusid'
                     }
                 ]
             }
@@ -130,7 +131,8 @@ export class SharedStore {
                         expiredAt: null,
                         id: '12312312',
                         password: 'password',
-                        token: 'asdfasdfasdfasdferwr23redfa'
+                        token: 'asdfasdfasdfasdferwr23redfa',
+                        resourceId: 'resource id uusid'
                     }
                 ]
             }
@@ -153,7 +155,8 @@ export class SharedStore {
                         expiredAt: null,
                         id: '12312312',
                         password: 'password',
-                        token: 'asdfasdfasdfasdferwr23redfa'
+                        token: 'asdfasdfasdfasdferwr23redfa',
+                        resourceId: 'resource id uusid'
                     }
                 ]
             }

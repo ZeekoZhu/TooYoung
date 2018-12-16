@@ -16,8 +16,9 @@ nuget Microsoft.Extensions.PlatformAbstractions
 nuget Microsoft.AspNetCore.Cryptography.KeyDerivation
 nuget MongoDB.Driver.GridFS
 nuget SixLabors.ImageSharp >= 1.0.0-beta0004 prerelease
-nuget xunit.runner.visualstudio >= 2.3.1
+nuget xunit.runner.visualstudio
 nuget Xunit.SerializedTheoryData
 nuget FsUnit.xUnit
 nuget FsUnit
 nuget ZeekoUtilsPack.BCLExt
+nuget QRCoder

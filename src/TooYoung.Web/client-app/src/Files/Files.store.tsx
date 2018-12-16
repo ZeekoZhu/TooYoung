@@ -271,13 +271,20 @@ export class FilesStore {
         return Promise.resolve({
             fileName: fileId,
             id: '12312312',
-            refererRules: [],
+            refererRules: [
+                {
+                    id: 'ewerqwre',
+                    allowedHost: 'www.cnblogs.com',
+                    resourceId: 'asasfasf'
+                }
+            ],
             tokenRules: [
                 {
                     expiredAt: null,
                     id: '12312312',
                     password: 'password',
-                    token: 'asdfasdfasdfasdferwr23redfa'
+                    token: 'asdfasdfasdfasdferwr23redfa',
+                    resourceId: 'sadfasfas'
                 }
             ]
         });

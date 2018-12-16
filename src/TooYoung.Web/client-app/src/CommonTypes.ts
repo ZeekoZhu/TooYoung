@@ -11,12 +11,14 @@ export interface ITokenRule {
     expiredAt: number | null;
     password: string;
     id: string;
+    resourceId: string;
 }
 
 
 export interface IRefererRule {
     id: string;
     allowedHost: string;
+    resourceId: string;
 }
 
 export type ISharingRule = IRefererRule | ITokenRule;

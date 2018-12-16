@@ -30,6 +30,7 @@ let webApp =
                   AccountHandlers.routes
                   DirectoryHandlers.routes
                   FileHandlers.routes
+                  QrCodeHandlers.routes
                 ] )
            ]
 
@@ -62,14 +63,13 @@ let configureApp (app : IApplicationBuilder) =
         .UseAuthentication()
         .UseStaticFiles()
     |> ignore
-    app.UseSpaStaticFiles()
     app.UseGiraffe(webApp)
-    app.Map(PathString("/app"), fun spaApp ->
-        app.UseSpa(fun spa ->
-            spa.Options.SourcePath <- "client-app"
-            if env.IsDevelopment() then
-                spa.UseProxyToSpaDevelopmentServer("http://localhost:3000")
-        )
+    app.UseSpaStaticFiles()
+    
+    app.UseSpa(fun spa ->
+        spa.Options.SourcePath <- "client-app"
+        if env.IsDevelopment() then
+            spa.UseProxyToSpaDevelopmentServer("http://localhost:1234")
     )
     |> ignore
 
