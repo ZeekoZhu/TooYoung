@@ -8,9 +8,9 @@ import { Login } from './Login/Login';
 import { AppStore } from './stores/App.store';
 
 export interface IPrivateRouteProp {
-    comp: typeof Component,
-    appStore?: AppStore,
-    path: string
+    comp: typeof Component;
+    appStore?: AppStore;
+    path: string;
 }
 
 @inject(selectAppStore)
@@ -37,8 +37,8 @@ export class PrivateRoute extends Component<IPrivateRouteProp> {
 export const AppRouter = () => (
     <Router>
         <Switch>
-            <Route path="/login" component={Login} />
-            <PrivateRoute path="/" comp={Home} />
+            <Route path='/login' component={Login} />
+            <PrivateRoute path='/' comp={Home} />
         </Switch>
     </Router>
 );

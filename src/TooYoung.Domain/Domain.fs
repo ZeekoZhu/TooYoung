@@ -101,7 +101,7 @@ module Sharing =
         member val RefererRules = List.empty<RefererRule> with get, set
 
     let canAccess (entry: SharingEntry) (claims: AccessClaim) =
-        if entry.RefererRules.IsEmpty && entry.TokenRules.IsEmpty then true
+        if entry.RefererRules.IsEmpty && entry.TokenRules.IsEmpty then false
         else canAccessViaReferer
                 (entry.RefererRules |> List.map (fun x -> x.AllowedHost))
                 claims.Host
@@ -136,13 +136,13 @@ module FileDirectory =
                 | RemoveSubDir x ->
                     this.DirectoryChildren <-
                         this.DirectoryChildren
-                        |> List.filter (fun d -> d = x)
+                        |> List.filter (fun d -> d <> x)
                 | AddItem x ->
                     this.FileChildren <- x :: this.FileChildren
                 | RemoveItem x ->
                     this.FileChildren <-
                         this.FileChildren
-                        |> List.filter (fun f -> f.Id = x)
+                        |> List.filter (fun f -> f.Id <> x)
             this.PendingOperations <- List.empty<DirectoryOperaion>
      
         member this.AppendTo (other: FileDirectory) =

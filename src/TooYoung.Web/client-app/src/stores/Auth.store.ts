@@ -1,9 +1,11 @@
 
 import { action, observable, runInAction } from 'mobx';
+import { AsyncData } from '../CommonTypes';
 
 export class AuthStore {
-    @observable public isUserSignedIn: 'loading' | true | false = 'loading';
-    @observable public userName: string = 'Foo Bar'
+    @observable public isUserSignedIn: AsyncData<boolean> = 'pending';
+    @observable public userName: string = 'Foo Bar';
+    @observable public isAdmin: AsyncData<boolean> = 'pending';
 
     public isSessionAlive(): Promise<boolean> {
         return Promise.resolve(!!localStorage.getItem('signin'));
@@ -30,11 +32,13 @@ export class AuthStore {
         // fake async
         console.log('set it');
         this.isUserSignedIn = true;
+        this.isAdmin = true;
     }
 
     @action('[Auth] Sign Out')
     public signOut() {
         localStorage.removeItem('signin');
         this.isUserSignedIn = false;
+        this.isAdmin = false;
     }
 }

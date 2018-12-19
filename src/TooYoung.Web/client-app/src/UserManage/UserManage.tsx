@@ -3,32 +3,35 @@ import { CommandBar } from 'office-ui-fabric-react/lib/CommandBar';
 import { DetailsList, DetailsListLayoutMode, SelectionMode } from 'office-ui-fabric-react/lib/DetailsList';
 import React, { Component } from 'react';
 
-import { SharedStore } from './Shared.store';
+import { UserManageStore } from './UserManage.store';
 
 // tslint:disable-next-line:no-empty-interface
-interface ISharedProps {
+interface IUserManageProps {
 }
 
-type SharedProps = ISharedProps;
+type UserManageProps = IUserManageProps;
 
 @observer
-export class Shared extends Component<SharedProps> {
-    private store = new SharedStore();
+export class UserManage extends Component<UserManageProps> {
+    private store!: UserManageStore;
+    constructor(props: UserManageProps) {
+        super(props);
+        this.store = new UserManageStore();
+    }
     public render() {
         return (
-            <div className='shared cmd-bar-page'>
+            <div className='files cmd-bar-page'>
                 <div className='cmd-bar'>
                     <CommandBar
                         items={this.store.commandBarItems}
-                        farItems={this.store.farItems}
                     />
                 </div>
                 <div className='title'>
-                    <h2 className='ms-font-xxl ms-fontWeight-semilight'>我的共享</h2>
+                    <h2 className='ms-font-xxl ms-fontWeight-semilight'>用户管理</h2>
                 </div>
                 <div className='file-list' data-is-scrollable='true'>
                     <DetailsList
-                        items={this.store.fileListItems}
+                        items={this.store.userListItems}
                         columns={this.store.columns}
                         selectionMode={SelectionMode.single}
                         setKey='set'

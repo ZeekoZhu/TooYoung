@@ -25,7 +25,6 @@ export interface IDocument {
     sharedLinks: number;
 }
 
-
 export class FilesStore {
     @observable private cmdBarButtons: ICommandBarItems = {
         upload: {
@@ -50,6 +49,28 @@ export class FilesStore {
             iconName: 'Delete'
         },
     };
+    private getSharingEntry = async (fileId: string): Promise<ISharingEntry> => {
+        return Promise.resolve({
+            fileName: fileId,
+            id: '12312312',
+            refererRules: [
+                {
+                    id: 'ewerqwre',
+                    allowedHost: 'www.cnblogs.com',
+                    resourceId: 'asasfasf'
+                }
+            ],
+            tokenRules: [
+                {
+                    expiredAt: null,
+                    id: '12312312',
+                    password: 'password',
+                    token: 'asdfasdfasdfasdferwr23redfa',
+                    resourceId: 'sadfasfas'
+                }
+            ]
+        });
+    }
     @computed public get commandBarItems(): ICommandBarItemProps[] {
         return _.sortBy(_.valuesIn(this.cmdBarButtons).filter(x => x !== null) as ICommandBarItemProps[], ['name']);
     }
@@ -132,8 +153,8 @@ export class FilesStore {
             name: 'lorem file.txt',
             dateModified: formatDate(new Date(), dateFormat),
             dateModifiedValue: +new Date(),
-            fileSize: filesize(123432435234),
-            fileSizeRaw: 123432435234,
+            fileSize: filesize(1235234),
+            fileSizeRaw: 1234234,
             iconName: 'Page',
             fileType: 'txt',
             value: 'uuid-for-txt',
@@ -176,7 +197,7 @@ export class FilesStore {
             maxWidth: 32,
             onRender: (item: IDocument) => {
                 return (
-                    <div className="icon">
+                    <div className='icon'>
                         <Icon iconName={item.iconName} />
                     </div>
                 );
@@ -267,38 +288,12 @@ export class FilesStore {
         return this.sharingEntry !== null;
     }
 
-    private getSharingEntry = async (fileId: string): Promise<ISharingEntry> => {
-        return Promise.resolve({
-            fileName: fileId,
-            id: '12312312',
-            refererRules: [
-                {
-                    id: 'ewerqwre',
-                    allowedHost: 'www.cnblogs.com',
-                    resourceId: 'asasfasf'
-                }
-            ],
-            tokenRules: [
-                {
-                    expiredAt: null,
-                    id: '12312312',
-                    password: 'password',
-                    token: 'asdfasdfasdfasdferwr23redfa',
-                    resourceId: 'sadfasfas'
-                }
-            ]
-        });
-    }
-
     @action.bound
     public setSharingEntry = async (fileId: string) => {
         const entry = await this.getSharingEntry(fileId);
         runInAction(() => {
             this.sharingEntry = entry;
-        })
+        });
     }
 
-
 }
-
-

@@ -1,0 +1,28 @@
+version: '3.4'
+services:
+  web:
+    image: zeekozhu/TooYoung:latest
+    ports:
+      - "3000:80"
+    restart: unless-stopped
+    working_dir: /app
+    environment:
+      - TZ=Asia/Shanghai
+      - ADMIN=root
+      - ADMIN_PASSWORD=p@55w0rd
+    volumes:
+      - /nas/appsettings/:appsettings
+      - /nas/logs/web:/app/logs
+    command: bash -c 'cp /appsettings/appsettings.Production.json . && sh run.sh'
+  mongo:
+    image: mongo
+    ports:
+      - "27011:27017"
+    restart: unless-stopped
+    environment:
+      - TZ=Asia/Shanghai
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=p@55w0rd
+    volumes:
+      - /nas/db:/data/db
+

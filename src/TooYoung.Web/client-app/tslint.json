@@ -1,8 +1,7 @@
 {
   "extends": [
     "tslint:recommended",
-    "tslint-react",
-    "tslint-config-prettier"
+    "tslint-react"
   ],
   "linterOptions": {
     "exclude": [
@@ -12,6 +11,20 @@
     ]
   },
   "rules": {
-    "no-console": false
+    "no-console": false,
+    "semicolon": true,
+    "quotemark": {
+      "options": "single"
+    },
+    "jsx-no-multiline-js": false,
+    "trailing-comma": false,
+    "arrow-parens": false,
+    "jsx-wrap-multiline": false,
+    "jsx-self-close": false,
+    "jsx-alignment": false,
+    "object-literal-sort-keys": false,
+    "jsx-no-lambda": false,
+    "member-access": false,
+    "member-ordering": false
   }
 }

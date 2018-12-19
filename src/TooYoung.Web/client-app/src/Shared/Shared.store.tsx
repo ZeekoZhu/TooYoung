@@ -1,18 +1,15 @@
 import formatDate from 'date-fns/format';
 import filesize from 'filesize';
 import _ from 'lodash';
-import React from 'react';
 import { action, computed, observable } from 'mobx';
 import { ICommandBarItemProps } from 'office-ui-fabric-react/lib/CommandBar';
 import { IColumn, Selection } from 'office-ui-fabric-react/lib/DetailsList';
 import { Icon } from 'office-ui-fabric-react/lib/Icon';
+import React from 'react';
 
-import { dateFormat, countSharing } from '../Common';
-import { ISharingEntry, DocumentIcon, ICommandBarItems } from '../CommonTypes';
-
+import { countSharing, dateFormat } from '../Common';
+import { DocumentIcon, ICommandBarItems, ISharingEntry } from '../CommonTypes';
 import { SharedStatus } from '../SharedStatus/SharedStatus';
-
-
 
 export interface IDocument {
     name: string;
@@ -25,8 +22,6 @@ export interface IDocument {
     fileSizeRaw: number;
     sharingEntry: null | ISharingEntry;
 }
-
-
 
 export class SharedStore {
     @observable public cmdBarButtons: ICommandBarItems = {
@@ -46,7 +41,6 @@ export class SharedStore {
             iconName: 'RemoveLink'
         }
     };
-
 
     @observable public farItems: ICommandBarItemProps[] = [
         {
@@ -174,7 +168,7 @@ export class SharedStore {
             maxWidth: 32,
             onRender: (item: IDocument) => {
                 return (
-                    <div className="icon">
+                    <div className='icon'>
                         <Icon iconName={item.iconName} />
                     </div>
                 );
@@ -242,6 +236,4 @@ export class SharedStore {
             isPadded: true
         },
     ];
-
-
 }

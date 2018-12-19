@@ -17,4 +17,4 @@ export const SharedStatus = (props: { links: number, onClick?: EventHandler<void
             </FabricLink>
         );
     }
-}
+};

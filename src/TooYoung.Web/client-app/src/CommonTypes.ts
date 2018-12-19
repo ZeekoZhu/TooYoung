@@ -14,7 +14,6 @@ export interface ITokenRule {
     resourceId: string;
 }
 
-
 export interface IRefererRule {
     id: string;
     allowedHost: string;
@@ -29,5 +28,11 @@ export interface ISharingEntry {
     tokenRules: ITokenRule[];
     refererRules: IRefererRule[];
 }
+
+export type AsyncData<T> = 'pending' | T;
+
+export const isPending = <T>(data: AsyncData<T>): data is 'pending' => {
+    return data === 'pending';
+};
 
 export type EventHandler<T> = (event: T) => void;

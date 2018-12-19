@@ -1,7 +1,7 @@
 import copy from 'clipboard-copy';
 import { action, observable } from 'mobx';
 import { observer } from 'mobx-react';
-import { PrimaryButton, DefaultButton } from 'office-ui-fabric-react/lib/Button';
+import { DefaultButton, PrimaryButton } from 'office-ui-fabric-react/lib/Button';
 import { Callout, DirectionalHint } from 'office-ui-fabric-react/lib/Callout';
 import {
     DocumentCard,
@@ -12,12 +12,12 @@ import {
 import React, { Component } from 'react';
 import styled from 'styled-components';
 
+import { isTokenRule } from '../Common';
+import { ISharingRule } from '../CommonTypes';
+
 const ImgPreivewDiv = styled.div`
     cursor:zoom-in;
 `;
-
-import { isTokenRule } from '../Common';
-import { ISharingRule } from '../CommonTypes';
 
 interface ISharingRuleProps {
     rule: ISharingRule;
@@ -31,16 +31,15 @@ const generateUrl = (rule: ISharingRule) => {
     if (isTokenRule(rule)) {
         const url = `${baseUrl}/${rule.resourceId}/${rule.token}`;
         return url;
-    }
-    else {
+    } else {
         const url = baseUrl + rule.resourceId;
         return url;
     }
-}
+};
 
 const qrcodeSrc = (content: string) => {
     return `/api/v1/qrcode/${encodeURIComponent(content)}`;
-}
+};
 
 @observer
 export class SharingRule extends Component<SharingRuleProps> {
@@ -69,7 +68,7 @@ export class SharingRule extends Component<SharingRuleProps> {
                         />
 
                     </ImgPreivewDiv>
-                    <div className="ms-DocumentCard-details">
+                    <div className='ms-DocumentCard-details'>
                         <DocumentCardTitle
                             title={ruleUrl}
                             shouldTruncate={true} />
@@ -77,13 +76,13 @@ export class SharingRule extends Component<SharingRuleProps> {
                         activity="Sent a few minutes ago"
                         people={[{ name: 'Kat Larrson', profileImageSrc: TestImages.personaFemale }]}
                     /> */}
-                        <div className="actions ms-textAlignRight">
+                        <div className='actions ms-textAlignRight'>
                             <DefaultButton
                                 iconProps={{
                                     iconName: 'Delete'
                                 }}>删除</DefaultButton>
                             <PrimaryButton
-                                text="复制链接"
+                                text='复制链接'
                                 onClick={() => {
                                     copy(ruleUrl);
                                 }}
@@ -101,7 +100,7 @@ export class SharingRule extends Component<SharingRuleProps> {
                     }}
                     directionalHint={DirectionalHint.leftCenter}
                 >
-                    <img src={qrcodeSrc(ruleUrl)} height="224" width="224" />
+                    <img src={qrcodeSrc(ruleUrl)} height='224' width='224' />
                 </Callout>
             </>
         );
