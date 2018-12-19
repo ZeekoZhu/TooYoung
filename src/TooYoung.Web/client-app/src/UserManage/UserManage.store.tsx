@@ -6,7 +6,7 @@ import { Link as FabricLink } from 'office-ui-fabric-react/lib/Link';
 import React from 'react';
 
 import { convertCmdItems } from '../Common';
-import { ICommandBarItems } from '../CommonTypes';
+import { ICommandBarItems, WrappedProp } from '../CommonTypes';
 
 export interface IUserInfo {
     id: string;
@@ -16,14 +16,17 @@ export interface IUserInfo {
     password: string;
     sizeUsedValue: number;
     sizeUsed: string;
+    locked: boolean;
 }
 
 export class UserManageStore {
     public selection = new Selection({
         onSelectionChanged: () => {
-            if (this.selection.count !== 0) {
-                const item = this.selection.getItems()[0] as IUserInfo;
+            if (this.selection.getSelectedCount() !== 0) {
+                const item = this.selection.getSelection()[0] as IUserInfo;
                 this.setSelected(item);
+            } else {
+                this.setSelected(null);
             }
         }
     });
@@ -33,6 +36,9 @@ export class UserManageStore {
             key: '1-new-user',
             iconProps: {
                 iconName: 'AddFriend'
+            },
+            onClick: () => {
+                this.showAddUser.set(true);
             }
         }
     };
@@ -41,14 +47,32 @@ export class UserManageStore {
         key: '2-block',
         iconProps: {
             iconName: 'BlockContact'
+        },
+        onClick: () => {
+            this.showBlockUser.set(true);
+        }
+
+    };
+    @observable private cmdUnBlockUserBtn: ICommandBarItemProps = {
+        name: '启用',
+        key: '2-unblock',
+        iconProps: {
+            iconName: 'Unlock'
+        },
+        onClick: () => {
+            // this.showBlockUser.set(true);
         }
     };
+
     @observable private cmdDeleteBtn: ICommandBarItemProps = {
         name: '删除',
         key: '3-delete',
         iconProps: {
             iconName: 'Delete'
         },
+        onClick: () => {
+            this.showDeleteUser.set(true);
+        }
     };
 
     @computed public get commandBarItems() {
@@ -57,6 +81,7 @@ export class UserManageStore {
 
     @observable public userListItems: IUserInfo[] = [
         {
+            locked: false,
             id: '111111',
             name: 'Fooo',
             displayName: 'Foo Bar',
@@ -66,6 +91,7 @@ export class UserManageStore {
             sizeUsed: fileSize(213222)
         },
         {
+            locked: true,
             id: '22222',
             name: 'Barrrr',
             displayName: 'Lorem',
@@ -87,6 +113,23 @@ export class UserManageStore {
             isSorted: true,
             data: 'string',
             isPadded: true
+        },
+        {
+            key: 'column5',
+            name: '状态',
+            fieldName: 'locked',
+            minWidth: 50,
+            maxWidth: 100,
+            isRowHeader: true,
+            data: 'boolean',
+            isPadded: true,
+            onRender: (item: IUserInfo) => {
+                if (item.locked) {
+                    return '已停用';
+                } else {
+                    return '正常';
+                }
+            }
         },
         {
             key: 'column2',
@@ -123,23 +166,36 @@ export class UserManageStore {
             onRender: (item: IUserInfo) => {
                 return (
                     <span>
-                        <FabricLink>重置密码</FabricLink>
+                        <FabricLink
+                            onClick={() => this.showResetPwd.set(true)}
+                        >重置密码</FabricLink>
                     </span>
                 );
             },
             isPadded: true
         },
     ];
-    @observable public selectedItem: IUserInfo | null = null;
+    public selectedItem: WrappedProp<IUserInfo | null> = new WrappedProp(null);
+    public showAddUser = new WrappedProp(false);
+    public showBlockUser = new WrappedProp(false);
+    public showDeleteUser = new WrappedProp(false);
+    public showResetPwd = new WrappedProp(false);
 
     @action.bound
-    public setSelected(item: IUserInfo) {
-        this.selectedItem = item;
-        if (this.selectedItem === null) {
+    public setSelected(item: IUserInfo | null) {
+        this.selectedItem.set(item);
+        if (this.selectedItem.value === null) {
             this.cmdBarButtons['2-block'] = null;
+            this.cmdBarButtons['2-unblock'] = null;
             this.cmdBarButtons['3-delete'] = null;
         } else {
-            this.cmdBarButtons['2-block'] = this.cmdBlockUserBtn;
+            if (this.selectedItem.value.locked) {
+                this.cmdBarButtons['2-unblock'] = this.cmdUnBlockUserBtn;
+                this.cmdBarButtons['2-block'] = null;
+            } else {
+                this.cmdBarButtons['2-block'] = this.cmdBlockUserBtn;
+                this.cmdBarButtons['2-unblock'] = null;
+            }
             this.cmdBarButtons['3-delete'] = this.cmdDeleteBtn;
         }
     }

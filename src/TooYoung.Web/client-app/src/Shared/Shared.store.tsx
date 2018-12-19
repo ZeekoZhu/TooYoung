@@ -53,6 +53,7 @@ export class SharedStore {
         }
     ];
 
+    // todo: wrong api call
     public selection = new Selection({
         onSelectionChanged: () => {
             if (this.selection.count !== 0) {

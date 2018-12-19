@@ -1,3 +1,4 @@
+import { action, observable } from 'mobx';
 import { ICommandBarItemProps } from 'office-ui-fabric-react/lib/CommandBar';
 
 export interface ICommandBarItems {
@@ -36,3 +37,14 @@ export const isPending = <T>(data: AsyncData<T>): data is 'pending' => {
 };
 
 export type EventHandler<T> = (event: T) => void;
+
+export class WrappedProp<T> {
+    @observable public value!: T;
+    @action.bound
+    public set(val: T) {
+        this.value = val;
+    }
+    constructor(val: T) {
+        this.set(val);
+    }
+}
