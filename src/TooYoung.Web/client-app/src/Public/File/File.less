@@ -1,0 +1,24 @@
+@import '../../shared.less';
+body {
+    height: 100vh;
+}
+
+.file {
+    height: 100%;
+    .flex-col();
+    .filename {
+        margin: 32px;
+    }
+    justify-content: space-between;
+    .info {
+        margin: 32px;
+        .flex-col();
+        span {
+            margin-bottom: 16px;
+        }
+    }
+    .buttons {
+        margin: 32px;
+        .flex-col();
+    }
+}

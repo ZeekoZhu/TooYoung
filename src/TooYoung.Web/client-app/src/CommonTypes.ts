@@ -7,6 +7,19 @@ export interface ICommandBarItems {
 
 export type DocumentIcon = 'FabricFolder' | 'Page';
 
+export interface IDocument {
+    name: string;
+    id: string;
+    value: string;
+    iconName: DocumentIcon;
+    fileType: string;
+    dateModified: string;
+    dateModifiedValue: number;
+    fileSize: string;
+    fileSizeRaw: number;
+    sharedLinks: number;
+}
+
 export interface ITokenRule {
     token: string;
     expiredAt: number | null;

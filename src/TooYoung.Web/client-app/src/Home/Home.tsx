@@ -5,6 +5,7 @@ import { Redirect, Route, Switch } from 'react-router';
 
 import { Files } from '../Files/Files';
 import { Header } from '../Header/Header';
+import { Profile } from '../Profile/Profile';
 import { Shared } from '../Shared/Shared';
 import { SideNav } from '../SideNav/SideNav';
 import { UserManage } from '../UserManage/UserManage';
@@ -21,6 +22,7 @@ export class Home extends Component {
                     <div className='content'>
                         <Switch>
                             <Route path='/admin' component={UserManage} />
+                            <Route path='/profile' component={Profile} />
                             <Route path='/files' component={Files} />
                             <Route path='/shared' component={Shared} />
                             <Route path='/'>

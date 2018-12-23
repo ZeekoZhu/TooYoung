@@ -5,6 +5,8 @@ import { BrowserRouter as Router, Redirect, Route, Switch } from 'react-router-d
 import { selectAppStore } from './Context';
 import { Home } from './Home/Home';
 import { Login } from './Login/Login';
+import { File } from './Public/File/File';
+import { Scan } from './Public/Scan/Scan';
 import { AppStore } from './stores/App.store';
 
 export interface IPrivateRouteProp {
@@ -38,6 +40,8 @@ export const AppRouter = () => (
     <Router>
         <Switch>
             <Route path='/login' component={Login} />
+            <Route path='/scan' component={Scan} />
+            <Route path='/file-share' component={File} />
             <PrivateRoute path='/' comp={Home} />
         </Switch>
     </Router>

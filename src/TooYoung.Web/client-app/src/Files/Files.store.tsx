@@ -9,21 +9,10 @@ import { Icon } from 'office-ui-fabric-react/lib/Icon';
 import React from 'react';
 
 import { dateFormat } from '../Common';
-import { DocumentIcon, ICommandBarItems, ISharingEntry } from '../CommonTypes';
+import { ICommandBarItems, IDocument, ISharingEntry } from '../CommonTypes';
 import { SharedStatus } from '../SharedStatus/SharedStatus';
 
-export interface IDocument {
-    name: string;
-    id: string;
-    value: string;
-    iconName: DocumentIcon;
-    fileType: string;
-    dateModified: string;
-    dateModifiedValue: number;
-    fileSize: string;
-    fileSizeRaw: number;
-    sharedLinks: number;
-}
+
 
 export class FilesStore {
     @observable private cmdBarButtons: ICommandBarItems = {

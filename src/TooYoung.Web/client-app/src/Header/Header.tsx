@@ -1,9 +1,13 @@
-import React, { Component } from 'react';
-import { observer, inject } from 'mobx-react';
-import { selectAppStore, WithAppStore } from '../Context';
-import { AuthStore } from '../stores/Auth.store';
 import './Header.less';
 
+import { inject, observer } from 'mobx-react';
+import React, { Component } from 'react';
+import { Link } from 'react-router-dom';
+
+import { selectAppStore, WithAppStore } from '../Context';
+import { AuthStore } from '../stores/Auth.store';
+
+// tslint:disable-next-line:no-empty-interface
 interface IHeaderProps {
 }
 
@@ -19,14 +23,16 @@ export class Header extends Component<HeaderProps> {
     }
     public render() {
         return (
-            <div className="header ms-bgColor-black flex-fixed ms-fontColor-neutralLighterAlt">
-                <div className="left-align">
-                    <span className="brand ms-font-xxl ms-fontWeight-regular">YourDrive</span>
+            <div className='header ms-bgColor-black flex-fixed ms-fontColor-neutralLighterAlt'>
+                <div className='left-align'>
+                    <span className='brand ms-font-xxl ms-fontWeight-regular'>YourDrive</span>
                 </div>
-                <div className="center-align"></div>
-                <div className="right-align">
-                    <div className="user-info">
-                        <span>你好，</span><span>{this.auth.userName}</span></div>
+                <div className='center-align'></div>
+                <div className='right-align'>
+                    <div className='user-info'>
+                        <span>你好，</span>
+                        <Link to='/profile' >{this.auth.userName}</Link>
+                    </div>
                 </div>
             </div>
         );
