@@ -27,7 +27,7 @@ export class AuthStore {
         });
     }
     @action('[Auth] Sign In')
-    public signIn() {
+    public signIn(userName: string, password: string) {
         localStorage.setItem('signin', 'true');
         // fake async
         console.log('set it');

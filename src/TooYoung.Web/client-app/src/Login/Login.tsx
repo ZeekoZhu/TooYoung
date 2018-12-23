@@ -1,11 +1,13 @@
 import './Login.less';
 
+import { observable } from 'mobx';
 import { inject, observer } from 'mobx-react';
 import { ActionButton, DefaultButton, PrimaryButton } from 'office-ui-fabric-react/lib/Button';
 import { TextField } from 'office-ui-fabric-react/lib/TextField';
 import React from 'react';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 
+import { WrappedProp } from '../CommonTypes';
 import { selectAppStore, WithAppStore } from '../Context';
 import { AuthStore } from '../stores/Auth.store';
 
@@ -16,13 +18,15 @@ type LoginProps = RouteComponentProps & ILoginProps & WithAppStore;
 @inject(selectAppStore)
 @observer
 class LoginComp extends React.Component<LoginProps> {
+    @observable userName = new WrappedProp<string>('');
+    @observable password = new WrappedProp<string>('');
     private authSvc!: AuthStore;
     constructor(props: LoginProps) {
         super(props);
         this.authSvc = props.appStore!.auth;
     }
     public signIn = () => {
-        this.authSvc.signIn();
+        this.authSvc.signIn(this.userName.value, this.password.value);
     }
     public signOut = () => {
         this.authSvc.signOut();
@@ -46,9 +50,11 @@ class LoginComp extends React.Component<LoginProps> {
             <div className='login-form'>
                 <div className='fields'>
                     <TextField
+                        onChange={(_, value) => this.userName.set(value || '')}
                         className='text-field'
                         placeholder='用户名' />
                     <TextField
+                        onChange={(_, value) => this.password.set(value || '')}
                         className='text-field'
                         placeholder='密码' />
                 </div>
