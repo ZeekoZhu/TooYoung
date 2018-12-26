@@ -25,6 +25,12 @@ type UnitOfWork() =
             
 
 module UnitOfWork =
+    let startWork (uow: UnitOfWork) f =
+        using uow
+            ( fun work ->
+                try f work
+                finally work.Commit()
+            )
     let commit (uow: UnitOfWork) =
         uow.Commit()
     let rollback (uow: UnitOfWork) =

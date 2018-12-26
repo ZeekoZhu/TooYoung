@@ -1,12 +1,24 @@
 import axios from 'axios';
-import { apiV1 } from './base.api';
+
+import { IProfile } from '../models/user';
+import { apiV1, falseOnFailed } from './base.api';
 
 const UserAPI = {
-    signin: (username: string, password: string) => {
-        axios.post(apiV1('/account/login'), {
-            userName: 'zeeko',
-            password: 'test'
+    signOut: async () => {
+        return await axios.post(apiV1('/account/logout'))
+            .then(x => x.status === 200);
+    },
+    signin: async (username: string, password: string) => {
+        const x = await axios.post(apiV1('/account/login'), {
+            userName: username,
+            password
         });
+        return x.status === 200;
+    },
+    getProfile: async () => {
+        const result = await axios.get<IProfile>(apiV1('/account/profile'))
+            .then(falseOnFailed);
+        return result;
     }
 };
 

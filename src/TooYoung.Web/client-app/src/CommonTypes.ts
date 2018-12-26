@@ -43,10 +43,12 @@ export interface ISharingEntry {
     refererRules: IRefererRule[];
 }
 
-export type AsyncData<T> = 'pending' | T;
+export const Pending = Symbol('pending');
+
+export type AsyncData<T> = 'pending' | T | symbol;
 
 export const isPending = <T>(data: AsyncData<T>): data is 'pending' => {
-    return data === 'pending';
+    return data === 'pending' || data === Pending;
 };
 
 export type EventHandler<T> = (event: T) => void;

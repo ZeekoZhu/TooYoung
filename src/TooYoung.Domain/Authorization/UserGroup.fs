@@ -1,16 +1,25 @@
 namespace TooYoung.Domain.Authorization
 
 module UserGroup =
+    open System.Runtime.Serialization
     open System.Runtime.CompilerServices
     open System
 
     type AccessConstraint =
         | All
         | Instance of string
+        override this.ToString() =
+            match this with
+            | All -> "*"
+            | Instance str -> str
 
     type AccessOperation =
         | Any
         | Action of string
+        override this.ToString() =
+            match this with
+            | Any -> "*"
+            | Action str -> str
 
     type AccessTargetType = string
 

@@ -10,8 +10,6 @@ open Async
 open FsToolkit.ErrorHandling
 
 type AuthorizationService(repo: IUserGroupRepository) =
-    let startWork = Repository.startWork repo
-    let unitwork = Repository.unitWork repo
 
     let checkForAdd name fn =
         repo.GetGroupByName name
@@ -24,7 +22,7 @@ type AuthorizationService(repo: IUserGroupRepository) =
     member this.CreateGroupForUserAsync (user: User) =
         let group = UserGroup(Guid.NewGuid())
         ( fun _ ->
-            group.Name <- user.Id.ToString()
+            group.Name <- user.UserName.ToString()
             group.Users <- [ user.Id ]
             repo.AddGroupAsync(group)
         )
@@ -48,8 +46,11 @@ type AuthorizationService(repo: IUserGroupRepository) =
         repo.DeleteGroupAsync groupId
 
     member this.AddUserToAsync (group: UserGroup) userId =
-        group.Users <- userId:: group.Users
-        group
+        group.Users <- userId:: group.Users |> List.distinct
+        repo.UpdateGroupAsync group
+
+    member this.UpdateGroupAsync group =
+        repo.UpdateGroupAsync group
 
     member this.GetAccessDefinitionsForUserAsync userId accessType =
         repo.GetPermissionForUser userId accessType

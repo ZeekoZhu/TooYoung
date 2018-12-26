@@ -7,6 +7,8 @@ open System.Security.Claims;
 open Giraffe
 
 [<AutoOpen>]
+module AppErrors =
+    exception InvalidState of string
 module ErrorMessage =
     type ErrorMessage = {
         Message: String

@@ -5,6 +5,7 @@ open Giraffe
 open Microsoft.AspNetCore.Http
 open TooYoung.Domain.Services
 open TooYoung.WebCommon
+open TooYoung.WebCommon.ErrorMessage
 open FSharp.Control.Tasks.V2
 
 let getDirSvc (ctx: HttpContext) = ctx.GetService<DirectoryService>()

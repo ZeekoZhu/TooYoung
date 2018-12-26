@@ -15,8 +15,6 @@ type FileInfoAddDto =
 
 
 type FileService(repo: IFileRepository) =
-    let startWork f = Repository.startWork repo f
-    let unitWork f = Repository.unitWork repo f
 
     let copyMetadata (src: Dictionary<string, string>) (target: Dictionary<string, string>) =
         for KeyValue(key, value) in src do
@@ -77,7 +75,7 @@ type FileService(repo: IFileRepository) =
     member this.Add (dto: FileInfoAddDto, ownerId) =
         let fileInfo = FileInfo(Guid.NewGuid().ToString(), ownerId, dto.Name)
         copyMetadata dto.Metadatas fileInfo.Metadatas
-        startWork (fun _ -> repo.AddAsync(fileInfo))
+        repo.AddAsync(fileInfo)
 
     /// 为一个文件设置文件内容，之前设置的内容会被彻底删除
     member this.SetContentAsync (fileInfoId: string, bytes: byte [], userId: string) =
@@ -86,7 +84,7 @@ type FileService(repo: IFileRepository) =
             AsyncResult.bind deleteBinary
             >> AsyncResult.bind (flip setBinary bytes)
         tryGetFile fileInfoId userId
-        |> (unitWork deleteAndSetNew)
+        |> deleteAndSetNew
         
     
     /// 更新一个文件的内容
@@ -97,7 +95,7 @@ type FileService(repo: IFileRepository) =
                 copyMetadata dto.Metadatas info.Metadatas
                 info
             )
-        >>= unitWork repo.UpdateAsync// 持久化
+        >>= repo.UpdateAsync// 持久化
  
 
     /// 删除一个文件
@@ -106,7 +104,7 @@ type FileService(repo: IFileRepository) =
         |> Async.bind (function
             | false -> Error "File not found" |> async.Return
             | true ->
-                startWork (fun _ -> repo.DeleteFileAsync fileinfoId)
+                 repo.DeleteFileAsync fileinfoId
             )
 
     /// 根据 id 获取文件信息
