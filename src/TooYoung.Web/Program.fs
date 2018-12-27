@@ -13,9 +13,12 @@ open Microsoft.AspNetCore
 open Microsoft.AspNetCore.Authentication.Cookies
 open Microsoft.AspNetCore.CookiePolicy
 open TooYoung.Api.Handlers
-open TooYoung.Provider.Mongo
+open TooYoung.Provider
 open TooYoung.Domain
 open Microsoft.AspNetCore.Http
+open TooYoung.App
+open TooYoung.Web.LoggingConfig
+open TooYoung.Web.BootStrap
 
 // ---------------------------------
 // Web app
@@ -38,7 +41,7 @@ let webApp =
 // Error handler
 // ---------------------------------
 
-let errorHandler (ex : Exception) (logger : ILogger) =
+let errorHandler (ex : Exception) (logger : Microsoft.Extensions.Logging.ILogger) =
     logger.LogError(EventId(), ex, "An unhandled exception has occurred while executing the request.")
     clearResponse >=> setStatusCode 500 >=> text ex.Message
 
@@ -84,25 +87,33 @@ let configureServices (hostBuilderCtx: WebHostBuilderContext) (services : IServi
             cfg.RootPath <- "client-app"
         )
     |> ignore
-    services
-    |> BootStrap.addMongoDbRepository hostBuilderCtx.Configuration
-    |> RegisterDomainServices.register
+    services.Configure<BootstrapOptions>(hostBuilderCtx.Configuration.GetSection("BootStrap"))
     |> ignore
-
-let configureLogging (builder : ILoggingBuilder) =
-    let filter (l : LogLevel) = l.Equals LogLevel.Error
-    builder.AddFilter(filter).AddConsole().AddDebug() |> ignore
+    services
+    |> Mongo.BootStrap.addMongoDbRepository hostBuilderCtx.Configuration
+    |> RegisterDomainServices.register
+    |> AppServices.register
+    |> ignore
 
 [<EntryPoint>]
 let main (args: string[]) =
     let contentRoot = Directory.GetCurrentDirectory()
     let webRoot     = Path.Combine(contentRoot, "WebRoot")
-    WebHost.CreateDefaultBuilder(args)
-           .UseWebRoot(webRoot)
-           .Configure(Action<IApplicationBuilder> configureApp)
-           .ConfigureServices(Action<WebHostBuilderContext, IServiceCollection> configureServices)
-           .ConfigureLogging(configureLogging)
-           .UseUrls("http://localhost:1503")
-           .Build()
-           .Run()
-    0
+    let webHost =
+        WebHost.CreateDefaultBuilder(args)
+               .UseWebRoot(webRoot)
+               .Configure(Action<IApplicationBuilder> configureApp)
+               .ConfigureServices(Action<WebHostBuilderContext, IServiceCollection> configureServices)
+               .UseSerilog()
+               .UseUrls("http://localhost:1503")
+               .Build()
+    async {
+        let! result = BootStrap.bootstrap (webHost.Services)
+        return
+            match result with
+            | Ok _ -> webHost.Run(); 0
+            | Error e ->
+                Console.Error.Write(e)
+                -1
+    }
+    |> Async.RunSynchronously

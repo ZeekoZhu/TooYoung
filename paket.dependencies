@@ -22,3 +22,6 @@ nuget FsUnit.xUnit
 nuget FsUnit
 nuget ZeekoUtilsPack.BCLExt
 nuget QRCoder
+nuget Serilog.AspNetCore
+nuget Serilog.Sinks.Console
+nuget Serilog.Settings.Configuration

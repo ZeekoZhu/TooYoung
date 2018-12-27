@@ -1,3 +1,6 @@
 Microsoft.AspNetCore.App
 Giraffe
 Microsoft.AspNetCore.SpaServices
+Serilog.AspNetCore
+Serilog.Sinks.Console
+Serilog.Settings.Configuration

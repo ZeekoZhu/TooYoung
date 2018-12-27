@@ -14,6 +14,7 @@
     <Content Include="WebRoot\**\*">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Compile Include="LoggingConfig.fs" />
     <Compile Include="Program.fs" />
     <Content Include="appsettings.json" />
     <None Include="paket.references" />

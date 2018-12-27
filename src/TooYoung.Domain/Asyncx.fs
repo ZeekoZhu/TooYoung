@@ -2,6 +2,7 @@ namespace TooYoung
 
 module Async =
     open FsToolkit.ErrorHandling
+    let inline (<>>) x f = AsyncResult.map f x 
     let inline fromOption none x =
             x |> Async.map (function
                             | None -> none

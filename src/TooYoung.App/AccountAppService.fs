@@ -5,12 +5,13 @@ open System.Text
 open Microsoft.Extensions.Configuration
 open Microsoft.AspNetCore.Cryptography.KeyDerivation
 open FsToolkit.ErrorHandling
+open FsToolkit.ErrorHandling.Operator.AsyncResult
 open FSharp.Control.Tasks.V2
 open Giraffe
 open TooYoung.Domain.Repositories
 open TooYoung.Domain.Services
 open TooYoung.Domain.User
-
+open TooYoung.Async
 [<CLIMutable>]
 type LoginModel = 
     { UserName: string
@@ -81,8 +82,8 @@ type AccountAppService
                         | None ->
                             let newUser = createUser model
                             accountRepo.Create newUser
-                            |> AsyncResult.bind (initUserSpace)
-                            |> AsyncResult.map (fun _ -> newUser)
+                            >>= (initUserSpace)
+                            <>> (fun _ -> newUser)
                     )
         }
 
