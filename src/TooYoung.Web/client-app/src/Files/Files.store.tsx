@@ -9,12 +9,11 @@ import { Icon } from 'office-ui-fabric-react/lib/Icon';
 import React from 'react';
 
 import { dateFormat } from '../Common';
-import { ICommandBarItems, IDocument, ISharingEntry } from '../CommonTypes';
+import { ICommandBarItems, IDocument, ISharingEntry, WrappedProp } from '../CommonTypes';
 import { SharedStatus } from '../SharedStatus/SharedStatus';
 
-
-
 export class FilesStore {
+    @observable public inputFileRef = React.createRef<HTMLInputElement>();
     @observable private cmdBarButtons: ICommandBarItems = {
         upload: {
             name: '上传',
@@ -22,6 +21,9 @@ export class FilesStore {
             iconProps: {
                 iconName: 'Upload'
             },
+            onClick: () => {
+                this.inputFileRef.current!.click();
+            }
         }
     };
     @observable private cmdDownloadBtn: ICommandBarItemProps = {
@@ -37,6 +39,9 @@ export class FilesStore {
         iconProps: {
             iconName: 'Delete'
         },
+        onClick: () => {
+            this.showDeleteFile.set(true);
+        }
     };
     private getSharingEntry = async (fileId: string): Promise<ISharingEntry> => {
         return Promise.resolve({
@@ -276,7 +281,9 @@ export class FilesStore {
     @computed public get showSharingPanel() {
         return this.sharingEntry !== null;
     }
-
+    // 需要添加弹框
+    // public showUploadFlie = new WrappedProp(false);
+    public showDeleteFile = new WrappedProp(false);
     @action.bound
     public setSharingEntry = async (fileId: string) => {
         const entry = await this.getSharingEntry(fileId);
