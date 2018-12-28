@@ -1,10 +1,13 @@
 namespace TooYoung.Domain.Authorization
 
 module UserGroup =
+    open Newtonsoft.Json
     open System.Runtime.Serialization
     open System.Runtime.CompilerServices
     open System
+    open TooYoung.Domain.JsonConverters
 
+    [<JsonConverter(typeof<ToStringConverter>)>]
     type AccessConstraint =
         | All
         | Instance of string
@@ -13,6 +16,7 @@ module UserGroup =
             | All -> "*"
             | Instance str -> str
 
+    [<JsonConverter(typeof<ToStringConverter>)>]
     type AccessOperation =
         | Any
         | Action of string

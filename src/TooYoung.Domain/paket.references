@@ -3,3 +3,4 @@ FSharpPlus
 FsToolkit.ErrorHandling
 Microsoft.Extensions.DependencyInjection
 AutoMapper
+Newtonsoft.Json

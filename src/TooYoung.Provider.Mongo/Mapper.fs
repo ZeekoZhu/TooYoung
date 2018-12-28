@@ -48,7 +48,7 @@ module AccessDefinition =
     let toModel (entity: AccessDefinitionEntity): AccessDefinition =
         { Target = entity.Target
           Constraint =
-            match entity.Target with
+            match entity.Constraint with
             | "*" -> AccessConstraint.All
             | target -> AccessConstraint.Instance target
           Restrict = entity.Restrict

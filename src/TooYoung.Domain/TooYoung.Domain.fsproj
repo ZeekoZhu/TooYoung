@@ -6,6 +6,7 @@
   <ItemGroup>
     <Compile Include="Funx.fs" />
     <Compile Include="Asyncx.fs" />
+    <Compile Include="JsonConverters.fs" />
     <Compile Include="Utils.fs" />
     <Compile Include="Domain.fs" />
     <Compile Include="EventBus.fs" />

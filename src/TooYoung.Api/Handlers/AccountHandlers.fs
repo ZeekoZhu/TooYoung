@@ -80,34 +80,21 @@ let register (model: RegisterModel) (next: HttpFunc) (ctx: HttpContext): HttpFun
             | Ok dir -> Successful.ok (json dir)
         return! fn next ctx
     }
-//    let accountRepo = getAccountRepo ctx
-//    task {
-//        let! user =  accountRepo.FindByUserName model.UserName
-//        let uow = accountRepo.BeginTransaction()
-//        return!
-//           UnitOfWork.startWork uow 
-//                ( fun _ ->
-//                    match user with
-//                        | Some _ -> RequestErrors.BAD_REQUEST "UserName has been taken" next ctx
-//                        | None ->
-//                                let newUser = createUser ctx model
-//                                task {
-//                                    let! fn = accountRepo.Create newUser
-//                                            |> AsyncResult.bind (initUserSpace ctx)
-//                                            |> Async.map
-//                                                ( function
-//                                                | Error e -> RequestErrors.BAD_REQUEST e
-//                                                | Ok dir -> Successful.ok (json dir)
-//                                                )
-//                                    return! fn next ctx
-//                                }
-//                )
-//    }
 
+[<CLIMutable>]
 type UserProfileModel =
     { User: User
       Permissions: AccessDefinition list
+      IsAdmin: bool
     }
+
+let isAdmin =
+    List.contains
+        { Target = "admin"
+          AccessOperation = AccessOperation.Any
+          Constraint = AccessConstraint.All
+          Restrict = false
+        }
 
 let profile =
     fun next ctx ->
@@ -120,7 +107,11 @@ let profile =
             let fn =
                 match (user, userGroup) with
                 | (Some user, Some group) ->
-                    let model = { User = user; Permissions = group.AccessDefinitions }
+                    let model =
+                        { User = user
+                          Permissions = group.AccessDefinitions
+                          IsAdmin = isAdmin group.AccessDefinitions
+                        }
                     Successful.ok (json model)
                 | _ -> raise (InvalidState("User has signed in but not found"))
             return! fn next ctx
