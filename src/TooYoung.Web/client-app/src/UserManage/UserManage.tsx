@@ -59,7 +59,7 @@ export class UserManage extends Component<UserManageProps> {
                         title: '添加新用户'
                     }}
                     hidden={!this.store.showAddUser.value}
-                    onDismiss={() => this.store.showAddUser.set(false)}
+                    onDismiss={this.closeAddUserDialog}
                 >
                     <div className='add-user'>
                         <Input>
@@ -78,16 +78,16 @@ export class UserManage extends Component<UserManageProps> {
                     <DialogFooter>
                         <PrimaryButton
                             text='添加'
-                            onClick={() => this.store.showAddUser.set(false)}
+                            onClick={this.closeAddUserDialog}
                         />
                         <DefaultButton
                             text='取消'
-                            onClick={() => this.store.showAddUser.set(false)}
+                            onClick={this.closeAddUserDialog}
                         />
                     </DialogFooter>
                 </Dialog>
                 <Dialog
-                    onDismissed={() => this.store.showBlockUser.set(false)}
+                    onDismiss={this.closeBlockUserDialog}
                     hidden={!this.store.showBlockUser.value}
                     dialogContentProps={{
                         title: '停用账户',
@@ -97,16 +97,16 @@ export class UserManage extends Component<UserManageProps> {
                     <DialogFooter>
                         <PrimaryButton
                             text='禁用'
-                            onClick={() => this.store.showBlockUser.set(false)}
+                            onClick={this.closeBlockUserDialog}
                         />
                         <DefaultButton
                             text='取消'
-                            onClick={() => this.store.showBlockUser.set(false)}
+                            onClick={this.closeBlockUserDialog}
                         />
                     </DialogFooter>
                 </Dialog>
                 <Dialog
-                    onDismissed={() => this.store.showResetPwd.set(false)}
+                    onDismissed={this.closeResetPwdDialog}
                     hidden={!this.store.showResetPwd.value}
                     dialogContentProps={{
                         title: '重置密码',
@@ -119,15 +119,46 @@ export class UserManage extends Component<UserManageProps> {
                     <DialogFooter>
                         <PrimaryButton
                             text='重置'
-                            onClick={() => this.store.showResetPwd.set(false)}
+                            onClick={this.closeResetPwdDialog}
                         />
                         <DefaultButton
                             text='取消'
-                            onClick={() => this.store.showResetPwd.set(false)}
+                            onClick={this.closeResetPwdDialog}
+                        />
+                    </DialogFooter>
+                </Dialog>
+                <Dialog
+                    onDismiss={this.closeDeleteUserDialog}
+                    hidden={!this.store.showDeleteUser.value}
+                    dialogContentProps={{
+                        title: '删除账户',
+                        subText: '将此用户删除'
+                    }}
+                >
+                    <DialogFooter>
+                        <PrimaryButton
+                            text='确定'
+                            onClick={this.closeDeleteUserDialog}
+                        />
+                        <DefaultButton
+                            text='取消'
+                            onClick={this.closeDeleteUserDialog}
                         />
                     </DialogFooter>
                 </Dialog>
             </div>
         );
+    }
+    private closeAddUserDialog = (): void => {
+        this.store.showAddUser.set(false);
+    }
+    private closeBlockUserDialog = (): void => {
+        this.store.showBlockUser.set(false);
+    }
+    private closeResetPwdDialog = (): void => {
+        this.store.showResetPwd.set(false);
+    }
+    private closeDeleteUserDialog = (): void => {
+        this.store.showDeleteUser.set(false);
     }
 }

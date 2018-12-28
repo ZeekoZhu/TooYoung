@@ -282,7 +282,6 @@ export class FilesStore {
         return this.sharingEntry !== null;
     }
     // 需要添加弹框
-    // public showUploadFlie = new WrappedProp(false);
     public showDeleteFile = new WrappedProp(false);
     @action.bound
     public setSharingEntry = async (fileId: string) => {
