@@ -44,24 +44,24 @@ type FileService(repo: IFileRepository) =
 
     let tryGetFile fileInfoId userId =
         repo.GetByIdAndUserAsync userId fileInfoId
-        |> Async.fromOption (Error "File not found")
+        |> Async.fromOption (Error <| Validation "File not found")
         
     let prepareDownload fileInfoId =
         repo.GetByIdAsync fileInfoId
         |> Async.map (function
-            | None -> Error "File not found"
+            | None -> Error <| Validation "File not found"
             | Some info -> Ok info
             ) 
         |> Async.map (Result.bind (function
             | x when String.IsNullOrEmpty x.BinaryId = false -> Ok x
-            | _ -> Error "File is empty"
+            | _ -> Error <| Validation "File is empty"
             ))
 
     let downloadRange (fileInfoId: string) (fromPos: int64) (toPos: int64) =
         prepareDownload fileInfoId
         |> Async.map
             (Result.bind
-                (fun file -> if int64 file.FileSize >= toPos then Ok file.BinaryId else Error "Out of range")
+                (fun file -> if int64 file.FileSize >= toPos then Ok file.BinaryId else Error <| Validation "Out of range")
             )
         >>= repo.GetBinaryStreamAsync
         >>= (fun stream ->
@@ -102,7 +102,7 @@ type FileService(repo: IFileRepository) =
     member this.DeleteFile (fileinfoId: string, userId: string) =
         repo.ExistsAsync fileinfoId userId
         |> Async.bind (function
-            | false -> Error "File not found" |> async.Return
+            | false -> Error (Validation "File not found") |> async.Return
             | true ->
                  repo.DeleteFileAsync fileinfoId
             )
@@ -114,7 +114,7 @@ type FileService(repo: IFileRepository) =
     /// 根据 id 获取文件信息
     member this.GetById (id) =
         repo.GetByIdAsync id
-        |> Async.fromOption (Error "File not found")
+        |> Async.fromOption (Error <| Validation "File not found")
 
     /// 获取指定文件的内容
     member this.GetFileBinary (fileInfoId: string) =

@@ -9,6 +9,7 @@ open Microsoft.Extensions.Logging
 open Microsoft.Extensions.DependencyInjection
 open Giraffe
 
+open Giraffe.Serialization.Json
 open Microsoft.AspNetCore
 open Microsoft.AspNetCore.Authentication.Cookies
 open Microsoft.AspNetCore.CookiePolicy
@@ -16,6 +17,7 @@ open TooYoung.Api.Handlers
 open TooYoung.Provider
 open TooYoung.Domain
 open Microsoft.AspNetCore.Http
+open Newtonsoft.Json
 open TooYoung.App
 open TooYoung.Web.LoggingConfig
 open TooYoung.Web.BootStrap
@@ -79,6 +81,11 @@ let configureApp (app : IApplicationBuilder) =
 /// Configure services
 let configureServices (hostBuilderCtx: WebHostBuilderContext) (services : IServiceCollection) =
 //    services.AddCors()    |> ignore
+    let customJsonSettings =
+        JsonSerializerSettings()
+    customJsonSettings.Converters.Insert(0, JsonConverters.OptionConverter())
+    services.AddSingleton<IJsonSerializer>(NewtonsoftJsonSerializer(customJsonSettings))
+    |> ignore
     services
         .AddGiraffe()
         .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie()

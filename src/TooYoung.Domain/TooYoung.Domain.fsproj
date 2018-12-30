@@ -4,6 +4,7 @@
     <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="AppErrors.fs" />
     <Compile Include="Funx.fs" />
     <Compile Include="Asyncx.fs" />
     <Compile Include="JsonConverters.fs" />

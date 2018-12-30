@@ -27,17 +27,14 @@ let addFile (dto: AddFileDto): HttpHandler =
             { Name = dto.FileName
               Metadatas = Dictionary()
             }
-        task {
-            let! result =
-                Async.combine
-                    (dirSvc.GetDir (dto.DirId, userId))
-                    (fileSvc.Add (fileInfoAddDto, userId))
-                |> AsyncResult.bind
-                    ( fun (dir, file) ->
-                        dirSvc.AddFile file dir
-                    )
-            return! jsonResult result 400 next ctx
-        }
+        Async.combine
+            (dirSvc.GetDir (dto.DirId, userId))
+            (fileSvc.Add (fileInfoAddDto, userId))
+        |> AsyncResult.bind
+            ( fun (dir, file) ->
+                dirSvc.AddFile file dir
+            )
+        |> AppResponse.appResult next ctx
 
 let uploadFile (fileInfoId: string): HttpHandler =
     fun next ctx ->
@@ -48,17 +45,17 @@ let uploadFile (fileInfoId: string): HttpHandler =
             use ms = new MemoryStream()
             do! ctx.Request.Body.CopyToAsync(ms)
             let bodyBytes = ms.ToArray()
-            let! result = fileSvc.SetContentAsync(fileInfoId, bodyBytes, userId)
-            return! jsonResult result 400 next ctx
+            return!
+                fileSvc.SetContentAsync(fileInfoId, bodyBytes, userId)
+                |> AppResponse.appResult next ctx
         }
 
 let getFileById (fileInfoId: string): HttpHandler =
     fun next ctx ->
         let fileSvc = getFileSvc ctx
-        task {
-            let! result = fileSvc.GetById fileInfoId
-            return! jsonResult result 400 next ctx
-        }
+        fileSvc.GetById fileInfoId
+        |> AppResponse.appResult next ctx
+        
 
 let downloadFile (fileInfoId: string): HttpHandler =
     fun next ctx ->
@@ -69,7 +66,7 @@ let downloadFile (fileInfoId: string): HttpHandler =
                 |> AsyncResult.bind (fun _ -> fileSvc.GetFileBinary fileInfoId)
             return!
                 match result with
-                | Error err -> jsonResult result 400 next ctx
+                | Error err -> ErrorMessage.appErrorToStatus err next ctx
                 | Ok fb ->
                     ctx.WriteBytesAsync (fb.Binary)
         }

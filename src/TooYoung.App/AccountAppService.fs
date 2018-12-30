@@ -1,21 +1,38 @@
 namespace TooYoung.App
 
-open System
-open System.Text
-open Microsoft.Extensions.Configuration
-open Microsoft.AspNetCore.Cryptography.KeyDerivation
+open FSharp.Control.Tasks.V2
+open FsToolkit.ErrorHandling
+open FsToolkit.ErrorHandling
 open FsToolkit.ErrorHandling
 open FsToolkit.ErrorHandling.Operator.AsyncResult
-open FSharp.Control.Tasks.V2
 open Giraffe
+open Microsoft.AspNetCore.Cryptography.KeyDerivation
+open Microsoft.Extensions.Configuration
+open System
+open System.Text
+open TooYoung
+open TooYoung.Async
 open TooYoung.Domain.Repositories
 open TooYoung.Domain.Services
 open TooYoung.Domain.User
-open TooYoung.Async
+open TooYoung.FunxAlias
+open TooYoung.Domain.Authorization.UserGroup
+
+open Microsoft.Extensions.Logging
+open Utils
+
 [<CLIMutable>]
 type LoginModel = 
     { UserName: string
       Password: string
+    }
+
+[<CLIMutable>]
+type UpdateProfileModel =
+    { UserName: string
+      DisplayName: string
+      Email: string
+      Password: string option
     }
 
 [<CLIMutable>]
@@ -40,7 +57,8 @@ type AccountAppService
         ( config: IConfiguration,
           accountRepo: IAccountRepository,
           dirSvc: DirectoryService,
-          authSvc: AuthorizationService
+          authSvc: AuthorizationService,
+          logger: ILogger<AccountAppService>
         ) =
     /// salt to hash passowrd
     let saltStr = config.GetSection("HashSalt").Value
@@ -69,7 +87,65 @@ type AccountAppService
                DisplayName = model.DisplayName,
                Email = model.Email
              )
-             
+
+    
+    let userIdShouldExist userId =
+        accountRepo.FindByIdAsync userId
+        |> AsyncResult.ofSome (fun _ -> Error (Validation "Target user not found"))
+    
+    let containsAdmin =
+        List.contains
+            { Target = "admin"
+              AccessOperation = AccessOperation.Any
+              Constraint = AccessConstraint.All
+              Restrict = false
+            }
+    member this.UserIdShouldExist userId = userIdShouldExist userId
+
+    member this.UpdateProfile (userId: Guid) (model: UpdateProfileModel) =
+        let model = {model with Password = Option.map hashPassword model.Password }
+        
+        let userNameShouldNotExist () =
+            accountRepo.FindByUserName model.UserName
+            |> Async.map
+                (Option.bind
+                    ( fun user ->
+                        if user.Id = userId then None else Some user)
+                    )
+            |> AsyncResult.ofNone (fun _ -> Error (Validation "UserName has been taken"))
+        
+        /// Update user model
+        let updateUser (user: User) =
+            user.UserName <- model.UserName
+            user.DisplayName <- model.DisplayName
+            match model.Password with
+            | Some pwd -> user.Password <- pwd
+            | None -> ()
+            user.Email <- model.Email
+            user
+        
+        /// update user group
+        let updateUserGroupAsync (user: User) =
+            authSvc.EnsureGroupByName user.UserName
+            <>> (fun group -> group.Name <- model.UserName; group)
+            >>= authSvc.UpdateGroupAsync
+            <>> (fun _ -> user)
+        
+        userNameShouldNotExist ()
+        >>= just userIdShouldExist userId
+        >>= updateUserGroupAsync
+        <>> updateUser
+        >>= accountRepo.UpdateAsync
+
+    member this.GetAllUsers () =
+        accountRepo.GetAllUsers()
+
+    member this.DeleteUser user =
+        // todo: remove user group
+        // todo: clear links
+        // todo: clean user space
+        accountRepo.DeleteUser user
+
     member this.CreateAccount (model: RegisterModel) =
         async {
             let! user = accountRepo.FindByUserName model.UserName
@@ -78,7 +154,7 @@ type AccountAppService
                 UnitOfWork.startWork uow
                     ( fun _ ->
                         match user with
-                        | Some _ -> AsyncResult.returnError "UserName has been taken"
+                        | Some _ -> AsyncResult.returnError (Validation "UserName has been taken")
                         | None ->
                             let newUser = createUser model
                             accountRepo.Create newUser
@@ -86,6 +162,25 @@ type AccountAppService
                             <>> (fun _ -> newUser)
                     )
         }
+
+    member this.SetLockState userId locked =
+        let setLockState (user: User) =
+            user.Locked <- locked
+            accountRepo.UpdateAsync user
+        userIdShouldExist userId
+        >>= setLockState
+
+    member this.IsAdmin userId =
+        let userGroupShouldExist (user: User) =
+            authSvc.EnsureGroupByName user.UserName
+            
+        userIdShouldExist userId
+        >>= userGroupShouldExist
+        |> Async.map
+            ( function
+            | Ok group -> containsAdmin group.AccessDefinitions 
+            | _ -> false
+            )
 
     member this.ValidateLogin (model: LoginModel) (user: User) =
         user.UserName = model.UserName

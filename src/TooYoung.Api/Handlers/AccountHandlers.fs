@@ -1,31 +1,31 @@
 module TooYoung.Api.Handlers.AccountHandlers
 
-open System
-open System.Security.Claims
-open Giraffe
-open System.Text
-open TooYoung.Domain.Repositories
 open FSharp.Control.Tasks.V2
 open FsToolkit.ErrorHandling
+open FsToolkit.ErrorHandling.Operator.AsyncResult
+open Giraffe
 open Giraffe.HttpStatusCodeHandlers
-open Microsoft.AspNetCore.Http
-open Microsoft.Extensions.Configuration
 open Microsoft.AspNetCore.Authentication
 open Microsoft.AspNetCore.Cryptography.KeyDerivation
+open Microsoft.AspNetCore.Http
+open Microsoft.Extensions.Configuration
+open System
+open System.Security.Claims
+open System.Text
 open TooYoung.Api.Handlers
-open TooYoung.Domain.User
-open TooYoung.Domain.Services
-open TooYoung.WebCommon
 open TooYoung.Api.Handlers.AuthGuard
 open TooYoung.App
+open TooYoung.Async
 open TooYoung.Domain.Authorization.UserGroup
+open TooYoung.Domain.Repositories
+open TooYoung.Domain.Services
+open TooYoung.Domain.User
 open TooYoung.WebCommon
+open Utils
+open TooYoung.Api.ServiceAccessor
+open TooYoung.WebCommon
+open TooYoung.Api.Handlers.Helper
 
-let getAccountRepo (ctx: HttpContext) = ctx.GetService<IAccountRepository>()
-let getDirService (ctx: HttpContext) = ctx.GetService<DirectoryService>()
-let getAuthService (ctx: HttpContext) = ctx.GetService<AuthorizationService>()
-let getGetHashSalt (ctx: HttpContext) = ctx.GetService<IConfiguration>().GetSection("HashSalt")
-let getAccountSvc (ctx: HttpContext) = ctx.GetService<AccountAppService>()
 
 let signIn (ctx: HttpContext) (user: User) =
     let identity = ClaimsIdentity(authenticationScheme)
@@ -117,13 +117,64 @@ let profile =
             return! fn next ctx
         }
 
+let updateProfile (userId: Guid) (model: UpdateProfileModel): HttpHandler =
+    fun next ctx ->
+        let authSvc = getAuthService ctx
+        let accountSvc = getAccountSvc ctx
+        let checkPermission () =
+            if userId = ctx.UserGuid()
+            then AsyncResult.retn userId
+            else
+                authSvc.EnsureGroupByName (ctx.UserName())
+                >>= (fun group ->
+                    if isAdmin group.AccessDefinitions
+                    then AsyncResult.retn userId
+                    else AsyncResult.returnError (Forbidden "Permission denied")
+                )
+        let update userId =
+            accountSvc.UpdateProfile userId model
+        
+        checkPermission ()
+        >>= update
+        |> AppResponse.appResult next ctx
+
+let setLocked (userId: Guid, locked: bool): HttpHandler =
+    fun next ctx ->
+        let accountSvc = getAccountSvc ctx
+        accountSvc.SetLockState userId locked
+        |> AppResponse.appResult next ctx
+
+let listUsers: HttpHandler =
+    fun next ctx ->
+        let accountSvc = getAccountSvc ctx
+        task {
+            let! result = accountSvc.GetAllUsers()
+            return! json result next ctx
+        }
+
+let deleteUser userId: HttpHandler =
+    fun next ctx ->
+        let accountSvc = getAccountSvc ctx
+        accountSvc.UserIdShouldExist userId
+        >>= accountSvc.DeleteUser
+        |> AppResponse.appResult next ctx
+
 let routes: HttpHandler =
     subRouteCi "/account"
         ( choose
             [ POST >=> routeCi "/login" >=> bindJson<LoginModel> login
               POST >=> routeCi "/register" >=> bindJson<RegisterModel> register
-              POST >=> routeCi "/logout" >=> requireLogin >=> logout
-              GET >=> routeCi "/ping" >=> requireLogin >=> ping
-              GET >=> routeCi "/profile" >=> requireLogin >=> profile
+              POST >=> routeCi "/logout" >=> requireAcitveUser >=> logout
+              GET >=> routeCi "/users" >=> requireAdmin >=> listUsers
+              GET >=> routeCi "/ping" >=> requireAcitveUser >=> ping
+              GET >=> routeCi "/profile" >=> requireAcitveUser >=> profile
+              PUT >=> subRouteCi "/profile"
+                        requireAcitveUser
+                        >=> combineParam
+                                (routeCif "/%O")
+                                (bindJson<UpdateProfileModel>)
+                                updateProfile
+              PATCH >=> routeCif "/%O/lock/%b" setLocked
+              DELETE >=> routeCif "/%O" (fun userId -> requireAdmin >=> (deleteUser userId)) 
             ]
         )

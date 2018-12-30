@@ -37,24 +37,24 @@ type SharingService (repo: ISharingRepository, fileSvc: FileService) =
     member this.GetResourceAsync (claim: AccessClaim) (resourceId) (userId) =
         // 先查找该资源有没有被分享出来
         repo.GetEntryAsync resourceId
-        |> Async.fromOption (Error "Resource is private")
+        |> Async.fromOption (Error <| Forbidden "Resource is private")
         // 检查是否有权限，所有者可以直接通过检查
         |> AsyncResult.map (fun entry ->
             entry.OwnerId = userId || Sharing.canAccess entry claim
         )
         >>= (function
             | true -> fileSvc.GetById resourceId
-            | false -> "Access denied" |> Error |> Async.fromValue
+            | false -> "Access denied" |> Forbidden |> Error |> Async.fromValue
         )
 
     /// 获取指定资源的所有分享入口
     member this.GetEntryByResource (resourceId) (userId) =
         repo.GetEntryAsync resourceId
-        |> Async.fromOption (Error "Resource is private")
+        |> Async.fromOption (Error <| Forbidden "Resource is private")
         |> AsyncResult.map (fun entry -> (entry.OwnerId = userId, entry))
         |> Async.map (function
             | Ok (true, entry) -> Ok entry
-            | Ok (false, _) -> Error "Access denied"
+            | Ok (false, _) -> Error <| Forbidden "Access denied"
             | Error e -> Error e
             )
 

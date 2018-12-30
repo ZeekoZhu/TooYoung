@@ -1,13 +1,14 @@
 namespace TooYoung.Domain.Services
+open FsToolkit.ErrorHandling
+open FsToolkit.ErrorHandling.Operator.AsyncResult
 open System
+open TooYoung
 open TooYoung.Domain.Authorization
-open TooYoung.Domain.User
 open TooYoung.Domain.Authorization.UserGroup
 open TooYoung.Domain.Repositories
-open FsToolkit.ErrorHandling.Operator.AsyncResult
-open TooYoung
-open Async
-open FsToolkit.ErrorHandling
+open TooYoung.Domain.User
+open Utils
+
 
 type AuthorizationService(repo: IUserGroupRepository) =
 
@@ -15,7 +16,7 @@ type AuthorizationService(repo: IUserGroupRepository) =
         repo.GetGroupByName name
         |> Async.bind
             ( function
-            | Some _ -> "Group already exists" |> Error |> Async.fromValue
+            | Some _ -> Validation "Group already exists" |> Error |> Async.fromValue
             | None -> fn ()
             )
     /// Create a new group for new user
@@ -31,6 +32,11 @@ type AuthorizationService(repo: IUserGroupRepository) =
     /// Get group by name
     member this.GetGroupByName name =
         repo.GetGroupByName name
+    member this.EnsureGroupByName name =
+        this.GetGroupByName name
+        |> AsyncResult.ofSome
+            (fun _ ->
+                raise (InvalidState (name |> sprintf "User group: %s should exists")))
 
     /// Create a new empty group
     member this.CreateNewGroup name (permissions: Permission list) =

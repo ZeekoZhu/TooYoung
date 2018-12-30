@@ -19,24 +19,19 @@ let getRootDir (next: HttpFunc) (ctx: HttpContext): HttpFuncResult =
 
 let getDir (dirId: string) (next: HttpFunc) (ctx: HttpContext): HttpFuncResult =
     let dirSvc = getDirSvc ctx
-    task {
-        let! dir = dirSvc.GetDir (dirId, ctx.UserId())
-        return! jsonResult dir 404 next ctx
-    }
+    dirSvc.GetDir (dirId, ctx.UserId())
+    |> AppResponse.appResult next ctx
 
 let getDirWithPath (dirId: string) (next: HttpFunc) (ctx: HttpContext): HttpFuncResult =
     let dirSvc = getDirSvc ctx
-    task {
-        let! path = dirSvc.GetDirWithPath dirId (ctx.UserId())
-        return! jsonResult path 404 next ctx
-    }
+    dirSvc.GetDirWithPath dirId (ctx.UserId())
+    |> AppResponse.appResult next ctx
 
 let createDir (dto: DirectoryAddDto) (next: HttpFunc) (ctx: HttpContext): HttpFuncResult =
     let dirSvc = getDirSvc ctx
-    task {
-        let! result = dirSvc.CreateDirectory dto (ctx.UserId())
-        return! jsonResult result 400 next ctx
-    }
+    dirSvc.CreateDirectory dto (ctx.UserId())
+    |> AppResponse.appResult next ctx
+    
 
 type DirRenameDto =
     { DirId: string
@@ -54,10 +49,8 @@ type DirRenameDto =
 
 let renameDir (dto: DirRenameDto) (next: HttpFunc) (ctx: HttpContext): HttpFuncResult =
     let dirSvc = getDirSvc ctx
-    task {
-        let! result = dirSvc.Rename (ctx.UserId()) dto.DirId dto.Name
-        return! jsonResult result 400 next ctx
-    }
+    dirSvc.Rename (ctx.UserId()) dto.DirId dto.Name
+    |> AppResponse.appResult next ctx
 
 
 

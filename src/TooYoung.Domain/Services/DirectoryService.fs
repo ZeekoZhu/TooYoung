@@ -25,7 +25,7 @@ type DirectoryService (repo: IDirectoryRepository, fileSvc: FileService, bus: Ev
 
     let getDir dirId userId =
         repo.GetDir dirId userId
-        |> Async.fromOption (Error "Directory not found")
+        |> Async.fromOption (Error <| Validation "Directory not found")
     let rec getDirPath dirId userId =
         getDir dirId userId
         >>= (fun dir ->
@@ -96,7 +96,8 @@ type DirectoryService (repo: IDirectoryRepository, fileSvc: FileService, bus: Ev
                )
                >> (function
                    | true -> Ok() 
-                   | false -> Error "Operation failed, please check log")
+                   | false -> Error (Multiple "Operation failed, please check log")
+                   )
                )
         )
 
@@ -121,8 +122,8 @@ type DirectoryService (repo: IDirectoryRepository, fileSvc: FileService, bus: Ev
     let deattachFromParent (dir: FileDirectory) =
         getDir dir.ParentId dir.OwnerId
         >>= (fun parent ->
-            dir.RemoveFrom parent
-            unitWork updateDir parent
+                dir.RemoveFrom parent
+                updateDir parent
             )
         |> AsyncResult.map (fun _ -> Rmrf dir.Id |>  bus.Publish |> Ok)
 
@@ -148,7 +149,7 @@ type DirectoryService (repo: IDirectoryRepository, fileSvc: FileService, bus: Ev
             repo.ContainsName dto.Name dir
             |> Async.map (function
                 | false -> Ok dir
-                | true -> Error "Directory already exists"
+                | true -> Error <| Validation "Directory already exists"
                 )
             )
         >>= createAsSubSir dto
@@ -157,7 +158,7 @@ type DirectoryService (repo: IDirectoryRepository, fileSvc: FileService, bus: Ev
     member this.CreateRootDir userId =
         repo.GetRootDir userId
         |> Async.map (function
-            | Some _ -> Error "Root directory has been initialized"
+            | Some _ -> Error (Validation "Root directory has been initialized")
             | None -> Ok userId
             )
         >>= createRootDir
@@ -165,9 +166,9 @@ type DirectoryService (repo: IDirectoryRepository, fileSvc: FileService, bus: Ev
     member this.Rename userId dirId newName =
         repo.GetDir dirId userId
         |> Async.bind (function
-            | None -> "Directory not found" |> AsyncResult.returnError
+            | None -> Validation "Directory not found" |> AsyncResult.returnError
             | Some dir ->
-                if dir.IsRoot then "Can not rename root directory" |> AsyncResult.returnError
+                if dir.IsRoot then Validation "Can not rename root directory" |> AsyncResult.returnError
                 elif dir.Name = newName then dir |> AsyncResult.retn
                 else dir.Name <- newName
                      repo.UpdateNode dir
@@ -178,13 +179,13 @@ type DirectoryService (repo: IDirectoryRepository, fileSvc: FileService, bus: Ev
     member this.DeleteDir userId dirId force =
         repo.GetDir dirId userId
         |> Async.map (function
-            | None -> Error "Directory not found"
+            | None -> Error <| Validation "Directory not found"
             | Some dir ->
-                if dir.IsRoot then Error "Can not delete root directory"
+                if dir.IsRoot then Error <| Validation "Can not delete root directory"
                 elif force || (dir.FileChildren.IsEmpty
                     && dir.DirectoryChildren.IsEmpty)
                 then Ok dir
-                else Error "Directory is not empty"
+                else Error <| Validation "Directory is not empty"
             )
         >>= deattachFromParent
 
@@ -205,7 +206,7 @@ type DirectoryService (repo: IDirectoryRepository, fileSvc: FileService, bus: Ev
     member this.DeleteFile (file: FileInfo) (dir: FileDirectory) =
         repo.ContainsName file.Name dir
         |> Async.map (function
-            | true -> Error "File already exists"
+            | true -> Error <| Validation "File already exists"
             | false -> Ok ()
             )
         >>= (fun _ ->

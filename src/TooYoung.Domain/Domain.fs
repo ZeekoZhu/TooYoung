@@ -167,3 +167,4 @@ module User =
         member val Password = String.Empty with get, set
         member val DisplayName = String.Empty with get, set
         member val Email = String.Empty with get, set
+        member val Locked = false with get, set
