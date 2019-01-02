@@ -2,11 +2,13 @@ namespace TooYoung.Domain.Services
 open System
 open System.Collections.Generic
 open FsToolkit.ErrorHandling
+open FsToolkit.ErrorHandling
 open FsToolkit.ErrorHandling.Operator.AsyncResult
 open TooYoung
 open TooYoung.Domain.Repositories
 open TooYoung.Domain.Resource
 open FunxAlias
+open TooYoung.Async
 
 type FileInfoAddDto =
     { Name: string
@@ -85,6 +87,17 @@ type FileService(repo: IFileRepository) =
             >> AsyncResult.bind (flip setBinary bytes)
         tryGetFile fileInfoId userId
         |> deleteAndSetNew
+    
+    member this.UploadStreamAsync (fileInfo) (stream: IO.Stream) =
+        let uploadStream stream (fileInfo: FileInfo) =
+            repo.CreateBinaryFromStreamAsync stream
+            >>= ( fun bin ->
+                    fileInfo.BinaryId <- bin.Id
+                    repo.UpdateAsync fileInfo
+                    <>> (fun _ -> fileInfo)
+                )
+        deleteBinary fileInfo
+        >>= uploadStream stream
         
     
     /// 更新一个文件的内容

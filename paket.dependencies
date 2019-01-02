@@ -25,3 +25,5 @@ nuget QRCoder
 nuget Serilog.AspNetCore
 nuget Serilog.Sinks.Console
 nuget Serilog.Settings.Configuration
+nuget MediaTypeMap.Core
+nuget Mime

@@ -3,3 +3,5 @@ Microsoft.Extensions.Configuration
 Microsoft.AspNetCore.Cryptography.KeyDerivation
 FsToolkit.ErrorHandling
 Giraffe
+MediaTypeMap.Core
+Mime

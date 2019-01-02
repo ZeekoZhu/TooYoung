@@ -8,7 +8,11 @@ type AppError =
 | Validation of string
 /// 403
 | Forbidden of string
+/// 404
+| NotFound of string
 /// 401
 | Unauthorized of string
 /// Multiple 500
 | Multiple of string
+/// Custom error code
+| HttpError of string * int

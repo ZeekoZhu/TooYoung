@@ -27,3 +27,5 @@ type IFileRepository =
     abstract member GetBinaryAsync: binaryId: string -> Async<Result<FileBinary, AppError>>
 
     abstract member GetBinaryStreamAsync: binaryId: string -> Async<Result<Stream, AppError>>
+    
+    abstract member CreateBinaryFromStreamAsync: stream: Stream -> Async<Result<FileBinary, AppError>>

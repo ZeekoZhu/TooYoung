@@ -113,6 +113,9 @@ let main (args: string[]) =
                .ConfigureServices(Action<WebHostBuilderContext, IServiceCollection> configureServices)
                .UseSerilog()
                .UseUrls("http://localhost:1503")
+               .UseKestrel(fun options ->
+                    options.Limits.MaxRequestBodySize <- Nullable()
+               )
                .Build()
     async {
         let! result = BootStrap.bootstrap (webHost.Services)

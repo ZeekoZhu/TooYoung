@@ -1,4 +1,5 @@
 module TooYoung.Api.Handlers.FileHandlers
+open System
 open System.Collections.Generic
 open System.IO
 open Microsoft.AspNetCore.Http
@@ -7,11 +8,12 @@ open TooYoung.Domain.Services
 open TooYoung.WebCommon
 open FSharp.Control.Tasks.V2
 open FsToolkit.ErrorHandling
+open Microsoft.Extensions.Primitives
+open Microsoft.Net.Http.Headers
 open TooYoung
 open TooYoung.WebCommon.ErrorMessage
-
-let getFileSvc (ctx: HttpContext) = ctx.GetService<FileService>()
-let getDirSvc (ctx: HttpContext) = ctx.GetService<DirectoryService>()
+open TooYoung.Api.ServiceAccessor
+open TooYoung.App
 
 type AddFileDto =
     { DirId: string
@@ -38,15 +40,12 @@ let addFile (dto: AddFileDto): HttpHandler =
 
 let uploadFile (fileInfoId: string): HttpHandler =
     fun next ctx ->
-        let userId = ctx.UserId()
-        let fileSvc = getFileSvc ctx
+        let userId = ctx.UserGuid()
+        let fileAppSvc = getFileAppSvc ctx
         ctx.Request.EnableBuffering()
         task {
-            use ms = new MemoryStream()
-            do! ctx.Request.Body.CopyToAsync(ms)
-            let bodyBytes = ms.ToArray()
             return!
-                fileSvc.SetContentAsync(fileInfoId, bodyBytes, userId)
+                fileAppSvc.UploadFileStream userId fileInfoId ctx.Request.Body 
                 |> AppResponse.appResult next ctx
         }
 
@@ -56,19 +55,33 @@ let getFileById (fileInfoId: string): HttpHandler =
         fileSvc.GetById fileInfoId
         |> AppResponse.appResult next ctx
         
+let getDownloadInfo (ctx: HttpContext) =
+    let range = ctx.Request.GetTypedHeaders().Range.Ranges |> Seq.tryHead
+    let info =
+        let tag = ctx.Request.GetTypedHeaders().IfRange.EntityTag.Tag.ToString()
+        {ETag = tag; From = 0; To = None}
+    match range with
+    | Some range ->
+        { info with
+              From = range.From |> Option.ofNullable |> Option.defaultValue 0L |> int
+              To = range.To |> Option.ofNullable |> Option.map int
+        }
+    | None -> { info with From = 0; To = None}
 
-let downloadFile (fileInfoId: string): HttpHandler =
+let downloadFile (fileInfoId: string) (fileName: string): HttpHandler =
     fun next ctx ->
-        let fileSvc = getFileSvc ctx
+        let fileAppSvc = getFileAppSvc ctx
         task {
-            let! result =
-                fileSvc.GetById fileInfoId
-                |> AsyncResult.bind (fun _ -> fileSvc.GetFileBinary fileInfoId)
+            let! result = fileAppSvc.PrepareForDownload fileInfoId fileName
             return!
                 match result with
-                | Error err -> ErrorMessage.appErrorToStatus err next ctx
-                | Ok fb ->
-                    ctx.WriteBytesAsync (fb.Binary)
+                | Error e -> ErrorMessage.appErrorToStatus e next ctx
+                | Ok (fileInfo, respStream) ->
+                    ctx.Response.ContentType <- fileInfo.Metadatas.Item "Mime"
+                    streamData true respStream
+                        (fileInfo.Metadatas.Item "ETag" |> sprintf "\"%s\"" |> StringSegment |> EntityTagHeaderValue |> Some)
+                        None
+                        next ctx
         }
 
 /// route
@@ -80,7 +93,7 @@ let routes: HttpHandler =
                   routeCif "/%s/content" uploadFile
                 ]
               GET >=> choose
-                [ routeCif "/%s/content" downloadFile
+                [ routeCif "/%s/%s" ( fun (x, y) -> downloadFile x y)
                   routeCif "/%s" getFileById
                 ]
             ]

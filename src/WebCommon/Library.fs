@@ -19,6 +19,8 @@ module ErrorMessage =
             | Forbidden e -> e, 403
             | Unauthorized e -> e, 401
             | Multiple e -> "Multiple error happened", 500
+            | HttpError (err, code) -> err, code
+            | NotFound e -> e, 404
         json {Error = errMsg} >=> setStatusCode status
 
     let jsonResult x errorStatus =

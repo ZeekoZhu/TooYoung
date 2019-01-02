@@ -106,6 +106,14 @@ type FileRepository(db: IMongoDatabase) =
         member this.CreateBinaryAsync bytes =
              createBinaryAsync bytes
 
+        member this.CreateBinaryFromStreamAsync stream =
+            let bin = FileBinary(Guid.NewGuid().ToString())
+            stream.Seek(0L, System.IO.SeekOrigin.Begin) |> ignore
+            gridFs.UploadFromStreamAsync(bin.Id, stream)
+            |> Async.AwaitTask
+            |> Async.map
+                (fun _ -> Ok bin)
+
         member this.DeleteBinaryAsync binId =
              deleteBinaryAsync binId
         
