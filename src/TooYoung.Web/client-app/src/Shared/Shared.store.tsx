@@ -8,7 +8,7 @@ import { Icon } from 'office-ui-fabric-react/lib/Icon';
 import React from 'react';
 
 import { countSharing, dateFormat } from '../Common';
-import { DocumentIcon, ICommandBarItems, ISharingEntry } from '../CommonTypes';
+import { DocumentIcon, ICommandBarItems, ISharingEntry, WrappedProp } from '../CommonTypes';
 import { SharedStatus } from '../SharedStatus/SharedStatus';
 
 export interface IDocument {
@@ -39,6 +39,9 @@ export class SharedStore {
         key: '2-unlink',
         iconProps: {
             iconName: 'RemoveLink'
+        },
+        onClick: () => {
+            this.showCancelShare.set(true);
         }
     };
 
@@ -69,7 +72,7 @@ export class SharedStore {
     }
 
     @observable public selectedItem: IDocument | null = null;
-
+    public showCancelShare = new WrappedProp(false);
     @action.bound
     public setSelectedItem(item: IDocument | null) {
         console.log(item);
