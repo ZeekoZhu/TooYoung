@@ -11,6 +11,7 @@ open TooYoung.Domain.Resource
 open TooYoung.Provider.Mongo
 open FsToolkit.ErrorHandling
 open Utils
+open FsToolkit.ErrorHandling.Operator.AsyncResult
 
 type FileRepository(db: IMongoDatabase) =
     let files = db.GetCollection<FileInfo>("FileInfo")

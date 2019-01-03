@@ -21,7 +21,7 @@ module ErrorMessage =
             | Multiple e -> "Multiple error happened", 500
             | HttpError (err, code) -> err, code
             | NotFound e -> e, 404
-        json {Error = errMsg} >=> setStatusCode status
+        setStatusCode status >=> json {Error = errMsg}
 
     let jsonResult x errorStatus =
         x

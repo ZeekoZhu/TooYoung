@@ -1,28 +1,32 @@
 namespace TooYoung.Provider.Mongo.Repositories
+
+open FsToolkit.ErrorHandling
+open MongoDB.Driver
+open MongoDB.Driver.Linq
 open System
 open System.Collections.Generic
-open MongoDB.Driver
 open TooYoung
 open TooYoung.Domain.FileDirectory
 open TooYoung.Domain.Repositories
+open TooYoung.Domain.Resource
+open TooYoung.FunxAlias
 open TooYoung.Provider.Mongo
-open FsToolkit.ErrorHandling
-
-open Utils
-open FunxAlias
 open TooYoung.Provider.Mongo.Enities
+open TooYoung.Provider.Mongo.MongoHelper
+open Utils
 open WebCommon.Impure
 
-type DirectoryRepository(db: IMongoDatabase, files: IFileRepository) =
+type DirectoryRepository(db: IMongoDatabase, fileRepo: IFileRepository) =
     let mapDir = Mapper.FileDirectory.toEntity
     let dirs = db.GetCollection<FileDirectoryEntity>("FileDirectory")
+    let files = db.GetCollection<FileInfo>("FileInfo")
 
     let setFileChildren (x: Async<FileDirectoryEntity option>) =
         x |>
         Async.bind (function
             | Some entity ->
               async {
-                  let! children = files.ListByIdAsync (entity.FileChildren |> ofCsList)
+                  let! children = fileRepo.ListByIdAsync (entity.FileChildren |> ofCsList)
                   let dir = Mapper.FileDirectory.toModel(entity)
                   dir.FileChildren <- children
                   return Some dir
@@ -60,6 +64,16 @@ type DirectoryRepository(db: IMongoDatabase, files: IFileRepository) =
             .AnyAsync()
         |> Async.AwaitTask
 
+    let containsFileName fileName (dir: FileDirectory) =
+        dirs.AsQueryable()
+            .Where(fun d -> d.Id = dir.Id)
+            .SelectMany(fun d -> d.FileChildren :> IEnumerable<_>)
+            .GroupJoin(files, (fun d -> d), (fun f -> f.Id), (fun _ f -> f))
+            .SelectMany(fun f -> f)
+            .Where(fun f -> f.Name = fileName)
+            .AnyAsync()
+        |> Async.AwaitTask
+
     let updateById update id =
         dirs.FindOneAndUpdateAsync<FileDirectoryEntity,FileDirectoryEntity>
             ((fun x -> x.Id = id), update)
@@ -86,6 +100,15 @@ type DirectoryRepository(db: IMongoDatabase, files: IFileRepository) =
         dirs.DeleteOneAsync(fun x -> x.Id = dir.Id)
         |> Async.AwaitTask
         |> Async.map (just Ok ())
+    
+    let getParentDir (file: FileInfo) =
+        dirs.Find(fun x -> x.FileChildren.Contains(file.Id))
+            .FirstOrDefaultAsync()
+        |> Async.AwaitTask
+        |> Async.map (Option.ofObj)
+        |> Async.map (Option.map Mapper.FileDirectory.toModel)
+        |> AsyncResult.ofSome
+            (fun _ -> "Can not find parent directory" |> Validation |> Error)
          
     interface IDirectoryRepository with
         member this.BeginTransaction() =
@@ -107,6 +130,9 @@ type DirectoryRepository(db: IMongoDatabase, files: IFileRepository) =
 
         member this.ContainsName name dir =
             containsName name dir
+        
+        member this.ContainsFileName name dir =
+            containsFileName name dir
 
         member this.AttachSubDirsAsync dir subDirs =
             attachSubDirsAsync dir subDirs
@@ -123,3 +149,5 @@ type DirectoryRepository(db: IMongoDatabase, files: IFileRepository) =
         member this.DeleteDir dir =
             deleteDir dir
         
+        member this.GetParentDirAsync x =
+            getParentDir x

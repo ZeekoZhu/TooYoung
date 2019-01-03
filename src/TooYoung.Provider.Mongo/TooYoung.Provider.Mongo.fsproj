@@ -14,6 +14,7 @@
     <Compile Include="Enities\UserGroupEntities.fs" />
     <Compile Include="MongoUnitOfWork.fs" />
     <Compile Include="Mapper.fs" />
+    <Compile Include="MongoHelper.fs" />
     <Compile Include="Repositories\AccountRepository.fs" />
     <Compile Include="Repositories\DirectoryRepository.fs" />
     <Compile Include="Repositories\FileRepository.fs" />

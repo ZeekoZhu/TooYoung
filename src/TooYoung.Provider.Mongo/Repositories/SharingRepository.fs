@@ -104,3 +104,9 @@ type SharingRepository (db: IMongoDatabase) =
 
         member this.RemoveRefererRule entry refererId =
              (removeRefererRule entry) refererId
+        
+        member this.DeleteEntry entry =
+            entries.FindOneAndDeleteAsync<SharingEntryEntity> (fun x -> x.Id = entry.Id)
+            |> Async.AwaitTask
+            |> Async.map (fun _ -> Ok ())
+            

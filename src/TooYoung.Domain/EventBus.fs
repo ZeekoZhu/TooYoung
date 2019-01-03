@@ -1,14 +1,14 @@
 namespace TooYoung.Domain
 open System.Reactive.Concurrency
 open FSharp.Control.Reactive
+open Microsoft.Extensions.DependencyInjection
 open System.Reactive.Subjects
 open TooYoung.Domain.FileDirectory
 
-type DirId = string
 type FileIds = string list
 
 type SystemEvent =
-    | Rmrf of DirId
+    | Rmrf of FileDirectory
     | RmFiles of FileIds
     | CreateUser of string
 
@@ -19,4 +19,3 @@ type EventBus() =
 
     member this.Publish event =
         subject.OnNext(event)
-

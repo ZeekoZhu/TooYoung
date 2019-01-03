@@ -18,8 +18,8 @@
     <Compile Include="Repositories\ISharingRepository.fs" />
     <Compile Include="Repositories\IAccountRepository.fs" />
     <Compile Include="Services\FileService.fs" />
-    <Compile Include="Services\DirectoryService.fs" />
     <Compile Include="Services\SharingService.fs" />
+    <Compile Include="Services\DirectoryService.fs" />
     <Compile Include="Authorization\UserGroup.fs" />
     <Compile Include="Authorization\IUserGroupRepository.fs" />
     <Compile Include="Authorization\AuthorizationService.fs" />

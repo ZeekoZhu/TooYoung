@@ -1,19 +1,21 @@
 module TooYoung.Api.Handlers.FileHandlers
+open FSharp.Control.Tasks.V2
+open FsToolkit.ErrorHandling
+open FsToolkit.ErrorHandling.Operator.AsyncResult
+open Giraffe
+open Microsoft.AspNetCore.Http
+open Microsoft.Extensions.Primitives
+open Microsoft.Net.Http.Headers
 open System
 open System.Collections.Generic
 open System.IO
-open Microsoft.AspNetCore.Http
-open Giraffe
-open TooYoung.Domain.Services
-open TooYoung.WebCommon
-open FSharp.Control.Tasks.V2
-open FsToolkit.ErrorHandling
-open Microsoft.Extensions.Primitives
-open Microsoft.Net.Http.Headers
 open TooYoung
-open TooYoung.WebCommon.ErrorMessage
 open TooYoung.Api.ServiceAccessor
 open TooYoung.App
+open TooYoung.Domain.Services
+open TooYoung.Domain.Sharing
+open TooYoung.WebCommon
+open TooYoung.WebCommon.ErrorMessage
 
 type AddFileDto =
     { DirId: string
@@ -68,11 +70,31 @@ let getDownloadInfo (ctx: HttpContext) =
         }
     | None -> { info with From = 0; To = None}
 
+let getAccessClaim (ctx: HttpContext) : AccessClaim =
+    let token =
+        ctx.GetQueryStringValue("token")
+        |> ( function
+           | Ok s ->
+                let pwd =
+                    ctx.GetQueryStringValue("pwd")
+                    |> Result.fold id (fun _ -> String.Empty)
+                (s, DateTime.Now, pwd) |> Some
+           | Error _ -> None
+        )
+    let referer =
+        ctx.Request.GetTypedHeaders().Referer |> Option.ofObj |> Option.map (fun uri -> uri.Host)
+    { Host = referer; Token = token }
+
+/// 下载文件
 let downloadFile (fileInfoId: string) (fileName: string): HttpHandler =
     fun next ctx ->
         let fileAppSvc = getFileAppSvc ctx
+        let accessClaim = getAccessClaim ctx
+        let userId = ctx.UserId()
         task {
-            let! result = fileAppSvc.PrepareForDownload fileInfoId fileName
+            let! result =
+                fileAppSvc.PrepareForDownload fileInfoId fileName accessClaim userId
+                >>= fileAppSvc.GetDownloadStream
             return!
                 match result with
                 | Error e -> ErrorMessage.appErrorToStatus e next ctx
@@ -84,6 +106,21 @@ let downloadFile (fileInfoId: string) (fileName: string): HttpHandler =
                         next ctx
         }
 
+let deleteFile (fileInfoId: string): HttpHandler =
+    fun next ctx ->
+        let fileAppSvc = getFileAppSvc ctx
+        let userId = ctx.UserId()
+        fileAppSvc.DeleteFile fileInfoId userId
+        |> AppResponse.appResult next ctx
+
+/// 测试能否下载文件
+let testAccess (fileInfoId:string) (fileName: string):HttpHandler =
+    fun next ctx ->
+        let claim = getAccessClaim ctx
+        let fileAppSvc = getFileAppSvc ctx
+        let userId = ctx.UserId()
+        fileAppSvc.PrepareForDownload fileInfoId fileName claim userId
+        |> AppResponse.appResult next ctx
 
 /// route
 let routes: HttpHandler =
@@ -94,7 +131,11 @@ let routes: HttpHandler =
                   routeCif "/%s/content" uploadFile
                 ]
               GET >=> choose
-                [ routeCif "/%s/%s" ( fun (x, y) -> downloadFile x y)
+                [ routeCif "/ping/%s/%s" (fun (x, y) -> testAccess x y)
+                  routeCif "/%s/%s" ( fun (x, y) -> downloadFile x y)
+                ]
+              DELETE >=> AuthGuard.requireAcitveUser >=> choose
+                [ routeCif "/%s" deleteFile
                 ]
             ]
         )

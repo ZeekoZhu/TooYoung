@@ -52,13 +52,17 @@ let renameDir (dto: DirRenameDto) (next: HttpFunc) (ctx: HttpContext): HttpFuncR
     dirSvc.Rename (ctx.UserId()) dto.DirId dto.Name
     |> AppResponse.appResult next ctx
 
-
+let deleteDir (dirId: string): HttpHandler =
+    fun next ctx ->
+        let dirSvc = getDirSvc ctx
+        dirSvc.DeleteDir (ctx.UserId()) dirId true
+        |> AppResponse.appResult next ctx
 
 
 
 let routes: HttpHandler =
     subRouteCi "/dir"
-        ( choose
+        ( AuthGuard.requireAcitveUser >=> choose
             [ GET >=> choose
                 [ routeCi "/root" >=> getRootDir
                   routeCif "/%s/path" getDirWithPath
@@ -69,6 +73,9 @@ let routes: HttpHandler =
                 ]
               PUT >=> choose
                 [ routeCi "/rename" >=> bindJson<DirRenameDto> renameDir
+                ]
+              DELETE >=> choose
+                [ routeCif "/%s" deleteDir
                 ]
             ]
         )

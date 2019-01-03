@@ -13,6 +13,7 @@
   <ItemGroup>
     <Compile Include="AccountAppService.fs" />
     <Compile Include="FileAppService.fs" />
+    <Compile Include="DirectoryAppService.fs" />
     <Compile Include="AppServices.fs" />
   </ItemGroup>
   <Import Project="..\..\.paket\Paket.Restore.targets" />

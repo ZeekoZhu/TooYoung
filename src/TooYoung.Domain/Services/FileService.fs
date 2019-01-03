@@ -16,7 +16,9 @@ type FileInfoAddDto =
     }
 
 
-type FileService(repo: IFileRepository) =
+type FileService
+    ( repo: IFileRepository
+    ) =
 
     let copyMetadata (src: Dictionary<string, string>) (target: Dictionary<string, string>) =
         for KeyValue(key, value) in src do
@@ -112,13 +114,9 @@ type FileService(repo: IFileRepository) =
  
 
     /// 删除一个文件
-    member this.DeleteFile (fileinfoId: string, userId: string) =
-        repo.ExistsAsync fileinfoId userId
-        |> Async.bind (function
-            | false -> Error (Validation "File not found") |> async.Return
-            | true ->
-                 repo.DeleteFileAsync fileinfoId
-            )
+    member this.DeleteFile (fileInfo: FileInfo) =
+        repo.DeleteFileAsync fileInfo.Id
+        >>= (fun _ -> repo.DeleteBinaryAsync fileInfo.BinaryId)
 
     /// 根据 id 获取文件信息
     member this.GetByIds (ids: string list) =

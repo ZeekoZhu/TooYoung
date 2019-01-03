@@ -3,9 +3,6 @@ namespace TooYoung.App
 open AppErrors
 open FSharp.Control.Tasks.V2
 open FsToolkit.ErrorHandling
-open FsToolkit.ErrorHandling
-open FsToolkit.ErrorHandling
-open FsToolkit.ErrorHandling
 open FsToolkit.ErrorHandling.Operator.AsyncResult
 open HeyRed.Mime
 open MimeTypes
@@ -18,6 +15,8 @@ open TooYoung.Domain.Services
 open TooYoung
 open FunxAlias
 open TooYoung.Async
+open TooYoung.Domain
+open TooYoung.Domain.Sharing
 open Utils
 
 type AppFileInfo = TooYoung.Domain.Resource.FileInfo
@@ -41,7 +40,10 @@ type DownloadInfo =
 
 type FileAppService
     ( fileSvc: FileService,
-      fileRepo: IFileRepository
+      fileRepo: IFileRepository,
+      dirSvc: DirectoryService,
+      shareSvc: SharingService,
+      dirRepo: IDirectoryRepository
     ) =
     let octetStream = "application/octet-stream"
     /// save file to tmp file
@@ -85,7 +87,7 @@ type FileAppService
                 )
             >>= (fun (file, info) ->
                     fileRepo.UpdateAsync file
-                    <>> (fun _ -> (file, info))
+                    <>> (switchTo (file, info))
                 )
             >>= (fun (file, info) -> 
                     async {
@@ -95,7 +97,7 @@ type FileAppService
                         return result
                     }
                 )
-            <>> (fun _ -> file)
+            <>> (switchTo file)
         updateFileInfo fileInfo
 
     let checkPermission fileInfoId userId =
@@ -108,15 +110,34 @@ type FileAppService
     member this.UploadFileStream (userId: Guid) (fileInfoId: string) (stream: Stream) =
         checkPermission fileInfoId (userId.ToString())
         >>= uploadFile stream
-    
-    member this.PrepareForDownload fileInfoId fileName =
-        let checkFileInfo fileName (fileInfo: AppFileInfo) =
-            if fileInfo.Name <> fileName then AsyncResult.returnError <| NotFound "File not found"
-            else AsyncResult.retn fileInfo
-            
+
+    member this.PrepareForDownload fileInfoId fileName (claim: AccessClaim) userId =
+        shareSvc.GetResourceAsync claim fileInfoId userId
+        >>= ( fun file ->
+            if file.Name <> fileName then AsyncResult.returnError <| NotFound "File not found"
+            else AsyncResult.retn file
+        )
+
+    member this.GetDownloadStream fileInfo =
         let getStream (fileInfo: AppFileInfo) =
             fileSvc.GetBinaryStream fileInfo.BinaryId
             <>> (fun stream -> fileInfo, stream)
-        fileSvc.GetById fileInfoId
-        >>= checkFileInfo fileName
-        >>= getStream
+        getStream fileInfo
+
+    /// 找到指定文件，并将其从文件夹中移除，最后删除所有与之相关的数据
+    member this.DeleteFile fileInfoId userId =
+        let deleteInDir (file:AppFileInfo) =
+            dirRepo.GetParentDirAsync file
+            >>= dirSvc.DeleteFile file
+            <>> switchTo file
+        checkPermission fileInfoId userId
+        >>= ( fun file ->
+                shareSvc.DeleteEntry fileInfoId userId
+                <>> switchTo file
+            )
+        >>= deleteInDir
+    
+    /// 删除文件以及相关分享链接
+    member this.DeleteFileAndSharing (fileInfo: AppFileInfo) =
+        fileSvc.DeleteFile fileInfo
+        >>= (fun _ -> shareSvc.DeleteEntry fileInfo.Id fileInfo.OwnerId)

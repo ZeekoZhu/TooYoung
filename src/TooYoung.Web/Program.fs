@@ -8,6 +8,7 @@ open Microsoft.AspNetCore.Hosting
 open Microsoft.Extensions.Logging
 open Microsoft.Extensions.DependencyInjection
 open Giraffe
+open System.Reactive.Linq
 
 open Giraffe.Serialization.Json
 open Microsoft.AspNetCore
@@ -19,6 +20,7 @@ open TooYoung.Domain
 open Microsoft.AspNetCore.Http
 open Newtonsoft.Json
 open TooYoung.App
+open TooYoung.Domain.Services
 open TooYoung.Web.LoggingConfig
 open TooYoung.Web.BootStrap
 
@@ -103,6 +105,20 @@ let configureServices (hostBuilderCtx: WebHostBuilderContext) (services : IServi
     |> AppServices.register
     |> ignore
 
+let subcribeEvents (provider:IServiceProvider) =
+    let bus = provider.GetService<EventBus>()
+    bus.Events
+       .Subscribe
+       ( function
+       | Rmrf event ->
+            use scope = provider.CreateScope()
+            let dirSvc = scope.ServiceProvider.GetService<DirectoryAppService>()
+            dirSvc.RmRf event
+            |> Async.RunSynchronously
+            |> ignore
+       | _ -> ()
+       )
+
 [<EntryPoint>]
 let main (args: string[]) =
     let contentRoot = Directory.GetCurrentDirectory()
@@ -118,13 +134,17 @@ let main (args: string[]) =
                     options.Limits.MaxRequestBodySize <- Nullable()
                )
                .Build()
-    async {
-        let! result = BootStrap.bootstrap (webHost.Services)
-        return
-            match result with
-            | Ok _ -> webHost.Run(); 0
-            | Error e ->
-                Console.Error.Write(e)
-                -1
-    }
-    |> Async.RunSynchronously
+    let sub = subcribeEvents webHost.Services
+    let result =
+        async {
+            let! result = BootStrap.bootstrap (webHost.Services)
+            return
+                match result with
+                | Ok _ -> webHost.Run(); 0
+                | Error e ->
+                    Console.Error.Write(e)
+                    -1
+        }
+        |> Async.RunSynchronously
+    sub.Dispose()
+    result

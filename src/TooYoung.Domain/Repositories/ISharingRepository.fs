@@ -11,3 +11,4 @@ type ISharingRepository =
     abstract AddTokenRule: entry: SharingEntry -> token: TokenRule -> Async<Result<SharingEntry, AppError>>
     abstract RemoveTokenRule: entry: SharingEntry -> tokenId: string -> Async<Result<unit,AppError>>
     abstract RemoveRefererRule: entry: SharingEntry -> refererId: string -> Async<Result<unit,AppError>>
+    abstract DeleteEntry: entry: SharingEntry -> Async<Result<unit, AppError>>

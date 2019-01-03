@@ -81,3 +81,8 @@ type SharingService (repo: ISharingRepository, fileSvc: FileService) =
     member this.RemoveRefererRule resourceId userId refererId =
         getEntryBeforeOperating resourceId userId
         >>= flip repo.RemoveRefererRule refererId
+    
+    /// 删除指定文件的全部分享链接
+    member this.DeleteEntry resourceId userId =
+        getEntryBeforeOperating resourceId userId
+        >>= repo.DeleteEntry
