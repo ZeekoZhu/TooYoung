@@ -40,7 +40,7 @@ module Sharing =
           ExpiredAt: DateTime option
           Password: string
           Id: string
-         }
+        }
 
     /// 访问认证信息
     type AccessClaim =

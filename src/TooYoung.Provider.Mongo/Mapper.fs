@@ -85,3 +85,61 @@ module UserGroup =
                   |> ofCsList
                 )
             )
+
+module TokenRule =
+    open System
+    open TooYoung.Domain.Sharing
+    let toEntity (model: TokenRule) =
+        TokenRuleEntity
+            ( Id = model.Id,
+              Token = model.Token,
+              Password = model.Password,
+              ExpiredAt = (model.ExpiredAt |> Option.toNullable)
+            )
+
+    let toModel (entity: TokenRuleEntity): TokenRule =
+        { Id = entity.Id
+          Token = entity.Token
+          ExpiredAt = entity.ExpiredAt |> Option.ofNullable
+          Password = entity.Password
+        }
+
+module RefererRule =
+    open System
+    open TooYoung.Domain.Sharing
+    let toEntity (model: RefererRule) =
+        RefererRuleEntity
+            ( Id = model.Id,
+              AllowedHost = model.AllowedHost
+            )
+    let toModel (entity: RefererRuleEntity): RefererRule =
+        { Id = entity.Id
+          AllowedHost = entity.AllowedHost
+        }
+
+module SharingEntry =
+    open System
+    open TooYoung.Domain.Sharing
+    
+    let toEntity (model: SharingEntry) =
+        SharingEntryEntity
+            ( Id = model.Id,
+              Type = model.Type,
+              ResourceId = model.ResourceId,
+              OwnerId = model.OwnerId,
+              TokenRules =
+                ( model.TokenRules
+                  |> mapToCsList TokenRule.toEntity
+                ),
+              RefererRules =
+                ( model.RefererRules
+                  |> mapToCsList (RefererRule.toEntity)
+                )
+            )
+    
+    let toModel (entity: SharingEntryEntity) =
+        SharingEntry
+            ( entity.Id, entity.OwnerId, entity.ResourceId,
+              TokenRules = (entity.TokenRules |> mapFromCsList TokenRule.toModel),
+              RefererRules = (entity.RefererRules |> mapFromCsList RefererRule.toModel)
+            )

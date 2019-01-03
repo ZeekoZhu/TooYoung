@@ -84,17 +84,17 @@ let downloadFile (fileInfoId: string) (fileName: string): HttpHandler =
                         next ctx
         }
 
+
 /// route
 let routes: HttpHandler =
     subRouteCi "/files"
         ( choose
-            [ POST >=> choose
+            [ POST >=> AuthGuard.requireAcitveUser >=> choose
                 [ routeCi "/" >=> bindJson<AddFileDto> addFile
                   routeCif "/%s/content" uploadFile
                 ]
               GET >=> choose
                 [ routeCif "/%s/%s" ( fun (x, y) -> downloadFile x y)
-                  routeCif "/%s" getFileById
                 ]
             ]
         )

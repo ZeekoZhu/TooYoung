@@ -16,3 +16,7 @@ module Impure =
         List.ofSeq csList
     let toCsList<'t> (someList: seq<'t>) =
         CsList(someList)
+    let mapToCsList mapper =
+        Seq.map mapper >> toCsList
+    let mapFromCsList mapper =
+        ofCsList >> List.map mapper

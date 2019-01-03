@@ -36,6 +36,7 @@ let webApp =
                   DirectoryHandlers.routes
                   FileHandlers.routes
                   QrCodeHandlers.routes
+                  SharingHandlers.routes
                 ] )
            ]
 

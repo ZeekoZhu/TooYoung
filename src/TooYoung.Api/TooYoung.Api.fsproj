@@ -11,6 +11,7 @@
     <Compile Include="Handlers\AccountHandlers.fs" />
     <Compile Include="Handlers\DirectoryHandlers.fs" />
     <Compile Include="Handlers\FileHandlers.fs" />
+    <Compile Include="Handlers\SharingHandlers.fs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\TooYoung.App\TooYoung.App.fsproj" />
