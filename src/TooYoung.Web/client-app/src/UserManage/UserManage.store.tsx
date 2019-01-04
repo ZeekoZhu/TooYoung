@@ -9,7 +9,6 @@ import { tap } from 'rxjs/operators';
 import UserAPI from '../api/user.api';
 import { convertCmdItems } from '../Common';
 import { ICommandBarItems, Validators, WrappedProp } from '../CommonTypes';
-import { IUser } from '../models/user';
 
 export interface IUserInfo {
     id: string;

@@ -32,6 +32,8 @@ export class Header extends Component<HeaderProps> {
                     <div className='user-info'>
                         <span>你好，</span>
                         <Link to='/profile' >{this.auth.userName}</Link>
+                        <span> | </span>
+                        <Link to='/login' >退出登录</Link>
                     </div>
                 </div>
             </div>
