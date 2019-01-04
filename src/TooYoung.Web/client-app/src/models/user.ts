@@ -15,4 +15,5 @@ export interface IAccessDefinition {
 export interface IProfile {
     user: IUser;
     permissions: IAccessDefinition[];
+    isAdmin: boolean;
 }

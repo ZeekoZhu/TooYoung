@@ -51,6 +51,10 @@ export const isPending = <T>(data: AsyncData<T>): data is 'pending' => {
     return data === 'pending' || data === Pending;
 };
 
+export const isValue = <T>(data: AsyncData<T>): data is T => {
+    return data !== Pending && data !== 'pending';
+};
+
 export type EventHandler<T> = (event: T) => void;
 
 export class WrappedProp<T> {

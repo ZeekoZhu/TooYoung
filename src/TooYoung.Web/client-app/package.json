@@ -20,6 +20,7 @@
     "react-dom": "^16.6.3",
     "react-qr-scanner": "^0.0.8",
     "react-router-dom": "^4.3.1",
+    "rxjs": "^6.3.3",
     "styled-components": "^4.1.2"
   },
   "scripts": {

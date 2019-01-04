@@ -19,6 +19,7 @@ open TooYoung.Provider
 open TooYoung.Domain
 open Microsoft.AspNetCore.Http
 open Newtonsoft.Json
+open Newtonsoft.Json.Serialization
 open TooYoung.App
 open TooYoung.Domain.Services
 open TooYoung.Web.LoggingConfig
@@ -87,6 +88,7 @@ let configureServices (hostBuilderCtx: WebHostBuilderContext) (services : IServi
     let customJsonSettings =
         JsonSerializerSettings()
     customJsonSettings.Converters.Insert(0, JsonConverters.OptionConverter())
+    customJsonSettings.ContractResolver <- CamelCasePropertyNamesContractResolver() :> IContractResolver
     services.AddSingleton<IJsonSerializer>(NewtonsoftJsonSerializer(customJsonSettings))
     |> ignore
     services

@@ -56,6 +56,7 @@ class LoginComp extends React.Component<LoginProps> {
                     <TextField
                         onChange={(_, value) => this.password.set(value || '')}
                         className='text-field'
+                        type='password'
                         placeholder='密码' />
                 </div>
                 <div className='buttons'>
@@ -89,8 +90,6 @@ class LoginComp extends React.Component<LoginProps> {
     }
     public render() {
         switch (this.authSvc.isUserSignedIn) {
-            case 'pending':
-                return (<p>Loading...</p>);
             case true:
                 return this.welcomeSignOut();
             case false:

@@ -1,24 +1,32 @@
 import axios from 'axios';
+import { defer } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 import { IProfile } from '../models/user';
-import { apiV1, falseOnFailed } from './base.api';
+import { apiV1, falseOnFailed, readData } from './base.api';
 
 const UserAPI = {
-    signOut: async () => {
-        return await axios.post(apiV1('/account/logout'))
-            .then(x => x.status === 200);
+    signOut: () => {
+        return defer(() => axios.post(apiV1('/account/logout')))
+            .pipe(
+                map(x => x.status === 200)
+            );
     },
-    signin: async (username: string, password: string) => {
-        const x = await axios.post(apiV1('/account/login'), {
+    signin: (username: string, password: string) => {
+        return defer(() => axios.post(apiV1('/account/login'), {
             userName: username,
             password
-        });
-        return x.status === 200;
+        })).pipe(
+            map(resp => resp.status === 200),
+            falseOnFailed
+        );
     },
-    getProfile: async () => {
-        const result = await axios.get<IProfile>(apiV1('/account/profile'))
-            .then(falseOnFailed);
-        return result;
+    getProfile: () => {
+        return defer(() => axios.get<IProfile>(apiV1('/account/profile')))
+            .pipe(
+                readData,
+                falseOnFailed
+            );
     }
 };
 
