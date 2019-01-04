@@ -171,16 +171,12 @@ type AccountAppService
         >>= setLockState
 
     member this.IsAdmin userId =
-        let userGroupShouldExist (user: User) =
-            authSvc.EnsureGroupByName user.UserName
+        let getPermissions (user: User) =
+            authSvc.GetAccessDefinitionsForUserAsync user.Id "admin"
             
         userIdShouldExist userId
-        >>= userGroupShouldExist
-        |> Async.map
-            ( function
-            | Ok group -> containsAdmin group.AccessDefinitions 
-            | _ -> false
-            )
+        >>= getPermissions
+        <>> (containsAdmin)
 
     member this.ValidateLogin (model: LoginModel) (user: User) =
         user.UserName = model.UserName

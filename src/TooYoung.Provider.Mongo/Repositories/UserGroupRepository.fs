@@ -1,10 +1,12 @@
 namespace TooYoung.Provider.Mongo.Repositories
 open System
+open System.Linq
 open MongoDB.Driver
+open MongoDB.Driver.Linq
 open TooYoung.Domain.Repositories
-open System.Linq;
 open FsToolkit.ErrorHandling
 
+open System.Collections.Generic
 open MongoDB.Bson
 open TooYoung.Domain.Authorization.UserGroup
 open TooYoung.Provider.Mongo
@@ -35,16 +37,10 @@ type UserGroupRepository(db: IMongoDatabase) =
         |> Async.map (fun _ -> ())
 
     let getPermissionForUser (userId: Guid) (targetType: string) =
-        let pipeline =
-            [ bson [ "$match", bson [ "Users", bson ["$elemMatch", bVal userId] ] ]
-              bson [ "$unwind", bVal "$Definitions" ]
-              bson [ "$match", bson [ "Target", bVal targetType ] ]
-            ]
-        groups.Aggregate()
-            .Match(fun g -> g.Users.Any(fun u -> u = userId))
-            .Unwind<UserGroupEntity, AccessDefinitionEntity>((fun x -> x.Definitions :> obj))
-            .Match(fun def -> def.Target = targetType)
-            .ToListAsync()
+        groups.AsQueryable()
+              .Where(fun g -> g.Users.Any(fun u -> u = userId))
+              .SelectMany(fun g -> g.Definitions :> IEnumerable<AccessDefinitionEntity>)
+              .ToListAsync()
         |> Async.AwaitTask
         |> Async.map ( List.ofSeq >> List.map (Mapper.AccessDefinition.toModel))
 
@@ -57,6 +53,7 @@ type UserGroupRepository(db: IMongoDatabase) =
         groups.Find(fun x -> x.Name = name).FirstOrDefaultAsync()
         |> Async.AwaitTask
         |> Async.map (Option.ofObj >> Option.map Mapper.UserGroup.toModel)
+
 
     interface IUserGroupRepository with
         member this.BeginTransaction () =

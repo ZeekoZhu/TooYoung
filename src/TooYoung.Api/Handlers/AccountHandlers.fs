@@ -88,29 +88,26 @@ type UserProfileModel =
       IsAdmin: bool
     }
 
-let isAdmin =
-    List.contains
-        { Target = "admin"
-          AccessOperation = AccessOperation.Any
-          Constraint = AccessConstraint.All
-          Restrict = false
-        }
-
 let profile =
     fun next ctx ->
         let accountRepo = getAccountRepo ctx
+        let accountSvc = getAccountSvc ctx
         let authSvc = getAuthService ctx
         task {
             let! user = accountRepo.FindByUserName (ctx.UserName())
             let! userGroup = authSvc.GetGroupByName (ctx.UserName())
-
+            let! isAdmin = accountSvc.IsAdmin (ctx.UserGuid())
+            let isAdmin =
+                match isAdmin with
+                | Ok x -> x
+                | Error _ -> false
             let fn =
                 match (user, userGroup) with
                 | (Some user, Some group) ->
                     let model =
                         { User = user
                           Permissions = group.AccessDefinitions
-                          IsAdmin = isAdmin group.AccessDefinitions
+                          IsAdmin = isAdmin
                         }
                     Successful.ok (json model)
                 | _ -> raise (InvalidState("User has signed in but not found"))
@@ -125,9 +122,9 @@ let updateProfile (userId: Guid) (model: UpdateProfileModel): HttpHandler =
             if userId = ctx.UserGuid()
             then AsyncResult.retn userId
             else
-                authSvc.EnsureGroupByName (ctx.UserName())
-                >>= (fun group ->
-                    if isAdmin group.AccessDefinitions
+                accountSvc.IsAdmin (ctx.UserGuid())
+                >>= (fun isAdmin ->
+                    if isAdmin
                     then AsyncResult.retn userId
                     else AsyncResult.returnError (Forbidden "Permission denied")
                 )
@@ -136,6 +133,11 @@ let updateProfile (userId: Guid) (model: UpdateProfileModel): HttpHandler =
         
         checkPermission ()
         >>= update
+        >>= ( fun user ->
+                signIn ctx user
+                |> Async.AwaitTask
+                |> Async.map (fun _ -> Ok user)
+            )
         |> AppResponse.appResult next ctx
 
 let setLocked (userId: Guid, locked: bool): HttpHandler =

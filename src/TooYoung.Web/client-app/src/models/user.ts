@@ -17,3 +17,10 @@ export interface IProfile {
     permissions: IAccessDefinition[];
     isAdmin: boolean;
 }
+
+export interface IUpdateProfileModel {
+    userName: string;
+    displayName: string;
+    email: string;
+    password?: string;
+}

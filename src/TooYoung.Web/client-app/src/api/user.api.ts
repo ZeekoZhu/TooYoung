@@ -2,7 +2,7 @@ import axios from 'axios';
 import { defer } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { IProfile } from '../models/user';
+import { IProfile, IUpdateProfileModel, IUser } from '../models/user';
 import { apiV1, falseOnFailed, readData } from './base.api';
 
 const UserAPI = {
@@ -23,6 +23,14 @@ const UserAPI = {
     },
     getProfile: () => {
         return defer(() => axios.get<IProfile>(apiV1('/account/profile')))
+            .pipe(
+                readData,
+                falseOnFailed
+            );
+    },
+
+    updateProfile: (model: IUpdateProfileModel, userId: string) => {
+        return defer(() => axios.put<IUser>(apiV1('/account/profile/' + userId), model))
             .pipe(
                 readData,
                 falseOnFailed

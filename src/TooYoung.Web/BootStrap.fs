@@ -32,33 +32,31 @@ let bootstrap (sp: IServiceProvider) =
     let bootstrapOptions = sp.GetService<IOptions<BootstrapOptions>>().Value
     let adminModel = bootstrapOptions.Admin
     let accountRepo = sp.GetService<IAccountRepository>()
-    
-    /// Add admin permission to user
-    let addAdminPermission (user: User) =
-        authSvc.GetGroupByName user.UserName
-        |> Async.map
-            ( Result.ofSome
-                (fun _ -> raise (InvalidState "User should have its own group"))
-            )
-        >>= ( fun group ->
-                group.AddPermissions
-                   [ { Target = "admin"
-                       Constraint = AccessConstraint.All
-                       AccessOperation = AccessOperation.Any
-                     }
-                   ]
-                authSvc.UpdateGroupAsync group
-            ) 
+    let findAdminGroup () =
+        authSvc.GetGroupByName "__admin"
+    let createAdminGroup () =
+        authSvc.CreateNewGroup "__admin"
+           [ { Target = "admin"
+               Constraint = AccessConstraint.All
+               AccessOperation = AccessOperation.Any
+             }
+           ]
+    /// Add user to admin group
+    let addAdminPermission group (user: User) =
+        authSvc.AddUserToAsync group user.Id
 
-    accountRepo.FindByUserName adminModel.UserName
+    findAdminGroup()
     |> Async.bind
         ( function
           | Some _ ->
             logger.LogInformation("Admin user has been initialized")
             Async.fromValue (Ok ())
           | None ->
-                accountSvc.CreateAccount adminModel
-                >>= addAdminPermission
+                createAdminGroup()
+                >>= (fun group ->
+                    accountSvc.CreateAccount adminModel
+                    >>= addAdminPermission group
+                )
                 <>> ( fun _ ->
                         logger.LogInformation ("Admin user initialized succeed")
                     )

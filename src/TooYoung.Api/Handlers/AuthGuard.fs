@@ -44,6 +44,10 @@ let requireAdmin: HttpHandler =
         task {
             let! result = 
                 accountSvc.IsAdmin (ctx.UserGuid())
+            let result =
+                match result with
+                | Ok x -> x
+                | Error _ -> false
             return!
                 if result then next ctx            
                 else
