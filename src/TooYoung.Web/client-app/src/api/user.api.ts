@@ -4,7 +4,7 @@ import { map } from 'rxjs/operators';
 
 import { IProfile, IUpdateProfileModel, IUser } from '../models/user';
 import { IUserInfo } from '../UserManage/UserManage.store';
-import { apiV1, falseOnFailed, readData, valueOnFailed } from './base.api';
+import { apiV1, errorMsg, falseOnFailed, readData, successMsg, valueOnFailed } from './base.api';
 
 const UserAPI = {
     signOut: () => {
@@ -18,6 +18,7 @@ const UserAPI = {
             userName: username,
             password
         })).pipe(
+            errorMsg,
             map(resp => resp.status === 200),
             falseOnFailed
         );
@@ -33,6 +34,8 @@ const UserAPI = {
     updateProfile: (model: IUpdateProfileModel, userId: string) => {
         return defer(() => axios.put<IUser>(apiV1('/account/profile/' + userId), model))
             .pipe(
+                successMsg('操作成功'),
+                errorMsg,
                 readData,
                 falseOnFailed
             );

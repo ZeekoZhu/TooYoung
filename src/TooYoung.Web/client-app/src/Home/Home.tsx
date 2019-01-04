@@ -1,16 +1,27 @@
 import './Home.less';
 
+import { inject, observer } from 'mobx-react';
 import React, { Component } from 'react';
 import { Redirect, Route, Switch } from 'react-router';
 
+import { selectAppStore } from '../Context';
 import { Files } from '../Files/Files';
 import { Header } from '../Header/Header';
 import { Profile } from '../Profile/Profile';
 import { Shared } from '../Shared/Shared';
 import { SideNav } from '../SideNav/SideNav';
+import { AppStore } from '../stores/App.store';
 import { UserManage } from '../UserManage/UserManage';
 
-export class Home extends Component {
+@inject(selectAppStore)
+@observer
+export class Home extends Component<{ appStore?: AppStore }> {
+
+    public componentDidMount() {
+        const appStore = this.props.appStore!;
+        appStore.auth.checkSession();
+        appStore.sharing.loadEntries();
+    }
     public render() {
         return (
             <div className='home'>

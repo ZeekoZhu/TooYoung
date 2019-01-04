@@ -4,12 +4,13 @@ import { map } from 'rxjs/operators';
 
 import { IFileDirectory } from '../models/dir';
 import { IFileInfo } from '../models/file';
-import { apiV1, falseOnFailed, readData, valueOnFailed } from './base.api';
+import { apiV1, errorMsg, falseOnFailed, readData, successMsg, valueOnFailed } from './base.api';
 
 export const FilesAPI = {
     getRootDir: () => {
         return defer(() => axios.get<IFileDirectory>(apiV1('/dir/root')))
             .pipe(
+                errorMsg,
                 readData,
                 falseOnFailed
             );
@@ -19,6 +20,8 @@ export const FilesAPI = {
             name, parentId
         }))
             .pipe(
+                errorMsg,
+                successMsg('操作成功'),
                 readData,
                 falseOnFailed
             );
@@ -26,6 +29,7 @@ export const FilesAPI = {
     deleteDir: (dirId: string) => {
         return defer(() => axios.delete(apiV1(`/dir/${dirId}`)))
             .pipe(
+                errorMsg,
                 map(() => true),
                 falseOnFailed
             );
@@ -33,6 +37,7 @@ export const FilesAPI = {
     getDirById: (dirId: string) => {
         return defer(() => axios.get<IFileDirectory>(apiV1(`/dir/${dirId}`)))
             .pipe(
+                errorMsg,
                 readData,
                 falseOnFailed
             );
@@ -40,6 +45,7 @@ export const FilesAPI = {
     getPath: (dirId: string) => {
         return defer(() => axios.get<IFileDirectory[]>(apiV1(`/dir/${dirId}/path`)))
             .pipe(
+                errorMsg,
                 readData,
                 valueOnFailed<IFileDirectory[]>([])
             );
@@ -47,6 +53,7 @@ export const FilesAPI = {
     queryDirs: (dirIds: string[]) => {
         return defer(() => axios.post<IFileDirectory[]>(apiV1('/dir/query'), dirIds))
             .pipe(
+                errorMsg,
                 readData,
                 valueOnFailed<IFileDirectory[]>([])
             );
@@ -56,6 +63,8 @@ export const FilesAPI = {
             fileName, dirId
         }))
             .pipe(
+                successMsg('操作成功'),
+                errorMsg,
                 readData,
                 falseOnFailed
             );
@@ -73,6 +82,8 @@ export const FilesAPI = {
     deleteFile: (fileId: string) => {
         return defer(() => axios.delete(apiV1(`/files/${fileId}`)))
             .pipe(
+                successMsg('操作成功'),
+                errorMsg,
                 map(_ => true),
                 falseOnFailed
             );
@@ -84,6 +95,7 @@ export const FilesAPI = {
             );
         return defer(() => axios.get<IFileInfo>(apiUrl))
             .pipe(
+                errorMsg,
                 readData,
                 falseOnFailed
             );
