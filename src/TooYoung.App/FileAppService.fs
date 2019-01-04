@@ -141,3 +141,15 @@ type FileAppService
     member this.DeleteFileAndSharing (fileInfo: AppFileInfo) =
         fileSvc.DeleteFile fileInfo
         >>= (fun _ -> shareSvc.DeleteEntry fileInfo.Id fileInfo.OwnerId)
+
+    member this.GetFileInfo (fileInfoIds: string list) (userId:string) =
+        fileSvc.GetByIds fileInfoIds
+        |> Async.map
+            ( fun files ->
+                let checkPermission () =
+                    files
+                    |> List.exists (fun f -> f.OwnerId <> userId)
+                if checkPermission ()
+                then []
+                else files
+            )

@@ -7,6 +7,7 @@ type IDirectoryRepository =
     inherit IRepository
     abstract GetRootDir: userId: string -> Async<FileDirectory option>
     abstract GetDir: dirId: string -> userId: string -> Async<FileDirectory option>
+    abstract GetDirs: dirIds: string list -> userId:string -> Async<FileDirectory list>
     abstract SaveNewNode: dir: FileDirectory -> Async<Result<FileDirectory, AppError>>
     abstract UpdateNode: dir: FileDirectory -> Async<Result<unit, AppError>>
     abstract ContainsName: name: string -> dir: FileDirectory -> Async<bool>

@@ -1,4 +1,3 @@
-
 module TooYoung.Api.Handlers.DirectoryHandlers
 open System
 open Giraffe
@@ -7,6 +6,7 @@ open TooYoung.Domain.Services
 open TooYoung.WebCommon
 open TooYoung.WebCommon.ErrorMessage
 open FSharp.Control.Tasks.V2
+open TooYoung.App
 
 let getDirSvc (ctx: HttpContext) = ctx.GetService<DirectoryService>()
 
@@ -58,6 +58,13 @@ let deleteDir (dirId: string): HttpHandler =
         dirSvc.DeleteDir (ctx.UserId()) dirId true
         |> AppResponse.appResult next ctx
 
+let getDirs (dirIds: string list): HttpHandler =
+    fun next ctx ->
+        let dirAppSvc = ctx.GetService<DirectoryAppService>()
+        task {
+            let! result = dirAppSvc.GetDirs dirIds (ctx.UserId())
+            return! json result next ctx
+        }
 
 
 let routes: HttpHandler =
@@ -70,6 +77,7 @@ let routes: HttpHandler =
                 ]
               POST >=> choose
                 [ routeCi "/" >=> bindJson<DirectoryAddDto> createDir
+                  routeCi "/query" >=> bindJson<string list> getDirs
                 ]
               PUT >=> choose
                 [ routeCi "/rename" >=> bindJson<DirRenameDto> renameDir

@@ -58,3 +58,6 @@ type DirectoryAppService
     /// 递归删除指定文件夹，只用于在后台进程删除文件夹
     member __.RmRf dir =
         ``rm -rf`` dir
+
+    member __.GetDirs dirIds userId =
+        dirRepo.GetDirs dirIds userId

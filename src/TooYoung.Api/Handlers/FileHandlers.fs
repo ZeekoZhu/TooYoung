@@ -122,12 +122,22 @@ let testAccess (fileInfoId:string) (fileName: string):HttpHandler =
         fileAppSvc.PrepareForDownload fileInfoId fileName claim userId
         |> AppResponse.appResult next ctx
 
+let getFileInfos (fileInfoIds: string list):HttpHandler =
+    fun next ctx ->
+        let userId = ctx.UserId()
+        let fileAppSvc = getFileAppSvc ctx
+        task {
+            let! result = fileAppSvc.GetFileInfo fileInfoIds userId
+            return! json result next ctx
+        }
+
 /// route
 let routes: HttpHandler =
     subRouteCi "/files"
         ( choose
             [ POST >=> AuthGuard.requireAcitveUser >=> choose
                 [ routeCi "/" >=> bindJson<AddFileDto> addFile
+                  routeCi "/query" >=> bindJson<string list> getFileInfos 
                   routeCif "/%s/content" uploadFile
                 ]
               GET >=> choose

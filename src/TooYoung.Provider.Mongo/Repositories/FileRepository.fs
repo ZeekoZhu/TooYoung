@@ -104,11 +104,9 @@ type FileRepository(db: IMongoDatabase) =
              addAsync fileInfo
 
         member this.ListByIdAsync ids =
-            try
-                files.Find(fun f -> ids.Contains(f.Id)).ToListAsync()
-                |> Async.AwaitTask
-                |> Async.map List.ofSeq
-            with _ -> Async.fromValue []
+            files.Find(fun f -> ids.Contains(f.Id)).ToListAsync()
+            |> Async.AwaitTask
+            |> Async.map List.ofSeq
         
         member this.GetByIdAsync id =
             files.Find(fun f -> f.Id = id).FirstOrDefaultAsync()

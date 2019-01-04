@@ -4,8 +4,10 @@ open FsToolkit.ErrorHandling
 open MongoDB.Driver
 open MongoDB.Driver.Linq
 open System
+open System.Linq
 open System.Collections.Generic
 open TooYoung
+open TooYoung.Domain
 open TooYoung.Domain.FileDirectory
 open TooYoung.Domain.Repositories
 open TooYoung.Domain.Resource
@@ -47,6 +49,13 @@ type DirectoryRepository(db: IMongoDatabase, fileRepo: IFileRepository) =
         |> Async.AwaitTask
         |> Async.map Option.ofObj
         |> setFileChildren
+
+    let getDirs (dirIds: string list) userId =
+        dirs.Find(fun x -> dirIds.Contains(x.Id) && x.OwnerId = userId)
+            .ToListAsync()
+        |> Async.AwaitTask
+        |> Async.map (List.ofSeq >> List.map Mapper.FileDirectory.toModel)
+        
 
     let saveNewNode (dir: FileDirectory) =
         dirs.InsertOneAsync(dir |> mapDir)
@@ -121,6 +130,9 @@ type DirectoryRepository(db: IMongoDatabase, fileRepo: IFileRepository) =
         member this.GetDir dirId userId =
             try getDir dirId userId
             with _ -> asyncNone()
+            
+        member __.GetDirs dirIds userId =
+            getDirs dirIds userId
 
         member this.SaveNewNode dir =
             saveNewNode dir
