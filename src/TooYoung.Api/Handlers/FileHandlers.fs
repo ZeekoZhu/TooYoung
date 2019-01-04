@@ -82,7 +82,7 @@ let getAccessClaim (ctx: HttpContext) : AccessClaim =
            | Error _ -> None
         )
     let referer =
-        ctx.Request.GetTypedHeaders().Referer |> Option.ofObj |> Option.map (fun uri -> uri.Host)
+        ctx.Request.GetTypedHeaders().Referer |> Option.ofObj |> Option.map (fun uri -> uri.AbsolutePath) |> Option.defaultValue "" |> Some
     { Host = referer; Token = token }
 
 /// 下载文件

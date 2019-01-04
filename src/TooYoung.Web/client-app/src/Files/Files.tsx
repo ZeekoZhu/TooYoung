@@ -12,6 +12,7 @@ import React, { Component } from 'react';
 import { RouteComponentProps, withRouter } from 'react-router';
 
 import { Input } from '../Common';
+import { IFileInfo } from '../models/file';
 import { SharingPanel } from '../SharingPanel/SharingPanel';
 import { FilesStore } from './Files.store';
 
@@ -76,10 +77,11 @@ class FilesComp extends Component<FilesProps> {
                     />
                     <Panel
                         type={PanelType.medium}
-                        isOpen={this.store.showSharingPanel}>
-                        {this.store.sharingEntry === null
+                        onDismissed={() => this.store.showSharingPanel.set(false)}
+                        isOpen={this.store.showSharingPanel.value}>
+                        {this.store.seletedItem === null
                             ? <h1>请选择一个文件</h1>
-                            : <SharingPanel entry={this.store.sharingEntry} />}
+                            : <SharingPanel file={this.store.seletedItem.origin as IFileInfo} />}
                     </Panel>
                     <input className='input-file' ref={this.store.inputFileRef} type='file' />
                     <Dialog

@@ -1,25 +1,38 @@
 import './SharingPanel.less';
 
 import { action, observable } from 'mobx';
-import { observer } from 'mobx-react';
+import { inject, observer } from 'mobx-react';
 import { ActionButton, DefaultButton, PrimaryButton } from 'office-ui-fabric-react/lib/Button';
+import { DatePicker } from 'office-ui-fabric-react/lib/DatePicker';
 import { Dialog, DialogFooter, DialogType } from 'office-ui-fabric-react/lib/Dialog';
 import { TextField } from 'office-ui-fabric-react/lib/TextField';
 import React, { Component } from 'react';
 
-import { EventHandler, ISharingEntry } from '../CommonTypes';
+import { EventHandler, WrappedProp } from '../CommonTypes';
+import { selectAppStore, WithAppStore } from '../Context';
+import { IFileInfo } from '../models/file';
 import { SharingRule } from '../SharingRule/SharingRule';
+import { SharingStore } from '../stores/Sharing.store';
 
 interface ISharingPanelProps {
-    entry: ISharingEntry;
+    file: IFileInfo;
 }
 
-type SharingPanelProps = ISharingPanelProps;
+type SharingPanelProps = WithAppStore & ISharingPanelProps;
 
+@inject(selectAppStore)
 @observer
 export class SharingPanel extends Component<SharingPanelProps> {
     @observable public showAddTokenRule = false;
     @observable public showAddRefererRule = false;
+    sharingStore!: SharingStore;
+    rulePassword = new WrappedProp('');
+    ruleExpiredAt = new WrappedProp(new Date());
+    ruleHost = new WrappedProp('');
+    constructor(props: SharingPanelProps) {
+        super(props);
+        this.sharingStore = props.appStore!.sharing;
+    }
     @action.bound
     setAddTokenRuleVisablity(show: boolean) {
         this.showAddTokenRule = show;
@@ -29,10 +42,10 @@ export class SharingPanel extends Component<SharingPanelProps> {
         this.showAddRefererRule = show;
     }
     public render() {
-        const { entry } = this.props;
+        const entry = this.sharingStore.entriesForFile(this.props.file.id).get();
         return (
             <div className='sharing-panel'>
-                <h1 className='ms-font-xxl ms-fontWeight-regular'>“{this.props.entry.fileName}” 的分享链接</h1>
+                <h1 className='ms-font-xxl ms-fontWeight-regular'>“{this.props.file.name}” 的分享链接</h1>
                 {/* 私密链接 */}
                 <div className='rules'>
                     <div className='rules-header'>
@@ -46,8 +59,8 @@ export class SharingPanel extends Component<SharingPanelProps> {
                             添加链接
                         </ActionButton>
                     </div>
-                    {entry.tokenRules.map(rule =>
-                        <SharingRule key={rule.id} rule={rule} />
+                    {(entry && entry.tokenRules || []).map(rule =>
+                        <SharingRule key={rule.id} rule={rule} file={this.props.file} />
                     )}
                 </div>
                 {/* 公开链接 */}
@@ -60,9 +73,10 @@ export class SharingPanel extends Component<SharingPanelProps> {
                                 iconName: 'Add'
                             }}>添加链接</ActionButton>
                     </div>
-                    {entry.refererRules.map(rule =>
+                    {(entry && entry.refererRules || []).map(rule =>
                         <SharingRule
                             key={rule.id}
+                            file={this.props.file}
                             rule={rule} />)}
                 </div>
                 <AddRuleDialog
@@ -74,14 +88,23 @@ export class SharingPanel extends Component<SharingPanelProps> {
                             <TextField
                                 label='其他人需要输入正确的提取码才能下载文件'
                                 placeholder='提取码'
+                                value={this.rulePassword.value}
+                                onChange={(_, value) => this.rulePassword.set(value || '')}
                                 iconProps={{
                                     iconName: 'Lock'
                                 }}
+                            />
+                            <DatePicker
+                                value={this.ruleExpiredAt.value}
+                                onSelectDate={(value) => this.ruleExpiredAt.set(value || new Date())}
                             />
                         </>
                     }
                     onSave={() => {
                         this.setAddTokenRuleVisablity(false);
+                        this.sharingStore.addTokenRule(
+                            this.rulePassword.value, this.ruleExpiredAt.value, this.props.file.id
+                        );
                     }}
                     onCancel={() => {
                         this.setAddTokenRuleVisablity(false);
@@ -96,6 +119,8 @@ export class SharingPanel extends Component<SharingPanelProps> {
                             <TextField
                                 label='限制 HTTP 请求头中的 Referer 字段，防止盗链'
                                 placeholder='允许的域名'
+                                value={this.ruleHost.value}
+                                onChange={(_, value) => this.ruleHost.set(value || '')}
                                 iconProps={{
                                     iconName: 'Website'
                                 }}
@@ -104,6 +129,7 @@ export class SharingPanel extends Component<SharingPanelProps> {
                     }
                     onSave={() => {
                         this.setAddRefererRuleVisablity(false);
+                        this.sharingStore.addRefererRule(this.ruleHost.value, this.props.file.id);
                     }}
                     onCancel={() => {
                         this.setAddRefererRuleVisablity(false);

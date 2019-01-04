@@ -26,14 +26,15 @@ export class SharedStatus extends Component<SharedStatusProps> {
     public render() {
         const entry = this.sharingStore.entriesForFile(this.props.fileId).get();
         const links = entry && entry.refererRules.length + entry.tokenRules.length || 0;
+        const clickHandler = () => nullableHandler(this.props.onClick)(entry || null);
         if (links === 0) {
             return (
-                <FabricLink>开始共享</FabricLink>
+                <FabricLink onClick={clickHandler}>开始共享</FabricLink>
             );
         } else {
             return (
                 <FabricLink
-                    onClick={() => nullableHandler(this.props.onClick)(entry || null)}>
+                    onClick={clickHandler}>
                     管理 {links} 个共享
              </FabricLink>
             );

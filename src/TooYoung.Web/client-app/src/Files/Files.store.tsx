@@ -73,7 +73,6 @@ export class FilesStore {
         },
         onClick: () => {
             const selected = this.seletedItem;
-            console.log(selected);
             if (selected && selected.iconName === 'Page') {
                 window.open(`/api/v1/files/${selected.id}/${selected.name}`, '_blank');
             }
@@ -233,7 +232,7 @@ export class FilesStore {
                     return (
                         <SharedStatus
                             onClick={(entry) => {
-                                this.setSharingEntry(entry);
+                                this.showSharingPanel.set(true);
                             }}
                             fileId={item.id} />
                     );
@@ -256,9 +255,7 @@ export class FilesStore {
     }
 
     @observable public sharingEntry: null | ISharingEntry = null;
-    @computed public get showSharingPanel() {
-        return this.sharingEntry !== null;
-    }
+    showSharingPanel = new WrappedProp(false);
     // 需要添加弹框
     public showDeleteFile = new WrappedProp(false);
     public showCreateDir = new WrappedProp(false);

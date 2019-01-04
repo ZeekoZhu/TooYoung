@@ -24,7 +24,9 @@ export const SharingAPI = {
             );
     },
     addTokenRule: (password: string, fileInfoId: string, expiredAt: Date) => {
-        return defer(() => axios.post<ISharingEntry>(apiV1('/sharing/token')))
+        return defer(() => axios.post<ISharingEntry>(apiV1('/sharing/token'), {
+            password, expiredAt, fileInfoId
+        }))
             .pipe(
                 successMsg('添加成功'),
                 readData,
