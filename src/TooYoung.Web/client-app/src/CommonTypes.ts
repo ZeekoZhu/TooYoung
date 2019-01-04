@@ -1,11 +1,13 @@
 import { format as formatDate } from 'date-fns';
 import filesize from 'filesize';
+import _ from 'lodash';
 import { action, observable } from 'mobx';
 import { ICommandBarItemProps } from 'office-ui-fabric-react/lib/CommandBar';
 
 import { dateFormat } from './Common';
 import { IFileDirectory } from './models/dir';
 import { IFileInfo } from './models/file';
+import { ISharingEntry } from './models/sharing';
 
 export interface ICommandBarItems {
     [key: string]: ICommandBarItemProps | null;
@@ -25,6 +27,39 @@ export interface IDocument {
     fileSizeRaw: number;
     origin: IFileInfo | IFileDirectory;
 }
+
+export interface ISharingDocument {
+    name: string;
+    value: string;
+    fileType: string;
+    iconName: DocumentIcon;
+    dateModified: string;
+    dateModifiedValue: Date;
+    fileSize: string;
+    fileSizeRaw: number;
+    sharingEntry: null | ISharingEntry;
+    file: IFileInfo;
+}
+
+export const entriesToDocs = (entries: ISharingEntry[], files: IFileInfo[]): ISharingDocument[] => {
+    const sortedEntries = _.sortBy(entries, ['resourceId']);
+    const sortedFiles = _.sortBy(files, ['id']);
+    const zipped = _.zip(sortedEntries, sortedFiles);
+    return zipped.map(([entry, file]): ISharingDocument => {
+        return {
+            name: file!.name,
+            dateModifiedValue: new Date(file!.dateModified),
+            dateModified: formatDate(file!.dateModified, dateFormat),
+            fileSize: filesize(file!.fileSize),
+            fileSizeRaw: file!.fileSize,
+            iconName: 'Page',
+            fileType: file!.metadatas.mime,
+            sharingEntry: entry!,
+            value: file!.id,
+            file: file!
+        };
+    });
+};
 
 export const fileInfoToDoc = (file: IFileInfo): IDocument => {
     const date = new Date(file.dateModified);

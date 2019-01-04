@@ -60,6 +60,12 @@ let addTokenRule (model: AddTokenRuleModel): HttpHandler =
         shareSvc.AddTokenRule model.FileInfoId userId rule
         |> AppResponse.appResult next ctx
 
+let deleteEntry resourceId: HttpHandler =
+    fun next ctx ->
+        let shareSvc = getSharingSvc ctx
+        shareSvc.DeleteEntry resourceId (ctx.UserId())
+        |> AppResponse.appResult next ctx
+
 let deleteRule removeAction (fileInfoId: string , ruleId: string): HttpHandler =
     fun next ctx ->
         let userId = ctx.UserId()
@@ -87,6 +93,7 @@ let routes: HttpHandler =
               DELETE >=> choose
                 [ routeCif "/%s/referer/%s" removeRefererRule
                   routeCif "/%s/token/%s" removeTokenRule
+                  routeCif "/%s/entry" deleteEntry
                 ]
             ]
         )

@@ -40,5 +40,12 @@ export const SharingAPI = {
                 map(() => true),
                 falseOnFailed
             );
+    },
+    deleteEntry: (fileInfoId: string) => {
+        return defer(() => axios.delete(apiV1(`/sharing/${fileInfoId}/entry`))).pipe(
+            successMsg('操作成功'),
+            map(() => true),
+            falseOnFailed
+        );
     }
 };

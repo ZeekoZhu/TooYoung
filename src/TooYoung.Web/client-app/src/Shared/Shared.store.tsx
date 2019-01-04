@@ -1,5 +1,3 @@
-import formatDate from 'date-fns/format';
-import filesize from 'filesize';
 import _ from 'lodash';
 import { action, computed, observable } from 'mobx';
 import { ICommandBarItemProps } from 'office-ui-fabric-react/lib/CommandBar';
@@ -7,21 +5,9 @@ import { IColumn, Selection } from 'office-ui-fabric-react/lib/DetailsList';
 import { Icon } from 'office-ui-fabric-react/lib/Icon';
 import React from 'react';
 
-import { countSharing, dateFormat } from '../Common';
-import { DocumentIcon, ICommandBarItems, ISharingEntry, WrappedProp } from '../CommonTypes';
+import { ICommandBarItems, ISharingDocument, WrappedProp } from '../CommonTypes';
 import { SharedStatus } from '../SharedStatus/SharedStatus';
-
-export interface IDocument {
-    name: string;
-    value: string;
-    fileType: string;
-    iconName: DocumentIcon;
-    dateModified: string;
-    dateModifiedValue: number;
-    fileSize: string;
-    fileSizeRaw: number;
-    sharingEntry: null | ISharingEntry;
-}
+import { SharingStore } from '../stores/Sharing.store';
 
 export class SharedStore {
     @observable public cmdBarButtons: ICommandBarItems = {
@@ -60,7 +46,7 @@ export class SharedStore {
     public selection = new Selection({
         onSelectionChanged: () => {
             if (this.selection.count !== 0) {
-                const item = this.selection.getItems()[0] as IDocument;
+                const item = this.selection.getItems()[0] as ISharingDocument;
                 this.setSelectedItem(item);
             } else {
                 this.setSelectedItem(null);
@@ -71,10 +57,11 @@ export class SharedStore {
         return _.sortBy(_.valuesIn(this.cmdBarButtons).filter(x => x !== null) as ICommandBarItemProps[], ['name']);
     }
 
-    @observable public selectedItem: IDocument | null = null;
+    @observable public selectedItem: ISharingDocument | null = null;
+    showSharingPanel = new WrappedProp(false);
     public showCancelShare = new WrappedProp(false);
     @action.bound
-    public setSelectedItem(item: IDocument | null) {
+    public setSelectedItem(item: ISharingDocument | null) {
         console.log(item);
         this.selectedItem = item;
         if (this.selectedItem === null) {
@@ -86,80 +73,7 @@ export class SharedStore {
         }
     }
 
-    @observable public fileListItems: IDocument[] = [
-        {
-            name: 'lorem file.txt',
-            dateModified: formatDate(new Date(), dateFormat),
-            dateModifiedValue: +new Date(),
-            fileSize: filesize(123432435234),
-            fileSizeRaw: 123432435234,
-            iconName: 'Page',
-            fileType: 'txt',
-            value: 'uuid-for-txt',
-            sharingEntry: {
-                fileName: 'lorem file.txt',
-                id: '12312312',
-                refererRules: [],
-                tokenRules: [
-                    {
-                        expiredAt: null,
-                        id: '12312312',
-                        password: 'password',
-                        token: 'asdfasdfasdfasdferwr23redfa',
-                        resourceId: 'resource id uusid'
-                    }
-                ]
-            }
-        },
-        {
-            name: 'test.jpg',
-            dateModified: formatDate(new Date(), dateFormat),
-            dateModifiedValue: +new Date(),
-            fileSize: filesize(2222),
-            fileSizeRaw: 2222,
-            iconName: 'Page',
-            fileType: 'jpg',
-            value: 'uuid-for-tes',
-            sharingEntry: {
-                fileName: 'test.jpg',
-                id: '12312312',
-                refererRules: [],
-                tokenRules: [
-                    {
-                        expiredAt: null,
-                        id: '12312312',
-                        password: 'password',
-                        token: 'asdfasdfasdfasdferwr23redfa',
-                        resourceId: 'resource id uusid'
-                    }
-                ]
-            }
-        },
-        {
-            name: 'data.zip',
-            dateModified: formatDate(new Date(), dateFormat),
-            dateModifiedValue: +new Date(),
-            fileSize: filesize(231231),
-            fileSizeRaw: 231231,
-            iconName: 'Page',
-            fileType: 'zip',
-            value: 'uuid-for-zip',
-            sharingEntry: {
-                fileName: 'test.jpg',
-                id: '12312312',
-                refererRules: [],
-                tokenRules: [
-                    {
-                        expiredAt: null,
-                        id: '12312312',
-                        password: 'password',
-                        token: 'asdfasdfasdfasdferwr23redfa',
-                        resourceId: 'resource id uusid'
-                    }
-                ]
-            }
-        },
-    ];
+    fileListItems = this.sharingStore.sharingDocs;
 
     public columns: IColumn[] = [
         {
@@ -170,7 +84,7 @@ export class SharedStore {
             fieldName: 'name',
             minWidth: 32,
             maxWidth: 32,
-            onRender: (item: IDocument) => {
+            onRender: (item: ISharingDocument) => {
                 return (
                     <div className='icon'>
                         <Icon iconName={item.iconName} />
@@ -201,7 +115,7 @@ export class SharedStore {
             maxWidth: 150,
             isResizable: true,
             data: 'number',
-            onRender: (item: IDocument) => {
+            onRender: (item: ISharingDocument) => {
                 return (
                     <span>
                         {item.dateModified}
@@ -219,7 +133,7 @@ export class SharedStore {
             isResizable: true,
             isCollapsable: true,
             data: 'number',
-            onRender: (item: IDocument) => {
+            onRender: (item: ISharingDocument) => {
                 return <span>{item.fileSize}</span>;
             }
         },
@@ -232,12 +146,17 @@ export class SharedStore {
             isResizable: true,
             isCollapsable: true,
             data: 'string',
-            onRender: (item: IDocument) => {
+            onRender: (item: ISharingDocument) => {
                 return (
-                    <SharedStatus links={countSharing(item.sharingEntry)} />
+                    <SharedStatus
+                        onClick={() => this.showSharingPanel.set(true)}
+                        fileId={item.file.id}
+                    />
                 );
             },
             isPadded: true
         },
     ];
+    constructor(public sharingStore: SharingStore) {
+    }
 }

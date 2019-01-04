@@ -83,5 +83,12 @@ export const FilesAPI = {
                 readData,
                 falseOnFailed
             );
+    },
+    queryFiles: (fileIds: string[]) => {
+        return defer(() => axios.post<IFileInfo[]>(apiV1('/files/query'), fileIds))
+            .pipe(
+                readData,
+                valueOnFailed<IFileInfo[]>([])
+            );
     }
 };

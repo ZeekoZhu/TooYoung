@@ -1,11 +1,13 @@
 import { computed } from 'mobx';
 
+import { FilesAPI } from '../api/files.api';
 import { SharingAPI } from '../api/sharing.api';
-import { WrappedProp } from '../CommonTypes';
+import { entriesToDocs, ISharingDocument, WrappedProp } from '../CommonTypes';
 import { ISharingEntry } from '../models/sharing';
 
 export class SharingStore {
     entries = new WrappedProp<ISharingEntry[]>([]);
+    sharingDocs = new WrappedProp<ISharingDocument[]>([]);
 
     entriesForFile(fileInfoId: string) {
         return computed(() => {
@@ -18,6 +20,12 @@ export class SharingStore {
             resp => {
                 if (resp !== false) {
                     this.entries.set(resp);
+                    const fileIds = resp.map(x => x.resourceId);
+                    FilesAPI.queryFiles(fileIds).subscribe(fileInfos => {
+                        if (fileInfos.length === resp.length) {
+                            this.sharingDocs.set(entriesToDocs(resp, fileInfos));
+                        }
+                    });
                 }
             }
         );
@@ -39,6 +47,14 @@ export class SharingStore {
     }
     deleteRule(type: 'token' | 'referer', ruleId: string, fileId: string) {
         SharingAPI.deleteRule(type, fileId, ruleId).subscribe(resp => {
+            if (resp !== false) {
+                this.loadEntries();
+            }
+        });
+    }
+
+    deleteEntry(fileId: string) {
+        SharingAPI.deleteEntry(fileId).subscribe(resp => {
             if (resp !== false) {
                 this.loadEntries();
             }
