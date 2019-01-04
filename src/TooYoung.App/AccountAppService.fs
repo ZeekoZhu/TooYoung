@@ -58,6 +58,7 @@ type AccountAppService
           accountRepo: IAccountRepository,
           dirSvc: DirectoryService,
           authSvc: AuthorizationService,
+          fileRepo: IFileRepository,
           logger: ILogger<AccountAppService>
         ) =
     /// salt to hash passowrd
@@ -138,7 +139,30 @@ type AccountAppService
         >>= accountRepo.UpdateAsync
 
     member this.GetAllUsers () =
-        accountRepo.GetAllUsers()
+        task {
+            let! users = accountRepo.GetAllUsers()
+            let! sizeUsedRecords =
+                users
+                |> List.map
+                    ( fun u ->
+                        fileRepo.SizeUsedByUserAsync (u.Id.ToString())
+                        |> Async.map (function | Ok x -> x | Error _ -> 0L)
+                    )
+                |> Async.Parallel
+                |> Async.map List.ofArray
+            return 
+                List.zip users sizeUsedRecords
+                |> List.map
+                    ( fun (u, size) ->
+                        { SizeUsedValue = size
+                          UserName = u.UserName
+                          DisplayName = u.DisplayName
+                          Locked = u.Locked
+                          Email = u.Email
+                          Id = u.Id.ToString()
+                        }
+                    )
+        }
 
     member this.DeleteUser user =
         // todo: remove user group

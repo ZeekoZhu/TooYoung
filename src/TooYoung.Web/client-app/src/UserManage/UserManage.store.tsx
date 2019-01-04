@@ -1,19 +1,21 @@
 import fileSize from 'filesize';
-import { action, computed, observable } from 'mobx';
+import { action, computed, observable, runInAction } from 'mobx';
 import { ICommandBarItemProps } from 'office-ui-fabric-react/lib/CommandBar';
 import { IColumn, Selection } from 'office-ui-fabric-react/lib/DetailsList';
 import { Link as FabricLink } from 'office-ui-fabric-react/lib/Link';
 import React from 'react';
+import { tap } from 'rxjs/operators';
 
+import UserAPI from '../api/user.api';
 import { convertCmdItems } from '../Common';
-import { ICommandBarItems, WrappedProp } from '../CommonTypes';
+import { ICommandBarItems, Validators, WrappedProp } from '../CommonTypes';
+import { IUser } from '../models/user';
 
 export interface IUserInfo {
     id: string;
-    name: string;
+    userName: string;
     displayName: string;
     email: string;
-    password: string;
     sizeUsedValue: number;
     sizeUsed: string;
     locked: boolean;
@@ -60,6 +62,10 @@ export class UserManageStore {
             iconName: 'Unlock'
         },
         onClick: () => {
+            const selected = this.selectedItem.value;
+            if (selected) {
+                this.lockUser(selected.id, false);
+            }
             // this.showBlockUser.set(true);
         }
     };
@@ -79,33 +85,12 @@ export class UserManageStore {
         return convertCmdItems(this.cmdBarButtons);
     }
 
-    @observable public userListItems: IUserInfo[] = [
-        {
-            locked: false,
-            id: '111111',
-            name: 'Fooo',
-            displayName: 'Foo Bar',
-            email: 'test@example.com',
-            password: 'asfasfdasdfaew23feaqa',
-            sizeUsedValue: 213222,
-            sizeUsed: fileSize(213222)
-        },
-        {
-            locked: true,
-            id: '22222',
-            name: 'Barrrr',
-            displayName: 'Lorem',
-            email: 'test@example.com',
-            password: 'asfasfdasdfaew23feaqa',
-            sizeUsedValue: 98777,
-            sizeUsed: fileSize(98777)
-        }
-    ];
+    @observable public userListItems: IUserInfo[] = [];
     public columns: IColumn[] = [
         {
             key: 'column1',
             name: '用户名',
-            fieldName: 'name',
+            fieldName: 'userName',
             minWidth: 150,
             maxWidth: 250,
             isRowHeader: true,
@@ -167,7 +152,10 @@ export class UserManageStore {
                 return (
                     <span>
                         <FabricLink
-                            onClick={() => this.showResetPwd.set(true)}
+                            onClick={() => {
+                                this.selectedItem.set(item);
+                                this.showResetPwd.set(true);
+                            }}
                         >重置密码</FabricLink>
                     </span>
                 );
@@ -180,6 +168,26 @@ export class UserManageStore {
     public showBlockUser = new WrappedProp(false);
     public showDeleteUser = new WrappedProp(false);
     public showResetPwd = new WrappedProp(false);
+    public resetPwdForm = {
+        pwd: new WrappedProp('')
+    };
+    public resetPwdFormValidators = {
+        pwd: computed(() => Validators.notEmpty(this.resetPwdForm.pwd.value))
+    };
+
+    public addUserForm = {
+        userName: new WrappedProp(''),
+        displayName: new WrappedProp(''),
+        password: new WrappedProp(''),
+        email: new WrappedProp(''),
+    };
+
+    public addUserFormValidators = {
+        userName: computed(() => Validators.notEmpty(this.addUserForm.userName.value)),
+        password: computed(() => Validators.notEmpty(this.addUserForm.password.value)),
+        email: computed(() => Validators.notEmpty(this.addUserForm.email.value)),
+        displayName: computed(() => Validators.notEmpty(this.addUserForm.displayName.value)),
+    };
 
     @action.bound
     public setSelected(item: IUserInfo | null) {
@@ -197,6 +205,67 @@ export class UserManageStore {
                 this.cmdBarButtons['2-unblock'] = null;
             }
             this.cmdBarButtons['3-delete'] = this.cmdDeleteBtn;
+        }
+    }
+
+    loadUsers() {
+        this.selection.setAllSelected(false);
+        UserAPI.getAllUsers().pipe(
+            tap(data => data.forEach(u => u.sizeUsed = fileSize(u.sizeUsedValue))),
+        )
+            .subscribe(resp => {
+                runInAction('[User Manage] Load users', () => {
+                    this.userListItems = resp;
+                });
+            });
+    }
+
+    addUser() {
+        const form = this.addUserForm;
+        UserAPI.addUser(form.userName.value, form.password.value, form.email.value, form.displayName.value)
+            .subscribe(resp => {
+                if (resp !== false) {
+                    this.loadUsers();
+                }
+                this.showAddUser.set(false);
+            });
+    }
+
+    lockUser(userId: string, lock: boolean) {
+        UserAPI.setLockStatus(userId, lock).subscribe(
+            resp => {
+                if (resp !== false) {
+                    this.loadUsers();
+                }
+            }
+        );
+    }
+
+    deleteUser(userId: string) {
+        UserAPI.deleteUser(userId).subscribe(
+            resp => {
+                if (resp !== false) {
+                    this.loadUsers();
+                }
+            }
+        );
+    }
+
+    resetPwd() {
+        const form = this.resetPwdForm;
+        const user = this.selectedItem.value;
+        const newPwd = form.pwd.value;
+        if (user) {
+            UserAPI.updateProfile({
+                userName: user.userName,
+                displayName: user.displayName,
+                email: user.email,
+                password: newPwd
+            }, user.id).subscribe(
+                resp => {
+                    this.selectedItem.set(null);
+                }
+            );
         }
     }
 

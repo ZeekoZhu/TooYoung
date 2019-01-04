@@ -67,3 +67,20 @@ export class WrappedProp<T> {
         this.set(val);
     }
 }
+
+export type FormValidator<T> = (value: T) => string;
+
+export const validators = <T>(...fns: Array<FormValidator<T>>) => (value: T) => {
+    let result = '';
+    for (const fn of fns) {
+        result = fn(value);
+        if (result !== '') {
+            return result;
+        }
+    }
+    return result;
+};
+
+export const Validators = {
+    notEmpty: (value: string) => !value || value === '' ? '此项不能为空' : ''
+};

@@ -134,9 +134,11 @@ let updateProfile (userId: Guid) (model: UpdateProfileModel): HttpHandler =
         checkPermission ()
         >>= update
         >>= ( fun user ->
-                signIn ctx user
-                |> Async.AwaitTask
-                |> Async.map (fun _ -> Ok user)
+                if user.Id <> ctx.UserGuid() then AsyncResult.retn user
+                else
+                    signIn ctx user
+                    |> Async.AwaitTask
+                    |> Async.map (fun _ -> Ok user)
             )
         |> AppResponse.appResult next ctx
 

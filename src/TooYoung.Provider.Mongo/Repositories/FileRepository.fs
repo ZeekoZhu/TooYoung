@@ -3,6 +3,7 @@ open System
 open System.IO
 open System.Linq
 open MongoDB.Driver
+open MongoDB.Driver.Linq
 open MongoDB.Driver.GridFS
 open FSharp.Control.Tasks.V2
 open TooYoung
@@ -84,8 +85,18 @@ type FileRepository(db: IMongoDatabase) =
             return Ok (stream :> Stream)
         }
         |> Async.AwaitTask
+    
+    let sizeUsedByUser userId =
+        files.AsQueryable()
+             .Where(fun file -> file.OwnerId = userId)
+             .Select(fun f -> f.FileSize)
+             .ToListAsync()
+        |> Async.AwaitTask
+        |> Async.map ( Seq.map int64 >> Seq.sum >> Ok)
 
     interface IFileRepository with
+        member this.SizeUsedByUserAsync userId =
+            sizeUsedByUser userId
         member this.BeginTransaction() =
             new MongoUnitOfWork(db.Client) :> UnitOfWork
 

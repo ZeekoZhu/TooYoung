@@ -27,6 +27,9 @@ export class UserManage extends Component<UserManageProps> {
         super(props);
         this.store = new UserManageStore();
     }
+    componentDidMount() {
+        this.store.loadUsers();
+    }
     public render() {
         return (
             <div className='admin cmd-bar-page'>
@@ -63,22 +66,42 @@ export class UserManage extends Component<UserManageProps> {
                 >
                     <div className='add-user'>
                         <Input>
-                            <TextField placeholder='用户名' />
+                            <TextField
+                                required={true}
+                                value={this.store.addUserForm.userName.value}
+                                onChange={(_, value) => this.store.addUserForm.userName.set(value || '')}
+                                errorMessage={this.store.addUserFormValidators.userName.get()}
+                                placeholder='用户名' />
                         </Input>
                         <Input>
-                            <TextField placeholder='显示名称' />
+                            <TextField
+                                required={true}
+                                value={this.store.addUserForm.displayName.value}
+                                onChange={(_, value) => this.store.addUserForm.displayName.set(value || '')}
+                                errorMessage={this.store.addUserFormValidators.displayName.get()}
+                                placeholder='显示名称' />
                         </Input>
                         <Input>
-                            <TextField placeholder='邮箱地址' />
+                            <TextField
+                                required={true}
+                                value={this.store.addUserForm.email.value}
+                                onChange={(_, value) => this.store.addUserForm.email.set(value || '')}
+                                errorMessage={this.store.addUserFormValidators.email.get()}
+                                placeholder='邮箱地址' />
                         </Input>
                         <Input>
-                            <TextField type='password' placeholder='密码' />
+                            <TextField
+                                required={true}
+                                value={this.store.addUserForm.password.value}
+                                onChange={(_, value) => this.store.addUserForm.password.set(value || '')}
+                                errorMessage={this.store.addUserFormValidators.password.get()}
+                                type='password' placeholder='密码' />
                         </Input>
                     </div>
                     <DialogFooter>
                         <PrimaryButton
                             text='添加'
-                            onClick={this.closeAddUserDialog}
+                            onClick={() => this.store.addUser()}
                         />
                         <DefaultButton
                             text='取消'
@@ -97,7 +120,13 @@ export class UserManage extends Component<UserManageProps> {
                     <DialogFooter>
                         <PrimaryButton
                             text='禁用'
-                            onClick={this.closeBlockUserDialog}
+                            onClick={() => {
+                                const selected = this.store.selectedItem;
+                                if (selected.value !== null) {
+                                    this.store.lockUser(selected.value.id, true);
+                                    this.closeBlockUserDialog();
+                                }
+                            }}
                         />
                         <DefaultButton
                             text='取消'
@@ -114,12 +143,20 @@ export class UserManage extends Component<UserManageProps> {
                     }}
                 >
                     <Input>
-                        <TextField placeholder='新密码'></TextField>
+                        <TextField
+                            required={true}
+                            value={this.store.resetPwdForm.pwd.value}
+                            onChange={(_, value) => this.store.resetPwdForm.pwd.set(value || '')}
+                            errorMessage={this.store.resetPwdFormValidators.pwd.get()}
+                            placeholder='新密码'></TextField>
                     </Input>
                     <DialogFooter>
                         <PrimaryButton
                             text='重置'
-                            onClick={this.closeResetPwdDialog}
+                            onClick={() => {
+                                this.store.resetPwd();
+                                this.closeResetPwdDialog();
+                            }}
                         />
                         <DefaultButton
                             text='取消'
@@ -138,7 +175,13 @@ export class UserManage extends Component<UserManageProps> {
                     <DialogFooter>
                         <PrimaryButton
                             text='确定'
-                            onClick={this.closeDeleteUserDialog}
+                            onClick={() => {
+                                const selected = this.store.selectedItem.value;
+                                if (selected) {
+                                    this.store.deleteUser(selected.id);
+                                    this.closeDeleteUserDialog();
+                                }
+                            }}
                         />
                         <DefaultButton
                             text='取消'
@@ -156,6 +199,7 @@ export class UserManage extends Component<UserManageProps> {
         this.store.showBlockUser.set(false);
     }
     private closeResetPwdDialog = (): void => {
+        this.store.selectedItem.set(null);
         this.store.showResetPwd.set(false);
     }
     private closeDeleteUserDialog = (): void => {

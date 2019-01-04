@@ -3,7 +3,8 @@ import { defer } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { IProfile, IUpdateProfileModel, IUser } from '../models/user';
-import { apiV1, falseOnFailed, readData } from './base.api';
+import { IUserInfo } from '../UserManage/UserManage.store';
+import { apiV1, falseOnFailed, readData, valueOnFailed } from './base.api';
 
 const UserAPI = {
     signOut: () => {
@@ -31,6 +32,46 @@ const UserAPI = {
 
     updateProfile: (model: IUpdateProfileModel, userId: string) => {
         return defer(() => axios.put<IUser>(apiV1('/account/profile/' + userId), model))
+            .pipe(
+                readData,
+                falseOnFailed
+            );
+    },
+
+    getAllUsers: () => {
+        return defer(() => axios.get<IUserInfo[]>(apiV1('/account/users')))
+            .pipe(
+                readData,
+                valueOnFailed<IUserInfo[]>([])
+            );
+    },
+
+    addUser: (userName: string, password: string, email: string, displayName: string) => {
+        return defer(() => axios.post<IUser>(apiV1('/account/register'), {
+            password, userName, email, displayName
+        }))
+            .pipe(
+                readData,
+                falseOnFailed
+            );
+    },
+
+    deleteUser: (userId: string) => {
+        return defer(() => axios.request<IUser>(
+            {
+                method: 'DELETE',
+                withCredentials: true,
+                url: apiV1(`/account/${userId}`)
+            }
+        ))
+            .pipe(
+                readData,
+                falseOnFailed
+            );
+    },
+
+    setLockStatus: (userId: string, lock: boolean) => {
+        return defer(() => axios.patch<IUser>(apiV1(`/account/${userId}/lock/${lock}`)))
             .pipe(
                 readData,
                 falseOnFailed

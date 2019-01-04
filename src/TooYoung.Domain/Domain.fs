@@ -159,6 +159,16 @@ module FileDirectory =
 
 module User =
     open System
+    
+    [<CLIMutable>]
+    type UserInfo =
+        { Id: string;
+          UserName: string;
+          DisplayName: string;
+          Email: string;
+          SizeUsedValue: int64;
+          Locked: bool;
+        }
 
     [<AllowNullLiteral>]
     type User(id: Guid) =
