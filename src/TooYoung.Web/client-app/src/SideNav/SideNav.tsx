@@ -2,7 +2,7 @@ import './SideNav.less';
 
 import { computed } from 'mobx';
 import { inject, observer } from 'mobx-react';
-import { INavLink, Nav } from 'office-ui-fabric-react/lib/Nav';
+import { Nav } from 'office-ui-fabric-react/lib/Nav';
 import React, { Component } from 'react';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 

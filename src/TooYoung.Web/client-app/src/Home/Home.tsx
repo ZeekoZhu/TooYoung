@@ -23,7 +23,7 @@ export class Home extends Component {
                         <Switch>
                             <Route path='/admin' component={UserManage} />
                             <Route path='/profile' component={Profile} />
-                            <Route path='/files' component={Files} />
+                            <Route path='/files/:dirId?' component={Files} />
                             <Route path='/shared' component={Shared} />
                             <Route path='/'>
                                 <Redirect to='/files'></Redirect>

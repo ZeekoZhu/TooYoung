@@ -1,3 +1,5 @@
+import { IFileInfo } from './file';
+
 export interface IFileDirectory {
     id: string;
     ownerId: string;
@@ -5,5 +7,5 @@ export interface IFileDirectory {
     name: string;
     parentId: string;
     directoryChildren: string[];
-    fileChildren: string[];
+    fileChildren: IFileInfo[];
 }

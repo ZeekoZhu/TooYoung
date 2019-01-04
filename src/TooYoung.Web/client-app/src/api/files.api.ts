@@ -45,14 +45,14 @@ export const FilesAPI = {
             );
     },
     queryDirs: (dirIds: string[]) => {
-        return defer(() => axios.post<IFileDirectory[]>(apiV1('/dir/query')))
+        return defer(() => axios.post<IFileDirectory[]>(apiV1('/dir/query'), dirIds))
             .pipe(
                 readData,
                 valueOnFailed<IFileDirectory[]>([])
             );
     },
     addFile: (fileName: string, dirId: string) => {
-        return defer(() => axios.post<IFileInfo>(apiV1('/files'), {
+        return defer(() => axios.post<IFileInfo>(apiV1('/files/'), {
             fileName, dirId
         }))
             .pipe(

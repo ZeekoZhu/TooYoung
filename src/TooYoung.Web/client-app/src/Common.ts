@@ -1,7 +1,9 @@
 import _ from 'lodash';
 import { ICommandBarItemProps } from 'office-ui-fabric-react/lib/CommandBar';
+import styled from 'styled-components';
 
-import { EventHandler, ICommandBarItems, ISharingEntry, ISharingRule, ITokenRule } from './CommonTypes';
+import { EventHandler, ICommandBarItems} from './CommonTypes';
+import { ISharingEntry } from './models/sharing';
 
 export const dateFormat = 'PPpp';
 
@@ -18,13 +20,9 @@ export const nullableHandler = <T>(handler: EventHandler<T> | null | undefined) 
     }
 };
 
-export const isTokenRule = (rule: ISharingRule): rule is ITokenRule => {
-    if (rule.hasOwnProperty('token')) {
-        return true;
-    }
-    return false;
-};
-
 export const convertCmdItems = (obj: ICommandBarItems) => {
     return _.sortBy(_.valuesIn(obj).filter(x => x !== null) as ICommandBarItemProps[], ['key']);
 };
+
+export const Input = styled.div`
+margin: 0 0 20px 0;`;

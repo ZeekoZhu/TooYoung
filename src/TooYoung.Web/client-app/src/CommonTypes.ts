@@ -1,5 +1,11 @@
+import { format as formatDate } from 'date-fns';
+import filesize from 'filesize';
 import { action, observable } from 'mobx';
 import { ICommandBarItemProps } from 'office-ui-fabric-react/lib/CommandBar';
+
+import { dateFormat } from './Common';
+import { IFileDirectory } from './models/dir';
+import { IFileInfo } from './models/file';
 
 export interface ICommandBarItems {
     [key: string]: ICommandBarItemProps | null;
@@ -14,34 +20,43 @@ export interface IDocument {
     iconName: DocumentIcon;
     fileType: string;
     dateModified: string;
-    dateModifiedValue: number;
+    dateModifiedValue: Date;
     fileSize: string;
     fileSizeRaw: number;
-    sharedLinks: number;
+    origin: IFileInfo | IFileDirectory;
 }
 
-export interface ITokenRule {
-    token: string;
-    expiredAt: number | null;
-    password: string;
-    id: string;
-    resourceId: string;
-}
+export const fileInfoToDoc = (file: IFileInfo): IDocument => {
+    const date = new Date(file.dateModified);
+    const fileType = file.metadatas.mime || 'file';
+    return {
+        dateModifiedValue: date,
+        dateModified: formatDate(date, dateFormat),
+        fileSize: filesize(file.fileSize),
+        fileSizeRaw: file.fileSize,
+        fileType,
+        iconName: 'Page',
+        id: file.id,
+        name: file.name,
+        value: file.id,
+        origin: file
+    };
+};
 
-export interface IRefererRule {
-    id: string;
-    allowedHost: string;
-    resourceId: string;
-}
-
-export type ISharingRule = IRefererRule | ITokenRule;
-
-export interface ISharingEntry {
-    id: string;
-    fileName: string;
-    tokenRules: ITokenRule[];
-    refererRules: IRefererRule[];
-}
+export const dirInfoToDoc = (dir: IFileDirectory): IDocument => {
+    return {
+        dateModified: '-',
+        dateModifiedValue: new Date(),
+        fileSize: '-',
+        fileSizeRaw: 0,
+        fileType: 'folder',
+        iconName: 'FabricFolder',
+        id: dir.id,
+        name: dir.name,
+        value: dir.id,
+        origin: dir
+    };
+};
 
 export const Pending = Symbol('pending');
 

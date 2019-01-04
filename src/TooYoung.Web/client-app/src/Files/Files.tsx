@@ -7,7 +7,11 @@ import { CommandBar } from 'office-ui-fabric-react/lib/CommandBar';
 import { DetailsList, DetailsListLayoutMode, SelectionMode } from 'office-ui-fabric-react/lib/DetailsList';
 import Dialog, { DialogFooter } from 'office-ui-fabric-react/lib/Dialog';
 import { Panel, PanelType } from 'office-ui-fabric-react/lib/Panel';
+import { TextField } from 'office-ui-fabric-react/lib/TextField';
 import React, { Component } from 'react';
+import { RouteComponentProps, withRouter } from 'react-router';
+
+import { Input } from '../Common';
 import { SharingPanel } from '../SharingPanel/SharingPanel';
 import { FilesStore } from './Files.store';
 
@@ -15,11 +19,35 @@ import { FilesStore } from './Files.store';
 interface IFilesProps {
 }
 
-type FilesProps = IFilesProps;
+type FilesProps = IFilesProps & RouteComponentProps<{ dirId?: string }>;
 
 @observer
-export class Files extends Component<FilesProps> {
+class FilesComp extends Component<FilesProps> {
     private store = new FilesStore();
+
+    loadDirInfo() {
+        const match = this.props.match;
+        const dirId = match.params.dirId;
+        if (dirId && dirId !== '') {
+            this.store.loadCurrentDir(dirId);
+        } else {
+            this.store.getRootDir().subscribe(resp => {
+                if (resp !== false) {
+                    this.props.history.push('/files/' + resp);
+                }
+            });
+        }
+    }
+
+    componentDidMount() {
+        this.loadDirInfo();
+    }
+    componentDidUpdate(prevProps: FilesProps) {
+        if (prevProps.match.params.dirId !== this.props.match.params.dirId) {
+            this.loadDirInfo();
+        }
+    }
+
     public render() {
         return (
             <div className='files cmd-bar-page'>
@@ -54,25 +82,61 @@ export class Files extends Component<FilesProps> {
                             : <SharingPanel entry={this.store.sharingEntry} />}
                     </Panel>
                     <input className='input-file' ref={this.store.inputFileRef} type='file' />
-
-                <Dialog
+                    <Dialog
+                        onDismissed={() => {
+                            return 0;
+                        }}
+                        hidden={!this.store.showCreateDir.value}
+                        dialogContentProps={{
+                            title: '创建文件夹'
+                        }}
+                    >
+                        <Input>
+                            <TextField
+                                required={true}
+                                value={this.store.newDirName.value}
+                                onChange={(_, value) => this.store.newDirName.set(value || '')}
+                                errorMessage={this.store.newDirNameValidators}
+                                placeholder='名称'></TextField>
+                        </Input>
+                        <DialogFooter>
+                            <PrimaryButton
+                                text='确定'
+                                onClick={() => {
+                                    this.store.createDir();
+                                    this.closeNewDirDialog();
+                                }}
+                            />
+                            <DefaultButton
+                                text='取消'
+                                onClick={this.closeNewDirDialog}
+                            />
+                        </DialogFooter>
+                    </Dialog>
+                    <Dialog
                         onDismiss={this.clonseDeleteFileDialog}
                         hidden={!this.store.showDeleteFile.value}
-                    dialogContentProps={{
-                        title: '删除账户',
-                        subText: '确定删除此文件？'
-                    }}
-                >
-                    <DialogFooter>
-                        <PrimaryButton
-                            text='确定'
+                        dialogContentProps={{
+                            title: '删除',
+                            subText: '确定删除此项？'
+                        }}
+                    >
+                        <DialogFooter>
+                            <PrimaryButton
+                                text='确定'
+                                onClick={() => {
+                                    const selected = this.store.seletedItem;
+                                    if (selected) {
+                                        this.store.deleteItem(selected);
+                                        this.clonseDeleteFileDialog();
+                                    }
+                                }}
+                            />
+                            <DefaultButton
+                                text='取消'
                                 onClick={this.clonseDeleteFileDialog}
-                        />
-                        <DefaultButton
-                            text='取消'
-                                onClick={this.clonseDeleteFileDialog}
-                        />
-                    </DialogFooter>
+                            />
+                        </DialogFooter>
                     </Dialog>
                 </div>
             </div>
@@ -80,5 +144,12 @@ export class Files extends Component<FilesProps> {
     }
     private clonseDeleteFileDialog = (): void => {
         this.store.showDeleteFile.set(false);
+        this.store.clearSelection();
+    }
+    private closeNewDirDialog = (): void => {
+        this.store.newDirName.set('');
+        this.store.showCreateDir.set(false);
     }
 }
+
+export const Files = withRouter(FilesComp);

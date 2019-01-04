@@ -4,6 +4,7 @@ export interface IFileInfo {
     name: string;
     fileSize: number;
     binaryId: string;
+    dateModified: string;
     metadatas: {
         [key: string]: string;
     };

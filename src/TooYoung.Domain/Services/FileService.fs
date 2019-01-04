@@ -95,6 +95,7 @@ type FileService
             repo.CreateBinaryFromStreamAsync stream
             >>= ( fun bin ->
                     fileInfo.BinaryId <- bin.Id
+                    fileInfo.DateModified <- DateTime.Now
                     repo.UpdateAsync fileInfo
                     <>> (fun _ -> fileInfo)
                 )

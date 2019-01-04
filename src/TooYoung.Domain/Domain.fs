@@ -4,6 +4,16 @@ module Resource =
     open System
     open System.Collections.Generic
     
+    [<CLIMutable>]
+    type DocumentInfo =
+        { Id: string
+          OwnerId: string
+          Name: string;
+          FileSize: string;
+          Metadatas: string;
+          DateModified: DateTime;
+        }
+    
     /// 文件信息
     [<AllowNullLiteral>]
     type FileInfo(id: string, ownerId: string, name: string) =
@@ -14,6 +24,7 @@ module Resource =
         /// 文件大小, bytes
         member val FileSize = 0 with get, set
         member val BinaryId = String.Empty with get, set
+        member val DateModified = DateTime.Now with get, set
         member val Metadatas = Dictionary<string, string>() with get, set
 
     /// 文件二进制存储实体

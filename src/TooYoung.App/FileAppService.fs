@@ -112,7 +112,12 @@ type FileAppService
         >>= uploadFile stream
 
     member this.PrepareForDownload fileInfoId fileName (claim: AccessClaim) userId =
-        shareSvc.GetResourceAsync claim fileInfoId userId
+        checkPermission fileInfoId userId
+        |> Async.bind
+            ( function
+            | Ok x -> AsyncResult.retn x
+            | Error _ -> shareSvc.GetResourceAsync claim fileInfoId userId
+            )
         >>= ( fun file ->
             if file.Name <> fileName then AsyncResult.returnError <| NotFound "File not found"
             else AsyncResult.retn file

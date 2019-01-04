@@ -7,16 +7,13 @@ import { DetailsList, DetailsListLayoutMode, SelectionMode } from 'office-ui-fab
 import Dialog, { DialogFooter, DialogType } from 'office-ui-fabric-react/lib/Dialog';
 import { TextField } from 'office-ui-fabric-react/lib/TextField';
 import React, { Component } from 'react';
-import styled from 'styled-components';
 
+import { Input } from '../Common';
 import { UserManageStore } from './UserManage.store';
 
 // tslint:disable-next-line:no-empty-interface
 interface IUserManageProps {
 }
-
-const Input = styled.div`
-margin: 0 0 20px 0;`;
 
 type UserManageProps = IUserManageProps;
 

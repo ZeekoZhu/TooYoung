@@ -1,5 +1,5 @@
-import './index.less';
 import 'babel-polyfill';
+import './index.less';
 
 import { initializeIcons } from '@uifabric/icons';
 import { configure } from 'mobx';
