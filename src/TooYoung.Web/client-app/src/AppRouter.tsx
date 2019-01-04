@@ -21,7 +21,6 @@ export class PrivateRoute extends Component<IPrivateRouteProp> {
     public render() {
         const { appStore, comp: Comp, ...rest } = this.props;
         const guard = (props: any) => {
-            console.log('2333', appStore!.auth.isUserSignedIn);
             return appStore!.auth.isUserSignedIn === true
                 ? (<Comp {...props} />)
                 : <Redirect to={{
@@ -41,7 +40,7 @@ export const AppRouter = () => (
         <Switch>
             <Route path='/login' component={Login} />
             <Route path='/scan' component={Scan} />
-            <Route path='/file-share' component={File} />
+            <Route path='/file-share/:file/token/:token/file/:name' component={File} />
             <PrivateRoute path='/' comp={Home} />
         </Switch>
     </Router>

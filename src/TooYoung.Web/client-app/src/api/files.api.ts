@@ -77,8 +77,12 @@ export const FilesAPI = {
                 falseOnFailed
             );
     },
-    testAccess: (fileId: string, fileName: string) => {
-        return defer(() => axios.get<IFileInfo>(apiV1(`/files/ping/${fileId}/${fileName}`)))
+    testAccess: (fileId: string, fileName: string, token: string, pwd: string) => {
+        const apiUrl =
+            apiV1(
+                `/files/ping/${fileId}/${fileName}?token=${token || 'token'}&pwd=${encodeURIComponent(pwd || 'pwd')}`
+            );
+        return defer(() => axios.get<IFileInfo>(apiUrl))
             .pipe(
                 readData,
                 falseOnFailed

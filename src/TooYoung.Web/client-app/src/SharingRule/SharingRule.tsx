@@ -24,6 +24,13 @@ const InfoDiv = styled.div`
     margin:16px;
 `;
 
+const DetailDiv = styled.div`
+    display: flex;
+    flex-flow: column nowrap;
+    justify-content: space-between;
+    width: 100%;
+`;
+
 const RuleDiv = styled.div`
     display: flex;
     justify-content:stretch;
@@ -48,7 +55,8 @@ type SharingRuleProps = WithAppStore & ISharingRuleProps;
 
 const generateUrl = (rule: ISharingRule, file: IFileInfo) => {
     if (isTokenRule(rule)) {
-        const url = `${baseUrl}/${file.id}/${file.name}?token=${rule.token}`;
+        // tslint:disable-next-line:max-line-length
+        const url = `${location.origin}/file-share/${file.id}/token/${rule.token}/file/${btoa(encodeURIComponent(file.name))}`;
         return url;
     } else {
         const url = `${baseUrl}/${file.id}/${file.name}`;
@@ -84,14 +92,7 @@ export class SharingRule extends Component<SharingRuleProps> {
                         ref={this.previewImg}>
                         <img src={qrcodeSrc(ruleUrl)} height={130} width={130} />
                     </ImgPreivewDiv>
-                    <div className='ms-DocumentCard-details'>
-                        <DocumentCardTitle
-                            title={ruleUrl}
-                            shouldTruncate={true} />
-                        {/* <DocumentCardActivity
-                        activity="Sent a few minutes ago"
-                        people={[{ name: 'Kat Larrson', profileImageSrc: TestImages.personaFemale }]}
-                    /> */}
+                    <DetailDiv>
                         <InfoDiv>
                             {isTokenRule(this.props.rule) ?
                                 <>
@@ -124,7 +125,7 @@ export class SharingRule extends Component<SharingRuleProps> {
                                     iconName: 'Copy'
                                 }} />
                         </div>
-                    </div>
+                    </DetailDiv>
                 </RuleDiv>
                 <Callout
                     target={this.previewImg.current}
