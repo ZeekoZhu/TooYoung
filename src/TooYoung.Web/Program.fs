@@ -96,7 +96,7 @@ let configureServices (hostBuilderCtx: WebHostBuilderContext) (services : IServi
         .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie()
         |> ignore
     services.AddSpaStaticFiles(fun cfg ->
-            cfg.RootPath <- "client-app"
+            cfg.RootPath <- "client-app/dist"
         )
     |> ignore
     services.Configure<BootstrapOptions>(hostBuilderCtx.Configuration.GetSection("BootStrap"))

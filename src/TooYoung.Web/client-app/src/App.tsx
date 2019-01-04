@@ -16,10 +16,6 @@ const appContext: IAppContext = observable({
 });
 
 class App extends Component {
-    public componentDidMount() {
-        appContext.appStore.auth.checkSession();
-        appContext.appStore.sharing.loadEntries();
-    }
     public render() {
         return (
             <Provider {...appContext}>
@@ -32,7 +28,7 @@ class App extends Component {
                         newestOnTop={false}
                         closeOnClick={true}
                         rtl={false}
-                        pauseOnHover={true}
+                        pauseOnHover={false}
                     />
                 </>
             </Provider>
