@@ -35,6 +35,7 @@ export class Scan extends Component<ScanProps> {
                 <div className='scanner'>
                     <QrReader
                         onError={() => false}
+                        facingMode='environment'
                         className='scanner'
                         onScan={this.dataHandler}
                     />
