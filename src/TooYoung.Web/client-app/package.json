@@ -11,7 +11,7 @@
     "clipboard-copy": "^2.0.1",
     "date-fns": "^2.0.0-alpha.26",
     "filesize": "^3.6.1",
-    "lodash": "^4.17.11",
+    "lodash": "^4.17.13",
     "mobx": "^5.7.0",
     "mobx-react": "^5.4.2",
     "mobx-react-devtools": "^6.0.3",
